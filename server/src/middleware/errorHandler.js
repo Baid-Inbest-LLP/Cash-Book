@@ -3,6 +3,8 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 import { config } from '../config/index.js';
 
 export const errorHandler = (err, req, res, _next) => {
+  void _next;
+
   if (err instanceof ApiError) {
     return ApiResponse.error(res, err.message, err.statusCode, err.errors);
   }

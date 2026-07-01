@@ -41,16 +41,16 @@ pnpm --filter server seed:companies  # upsert companies/branches only
 
 Created automatically on first boot when the database is empty:
 
-| Role | Email | Password |
-| --- | --- | --- |
-| Superadmin | superadmin@cashbook.com | super123 |
+| Role       | Email                   | Password      |
+| ---------- | ----------------------- | ------------- |
+| Superadmin | superadmin@cashbook.com | super123      |
 | Accountant | accountant@cashbook.com | accountant123 |
 
 ## Included modules
 
-| Area | Notes |
-| --- | --- |
-| Auth | Login, forgot/reset password, JWT refresh, role-based access |
-| Layout | Navbar header, collapsible gradient sidebar, light/dark theme toggle |
-| Companies | CRUD for companies and branch locations, optional company stamp |
-| Settings | User management (create/edit/deactivate/delete), change password |
+| Area      | Notes                                                                |
+| --------- | -------------------------------------------------------------------- |
+| Auth      | Login, forgot/reset password, JWT refresh, role-based access         |
+| Layout    | Navbar header, collapsible gradient sidebar, light/dark theme toggle |
+| Companies | CRUD for companies and branch locations, optional company stamp      |
+| Settings  | User management (create/edit/deactivate/delete), change password     |

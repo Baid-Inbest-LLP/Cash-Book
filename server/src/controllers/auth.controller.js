@@ -29,7 +29,11 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   const resetUrl = result.resetToken
     ? `${config.clientUrl}/reset-password?token=${result.resetToken}`
     : null;
-  ApiResponse.success(res, { resetUrl: config.env === 'development' ? resetUrl : undefined }, result.message);
+  ApiResponse.success(
+    res,
+    { resetUrl: config.env === 'development' ? resetUrl : undefined },
+    result.message,
+  );
 });
 
 export const resetPassword = asyncHandler(async (req, res) => {

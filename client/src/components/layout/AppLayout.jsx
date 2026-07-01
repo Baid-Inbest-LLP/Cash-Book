@@ -20,10 +20,7 @@ export default function AppLayout() {
     <div className="app-layout flex h-screen overflow-hidden bg-gray-50">
       <Sidebar isOpen={sidebarOpen} />
       <div className="app-layout__column">
-        <Navbar
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
-        />
+        <Navbar sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
         <main>
           <Outlet />
         </main>

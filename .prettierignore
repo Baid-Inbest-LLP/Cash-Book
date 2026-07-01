@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+coverage
+.git
+.husky/_
+server/uploads
+pnpm-lock.yaml

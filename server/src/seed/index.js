@@ -32,8 +32,12 @@ const seed = async () => {
   await ensureCompanies();
 
   console.log('Seed completed!');
-  console.log(`Superadmin: ${process.env.SUPERADMIN_EMAIL || 'superadmin@cashbook.com'} / ${process.env.SUPERADMIN_PASSWORD || 'super123'}`);
-  console.log(`Accountant: ${process.env.ACCOUNTANT_EMAIL || 'accountant@cashbook.com'} / ${process.env.ACCOUNTANT_PASSWORD || 'accountant123'}`);
+  console.log(
+    `Superadmin: ${process.env.SUPERADMIN_EMAIL || 'superadmin@cashbook.com'} / ${process.env.SUPERADMIN_PASSWORD || 'super123'}`,
+  );
+  console.log(
+    `Accountant: ${process.env.ACCOUNTANT_EMAIL || 'accountant@cashbook.com'} / ${process.env.ACCOUNTANT_PASSWORD || 'accountant123'}`,
+  );
   process.exit(0);
 };
 

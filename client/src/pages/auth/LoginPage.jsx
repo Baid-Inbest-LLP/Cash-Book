@@ -11,7 +11,11 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
   const { theme } = useSelector((state) => state.common);
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
   const isDark = theme === 'dark';
 
   useEffect(() => {
@@ -30,9 +34,7 @@ export default function LoginPage() {
   return (
     <div
       className={`min-h-screen flex items-center justify-center p-4 ${
-        isDark
-          ? 'bg-[#1a1b1e]'
-          : 'bg-gradient-to-br from-[#0b2f81] via-[#1446a0] to-[#1d5fb3]'
+        isDark ? 'bg-[#1a1b1e]' : 'bg-gradient-to-br from-[#0b2f81] via-[#1446a0] to-[#1d5fb3]'
       }`}
     >
       <div className="w-full max-w-md">
@@ -40,9 +42,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center mb-4">
             <img src={inbestLogo} alt="Inbest Logo" className="w-25 h-25 object-contain" />
           </div>
-          <p className={`text-lg mt-1 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>
-            Cash Book
-          </p>
+          <p className={`text-lg mt-1 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>Cash Book</p>
         </div>
 
         <div
@@ -50,13 +50,17 @@ export default function LoginPage() {
             isDark ? 'bg-[#25262b] border border-[#373a40]' : 'bg-white'
           }`}
         >
-          <h2 className={`text-xl font-bold mb-6 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          <h2
+            className={`text-xl font-bold mb-6 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}
+          >
             Sign In
           </h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <label
+                className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+              >
                 Email
               </label>
               <input
@@ -69,7 +73,9 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <label
+                className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
+              >
                 Password
               </label>
               <input
@@ -78,7 +84,9 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 {...register('password', { required: 'Password is required' })}
               />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+              )}
             </div>
 
             {error && (
@@ -98,8 +106,19 @@ export default function LoginPage() {
               {loading ? (
                 <span className="flex items-center gap-2">
                   <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
                   </svg>
                   Signing in...
                 </span>
