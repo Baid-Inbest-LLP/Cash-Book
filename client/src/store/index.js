@@ -9,6 +9,5 @@ export const store = configureStore({
     common: commonReducer,
     companies: companiesReducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({ serializableCheck: false }),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware({ serializableCheck: false }),
 });

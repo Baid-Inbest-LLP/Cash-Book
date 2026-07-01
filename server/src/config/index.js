@@ -1,31 +1,21 @@
 import dotenv from 'dotenv';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
 dotenv.config();
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 const DB_NAME = process.env.MONGODB_DB_NAME || 'cashbook_db';
 
-/** Ensure Atlas/local URI has database name + standard query params. */
+/** Ensure the Atlas URI has a database name + standard query params. */
 export const normalizeMongoUri = (rawUri) => {
-  if (!rawUri) return `mongodb://127.0.0.1:27017/${DB_NAME}`;
+  if (!rawUri) return null;
 
   let uri = rawUri.trim();
 
-  if (uri.includes('mongodb.net')) {
-    if (!/\.mongodb\.net\/[a-zA-Z0-9_-]+/.test(uri)) {
-      uri = uri.replace(/\.mongodb\.net\/?/, `.mongodb.net/${DB_NAME}`);
-    }
-    if (!uri.includes('retryWrites=')) {
-      uri += uri.includes('?') ? '&retryWrites=true&w=majority' : '?retryWrites=true&w=majority';
-    }
-    return uri;
+  if (!/\.mongodb\.net\/[a-zA-Z0-9_-]+/.test(uri)) {
+    uri = uri.replace(/\.mongodb\.net\/?/, `.mongodb.net/${DB_NAME}`);
   }
-
-  if (!/:\d+\/[^/?]+/.test(uri)) {
-    uri = uri.replace(/\/?$/, `/${DB_NAME}`);
+  if (!uri.includes('retryWrites=')) {
+    uri += uri.includes('?') ? '&retryWrites=true&w=majority' : '?retryWrites=true&w=majority';
   }
 
   return uri;

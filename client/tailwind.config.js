@@ -3,9 +3,18 @@ export default {
   important: '#root',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   safelist: [
-    { pattern: /bg-(amber|blue|purple|green|cyan|orange|rose|teal|indigo|pink|gray|red|yellow|emerald|slate|violet|sky)-(50|100|200|300|400|500|600|700)/ },
-    { pattern: /text-(amber|blue|purple|green|cyan|orange|rose|teal|indigo|pink|gray|red|yellow|emerald|slate|violet|sky|primary)-(50|100|200|300|400|500|600|700|800|900)/ },
-    { pattern: /border-(amber|blue|purple|green|cyan|orange|rose|teal|indigo|pink|gray|red|yellow|primary)-(50|100|200|300|400|500|600|700)/ },
+    {
+      pattern:
+        /bg-(amber|blue|purple|green|cyan|orange|rose|teal|indigo|pink|gray|red|yellow|emerald|slate|violet|sky)-(50|100|200|300|400|500|600|700)/,
+    },
+    {
+      pattern:
+        /text-(amber|blue|purple|green|cyan|orange|rose|teal|indigo|pink|gray|red|yellow|emerald|slate|violet|sky|primary)-(50|100|200|300|400|500|600|700|800|900)/,
+    },
+    {
+      pattern:
+        /border-(amber|blue|purple|green|cyan|orange|rose|teal|indigo|pink|gray|red|yellow|primary)-(50|100|200|300|400|500|600|700)/,
+    },
     { pattern: /from-(amber|blue|purple|green|orange|rose|red|gray|emerald|indigo|slate)-\d+/ },
     { pattern: /to-(amber|blue|purple|green|orange|rose|red|gray|emerald|indigo|slate)-\d+/ },
   ],

@@ -228,7 +228,12 @@ export default function SettingsPage() {
                     aria-label="Close create user modal"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -353,7 +358,11 @@ export default function SettingsPage() {
                             <span className="settings-role-badge">{roleLabel(u.role)}</span>
                           </td>
                           <td className="text-center">
-                            <span className={u.isActive ? 'company-status-active' : 'company-status-inactive'}>
+                            <span
+                              className={
+                                u.isActive ? 'company-status-active' : 'company-status-inactive'
+                              }
+                            >
                               {u.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </td>
@@ -364,12 +373,19 @@ export default function SettingsPage() {
                                 disabled={!canEdit}
                                 onClick={() => openEditUser(u)}
                                 className={`settings-action-btn ${
-                                  canEdit ? 'settings-action-btn--enabled' : 'settings-action-btn--disabled'
+                                  canEdit
+                                    ? 'settings-action-btn--enabled'
+                                    : 'settings-action-btn--disabled'
                                 }`}
                                 title={canEdit ? 'Edit user' : disabledReason}
                                 aria-label={canEdit ? `Edit ${u.name}` : undefined}
                               >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -381,7 +397,9 @@ export default function SettingsPage() {
                               <button
                                 type="button"
                                 disabled={deleteDisabled}
-                                onClick={() => setConfirmDelete({ _id: u._id, name: u.name, role: u.role })}
+                                onClick={() =>
+                                  setConfirmDelete({ _id: u._id, name: u.name, role: u.role })
+                                }
                                 className={`settings-action-btn ${
                                   deleteDisabled
                                     ? 'settings-action-btn--disabled'
@@ -389,7 +407,12 @@ export default function SettingsPage() {
                                 }`}
                                 title={deleteDisabled ? disabledReason : 'Delete'}
                               >
-                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -429,7 +452,9 @@ export default function SettingsPage() {
               >
                 <div className="company-form-header">
                   <div>
-                    <h2 id="edit-user-title" className="company-form-title">Edit user</h2>
+                    <h2 id="edit-user-title" className="company-form-title">
+                      Edit user
+                    </h2>
                     <p className="company-form-subtitle">Update name, email, or account status</p>
                   </div>
                   <button
@@ -440,7 +465,12 @@ export default function SettingsPage() {
                     aria-label="Close"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -487,7 +517,12 @@ export default function SettingsPage() {
                     <p className="company-form-section-hint mt-1">Inactive users cannot sign in.</p>
                   </div>
                   <div className="company-form-footer">
-                    <button type="button" onClick={closeEditUser} disabled={editSubmitting} className="btn-secondary">
+                    <button
+                      type="button"
+                      onClick={closeEditUser}
+                      disabled={editSubmitting}
+                      className="btn-secondary"
+                    >
                       Cancel
                     </button>
                     <button type="submit" disabled={editSubmitting} className="btn-primary">
@@ -511,7 +546,9 @@ export default function SettingsPage() {
           >
             <div className="company-form-header">
               <div>
-                <h2 id="change-password-title" className="company-form-title">Change password</h2>
+                <h2 id="change-password-title" className="company-form-title">
+                  Change password
+                </h2>
                 <p className="company-form-subtitle">
                   Enter your current password, then choose a new one (min. 6 characters).
                 </p>
@@ -524,7 +561,12 @@ export default function SettingsPage() {
                 aria-label="Close"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -564,7 +606,8 @@ export default function SettingsPage() {
                   autoComplete="new-password"
                   {...registerPwd('confirmPassword', {
                     required: 'Please confirm your new password',
-                    validate: (val) => val === watchPwd('newPassword') || 'Does not match new password',
+                    validate: (val) =>
+                      val === watchPwd('newPassword') || 'Does not match new password',
                   })}
                 />
                 {pwdErrors.confirmPassword && (
@@ -572,7 +615,12 @@ export default function SettingsPage() {
                 )}
               </div>
               <div className="company-form-footer">
-                <button type="button" onClick={closePasswordModal} disabled={pwdSubmitting} className="btn-secondary">
+                <button
+                  type="button"
+                  onClick={closePasswordModal}
+                  disabled={pwdSubmitting}
+                  className="btn-secondary"
+                >
                   Cancel
                 </button>
                 <button type="submit" disabled={pwdSubmitting} className="btn-primary">

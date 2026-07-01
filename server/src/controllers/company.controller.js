@@ -57,9 +57,7 @@ const syncLocations = async (companyId, locations = []) => {
   }
 
   const existing = await Location.find({ company: companyId });
-  const incomingIds = new Set(
-    locations.filter((l) => l._id).map((l) => String(l._id)),
-  );
+  const incomingIds = new Set(locations.filter((l) => l._id).map((l) => String(l._id)));
   const remainingCount =
     existing.filter((l) => incomingIds.has(String(l._id))).length +
     locations.filter((l) => !l._id).length;

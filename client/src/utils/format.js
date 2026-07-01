@@ -124,8 +124,9 @@ export const buildMonthlyReportNo = (financialYear, month) => {
   const fyShort = start && end ? `${String(start).slice(-2)}-${end}` : String(financialYear);
   const trimmed = String(month).trim();
   const fromMap = MONTH_ABBREV[trimmed.toLowerCase()];
-  const monthLabel = fromMap
-    || (trimmed.length <= 3
+  const monthLabel =
+    fromMap ||
+    (trimmed.length <= 3
       ? trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase()
       : trimmed.slice(0, 3).charAt(0).toUpperCase() + trimmed.slice(1, 3).toLowerCase());
   return `MER/${fyShort}/${monthLabel}`;
@@ -273,4 +274,3 @@ export const getApprovalStatusGradient = (status) => {
       return 'from-gray-500 to-gray-600';
   }
 };
-

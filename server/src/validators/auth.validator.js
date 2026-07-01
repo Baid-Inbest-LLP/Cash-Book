@@ -1,37 +1,36 @@
-import { body } from 'express-validator';
+import { z } from 'zod';
 
-export const loginValidator = [
-  body('email')
+export const loginSchema = z.object({
+  email: z
+    .string()
     .trim()
-    .notEmpty()
-    .withMessage('Email is required')
-    .isEmail()
-    .withMessage('Valid email is required')
-    .normalizeEmail(),
-  body('password').notEmpty().withMessage('Password is required'),
-];
+    .min(1, 'Email is required')
+    .email('Valid email is required')
+    .toLowerCase(),
+  password: z.string().min(1, 'Password is required'),
+});
 
-export const registerValidator = [
-  body('name').trim().notEmpty().withMessage('Name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').optional().isIn(['superadmin', 'accountant']),
-];
+export const registerSchema = z.object({
+  name: z.string().trim().min(1, 'Name is required'),
+  email: z.string().trim().email('Valid email is required').toLowerCase(),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  role: z.enum(['superadmin', 'accountant']).optional(),
+});
 
-export const forgotPasswordValidator = [
-  body('email').isEmail().withMessage('Valid email is required'),
-];
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email('Valid email is required').toLowerCase(),
+});
 
-export const resetPasswordValidator = [
-  body('token').notEmpty().withMessage('Reset token is required'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-];
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, 'Reset token is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
-export const refreshTokenValidator = [
-  body('refreshToken').notEmpty().withMessage('Refresh token is required'),
-];
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh token is required'),
+});
 
-export const changePasswordValidator = [
-  body('currentPassword').notEmpty().withMessage('Current password is required'),
-  body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters'),
-];
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, 'Current password is required'),
+  newPassword: z.string().min(6, 'New password must be at least 6 characters'),
+});

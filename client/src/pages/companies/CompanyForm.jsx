@@ -82,7 +82,9 @@ export default function CompanyForm({ company, onClose }) {
         companiesApi
           .getStamp(company._id)
           .then((res) => setStampPreview(res.data?.data?.stampPreview || ''))
-          .catch(() => notifications.show({ message: 'Could not load company stamp', color: 'red' }))
+          .catch(() =>
+            notifications.show({ message: 'Could not load company stamp', color: 'red' }),
+          )
           .finally(() => setStampLoading(false));
       }
     } else {
@@ -143,7 +145,12 @@ export default function CompanyForm({ company, onClose }) {
 
   const handleChange = (field, value) => {
     setForm((p) => ({ ...p, [field]: value }));
-    if (errors[field]) setErrors((e) => { const n = { ...e }; delete n[field]; return n; });
+    if (errors[field])
+      setErrors((e) => {
+        const n = { ...e };
+        delete n[field];
+        return n;
+      });
   };
 
   const handleLocationChange = (idx, field, value) => {
@@ -153,7 +160,12 @@ export default function CompanyForm({ company, onClose }) {
       return { ...p, locations };
     });
     const key = `loc_${idx}_${field}`;
-    if (errors[key]) setErrors((e) => { const n = { ...e }; delete n[key]; return n; });
+    if (errors[key])
+      setErrors((e) => {
+        const n = { ...e };
+        delete n[key];
+        return n;
+      });
   };
 
   const setDefault = (idx) => {
@@ -218,33 +230,35 @@ export default function CompanyForm({ company, onClose }) {
     }
   };
 
-  const inputCls = (err) =>
-    `input-field text-sm ${err ? 'border-red-400 focus:ring-red-400' : ''}`;
+  const inputCls = (err) => `input-field text-sm ${err ? 'border-red-400 focus:ring-red-400' : ''}`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-black/40 backdrop-blur-sm overflow-y-auto">
       <div className="company-form-panel">
         <div className="company-form-header">
           <div>
-            <h2 className="company-form-title">
-              {isEdit ? 'Edit Company' : 'Add New Company'}
-            </h2>
+            <h2 className="company-form-title">{isEdit ? 'Edit Company' : 'Add New Company'}</h2>
             <p className="company-form-subtitle">
-              {isEdit ? 'Update company info and locations' : 'Add company details and branch locations'}
+              {isEdit
+                ? 'Update company info and locations'
+                : 'Add company details and branch locations'}
             </p>
           </div>
           <button type="button" onClick={onClose} className="company-form-close-btn">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <h3 className="company-form-section-title mb-3">
-              Company Information
-            </h3>
+            <h3 className="company-form-section-title mb-3">Company Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
                 <Field label="Company Name" required error={errors.name}>
@@ -305,7 +319,9 @@ export default function CompanyForm({ company, onClose }) {
                 checked={form.isActive}
                 onChange={(e) => handleChange('isActive', e.target.checked)}
               />
-              <label htmlFor="companyActive" className="company-form-checkbox-label">Active company</label>
+              <label htmlFor="companyActive" className="company-form-checkbox-label">
+                Active company
+              </label>
             </div>
 
             <div className="mt-4 pt-4 company-form-divider">
@@ -354,12 +370,16 @@ export default function CompanyForm({ company, onClose }) {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="company-form-section-title">
-                  Locations / Branch Addresses
-                </h3>
-                <p className="company-form-section-hint">Add one or more locations for this company</p>
+                <h3 className="company-form-section-title">Locations / Branch Addresses</h3>
+                <p className="company-form-section-hint">
+                  Add one or more locations for this company
+                </p>
               </div>
-              <button type="button" onClick={addLocation} className="btn-secondary text-xs py-1.5 px-3">
+              <button
+                type="button"
+                onClick={addLocation}
+                className="btn-secondary text-xs py-1.5 px-3"
+              >
                 + Add Location
               </button>
             </div>
@@ -385,9 +405,7 @@ export default function CompanyForm({ company, onClose }) {
                         {(loc.label || `Location ${idx + 1}`)?.toUpperCase?.()}
                       </span>
                       {loc.isDefault && (
-                        <span className="company-location-default-pill">
-                          Default
-                        </span>
+                        <span className="company-location-default-pill">Default</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
@@ -406,8 +424,18 @@ export default function CompanyForm({ company, onClose }) {
                           onClick={() => removeLocation(idx)}
                           className="company-location-remove-btn"
                         >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
                           </svg>
                         </button>
                       )}
@@ -421,7 +449,9 @@ export default function CompanyForm({ company, onClose }) {
                           className={inputCls(errors[`loc_${idx}_label`])}
                           placeholder='e.g. "HQ", "BRO 1"'
                           value={loc.label?.toUpperCase?.() || ''}
-                          onChange={(e) => handleLocationChange(idx, 'label', e.target.value.toUpperCase())}
+                          onChange={(e) =>
+                            handleLocationChange(idx, 'label', e.target.value.toUpperCase())
+                          }
                         />
                       </Field>
                     </div>
@@ -479,7 +509,9 @@ export default function CompanyForm({ company, onClose }) {
           </div>
 
           <div className="company-form-footer">
-            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="button" onClick={onClose} className="btn-secondary">
+              Cancel
+            </button>
             <button type="submit" disabled={submitting} className="btn-primary">
               {submitting ? 'Saving...' : isEdit ? 'Update Company' : 'Create Company'}
             </button>

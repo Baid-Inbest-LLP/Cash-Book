@@ -3,24 +3,23 @@ import * as authController from '../controllers/auth.controller.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import {
-  loginValidator,
-  registerValidator,
-  forgotPasswordValidator,
-  resetPasswordValidator,
-  refreshTokenValidator,
-  changePasswordValidator,
+  loginSchema,
+  registerSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  refreshTokenSchema,
+  changePasswordSchema,
 } from '../validators/auth.validator.js';
 
 const router = Router();
 
-router.post('/login', loginValidator, validate, authController.login);
-router.post('/refresh', refreshTokenValidator, validate, authController.refreshToken);
-router.post('/forgot-password', forgotPasswordValidator, validate, authController.forgotPassword);
-router.post('/reset-password', resetPasswordValidator, validate, authController.resetPassword);
+router.post('/login', validate(loginSchema), authController.login);
+router.post('/refresh', validate(refreshTokenSchema), authController.refreshToken);
+router.post('/forgot-password', validate(forgotPasswordSchema), authController.forgotPassword);
+router.post('/reset-password', validate(resetPasswordSchema), authController.resetPassword);
 router.post(
   '/register',
-  registerValidator,
-  validate,
+  validate(registerSchema),
   authenticate,
   authorize('superadmin'),
   authController.register,
@@ -30,8 +29,7 @@ router.get('/me', authenticate, authController.getMe);
 router.put(
   '/change-password',
   authenticate,
-  changePasswordValidator,
-  validate,
+  validate(changePasswordSchema),
   authController.changePassword,
 );
 
