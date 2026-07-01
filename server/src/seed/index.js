@@ -10,7 +10,7 @@ dotenv.config();
 const uri = normalizeMongoUri(process.env.MONGODB_URI);
 
 const seed = async () => {
-  await mongoose.connect(uri, getConnectionOptions(uri));
+  await mongoose.connect(uri, getConnectionOptions());
   console.log('Connected for seeding...');
 
   await Promise.all([User.deleteMany(), Company.deleteMany(), Location.deleteMany()]);

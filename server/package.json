@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node --watch src/index.js",
+    "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "build": "echo \"Server runs directly with Node\"",
     "lint": "eslint src/",
@@ -28,6 +28,7 @@
     "pngjs": "^7.0.0"
   },
   "devDependencies": {
-    "eslint": "^9.25.1"
+    "eslint": "^9.25.1",
+    "nodemon": "^3.1.9"
   }
 }
