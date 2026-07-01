@@ -24,14 +24,10 @@ const entrySchema = new mongoose.Schema(
     amount: { type: Number, required: true, min: 0 },
     description: { type: String, trim: true, default: '' },
 
-    // Recycle-bin pattern: excluded entries are hidden from the cash book and
-    // ignored by the Balance Engine, but not removed.
+    // Excluded entries are hidden from the cash book and ignored by the
+    // Balance Engine until they are permanently deleted.
     isExcluded: { type: Boolean, default: false },
     excludedAt: { type: Date, default: null },
-
-    // Soft delete — also ignored by the Balance Engine.
-    isDeleted: { type: Boolean, default: false },
-    deletedAt: { type: Date, default: null },
 
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
@@ -44,8 +40,8 @@ entrySchema.index({ financialYear: 1 });
 entrySchema.index({ isExcluded: 1 });
 entrySchema.index({ company: 1 });
 
-// Compound index for the hot path: active entries within a financial year
+// Compound index for the hot path: visible entries within a financial year
 // (Balance Engine, dashboard, and month-wise reports).
-entrySchema.index({ financialYear: 1, isDeleted: 1, isExcluded: 1, date: 1 });
+entrySchema.index({ financialYear: 1, isExcluded: 1, date: 1 });
 
 export const Entry = mongoose.model('Entry', entrySchema);
