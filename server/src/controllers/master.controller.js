@@ -7,7 +7,7 @@ import { USER_ROLES } from '../constants/roles.js';
 
 const crud = (Model, name) => ({
   list: asyncHandler(async (req, res) => {
-    const filter = req.query.activeOnly === 'false' ? {} : { isActive: { $ne: false } };
+    const filter = req.query.activeOnly === 'false' ? {} : { isActive: true };
     const items = await Model.find(filter).sort({ name: 1 }).lean();
     ApiResponse.success(res, items);
   }),

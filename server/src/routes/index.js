@@ -3,6 +3,7 @@ import authRoutes from './auth.routes.js';
 import masterRoutes from './master.routes.js';
 import companyRoutes from './company.routes.js';
 import expenseHeadRoutes from './expenseHead.routes.js';
+import entryRoutes from './entry.routes.js';
 
 const router = Router();
 
@@ -18,5 +19,6 @@ router.use('/auth', authRoutes);
 router.use('/masters', masterRoutes);
 router.use('/companies', companyRoutes);
 router.use('/expense-heads', expenseHeadRoutes);
+router.use('/entries', entryRoutes);
 
 export default router;

@@ -47,9 +47,7 @@ const applyStamp = (company, stampImage, { clearStamp = false } = {}) => {
 };
 
 const loadCompanyLocations = (companyId) =>
-  Location.find({ company: companyId, isActive: { $ne: false } })
-    .sort({ isDefault: -1, label: 1 })
-    .lean();
+  Location.find({ company: companyId, isActive: true }).sort({ isDefault: -1, label: 1 }).lean();
 
 const syncLocations = async (companyId, locations = []) => {
   if (!locations.length) {
@@ -100,7 +98,7 @@ const syncLocations = async (companyId, locations = []) => {
     }
   }
 
-  const all = await Location.find({ company: companyId, isActive: { $ne: false } });
+  const all = await Location.find({ company: companyId, isActive: true });
   const defaults = all.filter((l) => l.isDefault);
   if (!defaults.length && all.length) {
     await Location.updateMany({ company: companyId }, { isDefault: false });
@@ -137,7 +135,7 @@ export const getCompanies = asyncHandler(async (req, res) => {
   const companyIds = companies.map((c) => c._id);
   const locationDocs = await Location.find({
     company: { $in: companyIds },
-    isActive: { $ne: false },
+    isActive: true,
   })
     .sort({ isDefault: -1, label: 1 })
     .lean();

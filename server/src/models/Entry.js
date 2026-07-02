@@ -24,12 +24,13 @@ const entrySchema = new mongoose.Schema(
     amount: { type: Number, required: true, min: 0 },
     description: { type: String, trim: true, default: '' },
 
-    // Excluded entries are hidden from the cash book and ignored by the
-    // Balance Engine until they are permanently deleted.
+    // Excluded entries are the recycle bin and are ignored by balance calculations.
     isExcluded: { type: Boolean, default: false },
     excludedAt: { type: Date, default: null },
+    excludedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
   },
   { timestamps: true },
 );

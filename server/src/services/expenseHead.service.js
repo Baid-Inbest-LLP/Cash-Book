@@ -11,7 +11,7 @@ const rethrowDuplicate = (err) => {
 
 // List heads sorted by name (case-insensitively); active only unless activeOnly is false.
 export const listExpenseHeads = ({ activeOnly = true } = {}) => {
-  const filter = activeOnly ? { isActive: { $ne: false } } : {};
+  const filter = activeOnly ? { isActive: true } : {};
   return ExpenseHead.find(filter).sort({ name: 1 }).collation({ locale: 'en', strength: 2 }).lean();
 };
 
