@@ -4,9 +4,6 @@ import { ENTRY_TYPES } from '../constants/entryTypes.js';
 import { Company, Entry, ExpenseHead } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 
-// Escape user search text before using it in a MongoDB regex filter.
-const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
 // Convert validated ObjectId strings for aggregation-safe MongoDB filters.
 const toObjectId = (id) => new mongoose.Types.ObjectId(id);
 
@@ -109,7 +106,7 @@ const buildListFilter = ({ filters }) => {
   if (filters.month) filter.month = filters.month;
   if (filters.company) filter.company = toObjectId(filters.company);
   if (filters.expenseHead) filter.expenseHead = toObjectId(filters.expenseHead);
-  if (filters.search) filter.description = { $regex: escapeRegExp(filters.search), $options: 'i' };
+  if (filters.search) filter.$text = { $search: filters.search };
 
   if (filters.fromDate || filters.toDate) {
     filter.date = {};
