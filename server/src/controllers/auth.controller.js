@@ -21,7 +21,7 @@ export const logout = asyncHandler(async (req, res) => {
 });
 
 export const getMe = asyncHandler(async (req, res) => {
-  ApiResponse.success(res, req.user, 'User profile');
+  ApiResponse.success(res, authService.toAuthUserPayload(req.user), 'User profile');
 });
 
 export const forgotPassword = asyncHandler(async (req, res) => {

@@ -7,6 +7,12 @@ import {
   verifyRefreshToken,
 } from '../utils/tokenUtils.js';
 
+const toAuthUser = (user) => ({
+  _id: user._id,
+  name: user.name,
+  role: user.role,
+});
+
 export const login = async (email, password) => {
   const normalizedEmail = String(email).trim().toLowerCase();
   const user = await User.findOne({ email: normalizedEmail }).select('+password +refreshToken');
@@ -17,7 +23,7 @@ export const login = async (email, password) => {
     throw ApiError.unauthorized('Account is deactivated');
   }
 
-  const payload = { id: user._id, email: user.email, role: user.role };
+  const payload = { id: user._id };
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);
 
@@ -25,7 +31,7 @@ export const login = async (email, password) => {
   user.lastLogin = new Date();
   await user.save({ validateBeforeSave: false });
 
-  return { user, accessToken, refreshToken };
+  return { user: toAuthUser(user), accessToken, refreshToken };
 };
 
 export const refreshAccessToken = async (token) => {
@@ -35,9 +41,9 @@ export const refreshAccessToken = async (token) => {
     throw ApiError.unauthorized('Invalid refresh token');
   }
 
-  const payload = { id: user._id, email: user.email, role: user.role };
+  const payload = { id: user._id };
   const accessToken = generateAccessToken(payload);
-  return { accessToken, user };
+  return { accessToken };
 };
 
 export const logout = async (userId) => {
@@ -106,3 +112,5 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   user.password = newPassword;
   await user.save();
 };
+
+export const toAuthUserPayload = toAuthUser;
