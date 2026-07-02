@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { getFinancialYear } from '../config/index.js';
 import { ENTRY_TYPES } from '../constants/entryTypes.js';
-import { Company, Entry, ExpenseHead, OpeningBalance } from '../models/index.js';
+import { Company, Entry, ExpenseHead } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 
 // Escape user search text before using it in a MongoDB regex filter.
@@ -9,12 +9,6 @@ const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\
 
 // Convert validated ObjectId strings for aggregation-safe MongoDB filters.
 const toObjectId = (id) => new mongoose.Types.ObjectId(id);
-
-const ENTRY_POPULATE = [
-  { path: 'company', select: 'name code' },
-  { path: 'expenseHead', select: 'name' },
-  { path: 'createdBy', select: 'name' },
-];
 
 // Build a one-to-one lookup stage pair for lightweight referenced fields.
 const lookupOne = ({ from, localField, as, project }) => [
@@ -38,15 +32,6 @@ const getEntryPeriod = (date) => {
     month: entryDate.getMonth() + 1,
   };
 };
-
-// Attach lightweight reference details to a saved entry document.
-const populateEntryDoc = async ({ entry }) => {
-  await entry.populate(ENTRY_POPULATE);
-  return entry.toObject();
-};
-
-// Attach lightweight reference details to an entry query result.
-const populateEntryQuery = (query) => query.populate(ENTRY_POPULATE);
 
 // Load an entry or fail with a consistent API error.
 const loadEntry = async ({ id }) => {
@@ -77,7 +62,7 @@ const createEntry = async ({ type, date, company, expenseHead, amount, descripti
   await Promise.all(referenceChecks);
 
   const period = getEntryPeriod(date);
-  const entry = await Entry.create({
+  await Entry.create({
     type,
     date,
     company,
@@ -87,8 +72,6 @@ const createEntry = async ({ type, date, company, expenseHead, amount, descripti
     ...period,
     createdBy: userId,
   });
-
-  return populateEntryDoc({ entry });
 };
 
 // Insert a receipt entry.
@@ -141,33 +124,7 @@ const buildListFilter = ({ filters }) => {
   return filter;
 };
 
-// Shape aggregation totals into the balance summary expected by the entries page.
-const buildSummary = ({ financialYear, openingBalance = 0, totals = [] }) => {
-  const summary = {
-    financialYear,
-    openingBalance,
-    totalReceipts: 0,
-    totalPayments: 0,
-    receiptCount: 0,
-    paymentCount: 0,
-  };
-
-  for (const item of totals) {
-    if (item._id === ENTRY_TYPES.RECEIPT) {
-      summary.totalReceipts = item.amount;
-      summary.receiptCount = item.count;
-    } else if (item._id === ENTRY_TYPES.PAYMENT) {
-      summary.totalPayments = item.amount;
-      summary.paymentCount = item.count;
-    }
-  }
-
-  summary.netMovement = summary.totalReceipts - summary.totalPayments;
-  summary.closingBalance = summary.openingBalance + summary.netMovement;
-  return summary;
-};
-
-// Fetch paginated entries, total count, and receipt/payment totals in one DB round trip.
+// Fetch paginated entries and total count in one DB round trip.
 const aggregateEntries = async ({ filter, skip, limit }) => {
   const [result = {}] = await Entry.aggregate([
     { $match: filter },
@@ -189,23 +146,21 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
             as: 'expenseHead',
             project: { name: 1 },
           }),
-          ...lookupOne({
-            from: 'users',
-            localField: 'createdBy',
-            as: 'createdBy',
-            project: { name: 1 },
-          }),
-        ],
-        total: [{ $count: 'count' }],
-        totals: [
           {
-            $group: {
-              _id: '$type',
-              amount: { $sum: '$amount' },
-              count: { $sum: 1 },
+            $project: {
+              type: 1,
+              date: 1,
+              financialYear: 1,
+              month: 1,
+              company: 1,
+              expenseHead: 1,
+              amount: 1,
+              description: 1,
+              isExcluded: 1,
             },
           },
         ],
+        total: [{ $count: 'count' }],
       },
     },
   ]);
@@ -213,30 +168,20 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
   return {
     entries: result.entries || [],
     total: result.total?.[0]?.count || 0,
-    totals: result.totals || [],
   };
 };
 
-// List entries with pagination and matching balance summary.
+// List entries with pagination.
 export const listEntries = async ({ filters = {} }) => {
   const page = filters.page || 1;
   const limit = filters.limit || 50;
   const filter = buildListFilter({ filters });
   const skip = (page - 1) * limit;
 
-  const [entryResult, openingBalanceDoc] = await Promise.all([
-    aggregateEntries({ filter, skip, limit }),
-    OpeningBalance.findOne({ financialYear: filter.financialYear }).select('openingBalance').lean(),
-  ]);
-  const summary = buildSummary({
-    financialYear: filter.financialYear,
-    openingBalance: openingBalanceDoc?.openingBalance || 0,
-    totals: entryResult.totals,
-  });
+  const entryResult = await aggregateEntries({ filter, skip, limit });
 
   return {
     entries: entryResult.entries,
-    summary,
     pagination: {
       page,
       pages: Math.ceil(entryResult.total / limit) || 1,
@@ -281,47 +226,43 @@ export const updateEntry = async ({ id, updates, userId }) => {
   entry.updatedBy = userId;
 
   await entry.save();
-  return populateEntryDoc({ entry });
 };
 
 // Move an entry to the excluded/recycle-bin list.
 export const excludeEntry = async ({ id, userId }) => {
-  const entry = await populateEntryQuery(
-    Entry.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          isExcluded: true,
-          excludedAt: new Date(),
-          excludedBy: userId,
-        },
+  const { matchedCount } = await Entry.updateOne(
+    { _id: id },
+    {
+      $set: {
+        isExcluded: true,
+        excludedAt: new Date(),
+        excludedBy: userId,
       },
-      { new: true, runValidators: true },
-    ),
-  ).lean();
+    },
+  );
 
-  if (!entry) throw ApiError.notFound('Entry not found');
-  return entry;
+  if (!matchedCount) throw ApiError.notFound('Entry not found');
 };
 
 // Restore an excluded entry back to normal cashbook calculations.
 export const restoreEntry = async ({ id }) => {
-  const entry = await populateEntryQuery(
-    Entry.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          isExcluded: false,
-          excludedAt: null,
-          excludedBy: null,
-        },
+  const { matchedCount } = await Entry.updateOne(
+    { _id: id, isExcluded: true },
+    {
+      $set: {
+        isExcluded: false,
+        excludedAt: null,
+        excludedBy: null,
       },
-      { new: true, runValidators: true },
-    ),
-  ).lean();
+    },
+  );
+  if (matchedCount) return;
 
-  if (!entry) throw ApiError.notFound('Entry not found');
-  return entry;
+  const exists = await Entry.exists({ _id: id });
+  if (exists) {
+    throw ApiError.badRequest('Only excluded entries can be restored');
+  }
+  throw ApiError.notFound('Entry not found');
 };
 
 // Permanently delete an entry only after it has been moved to excluded entries.

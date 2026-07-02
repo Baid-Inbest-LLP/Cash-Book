@@ -41,7 +41,7 @@ export const listEntries = asyncHandler(async (req, res) => {
 export const createReceipt = asyncHandler(async (req, res) => {
   const { date, company, amount, description } = req.body;
 
-  const entry = await entryService.createReceipt({
+  await entryService.createReceipt({
     date,
     company,
     amount,
@@ -49,14 +49,14 @@ export const createReceipt = asyncHandler(async (req, res) => {
     userId: req.user._id,
   });
 
-  ApiResponse.created(res, entry, 'Receipt entry created');
+  ApiResponse.created(res, null, 'Receipt entry created');
 });
 
 // POST /entries/payment - create a payment entry with an expense head.
 export const createPayment = asyncHandler(async (req, res) => {
   const { date, company, expenseHead, amount, description } = req.body;
 
-  const entry = await entryService.createPayment({
+  await entryService.createPayment({
     date,
     company,
     expenseHead,
@@ -65,7 +65,7 @@ export const createPayment = asyncHandler(async (req, res) => {
     userId: req.user._id,
   });
 
-  ApiResponse.created(res, entry, 'Payment entry created');
+  ApiResponse.created(res, null, 'Payment entry created');
 });
 
 // PUT /entries/:id - update an existing entry and refresh derived period tags when date changes.
@@ -73,7 +73,7 @@ export const updateEntry = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { type, date, company, expenseHead, amount, description } = req.body;
 
-  const entry = await entryService.updateEntry({
+  await entryService.updateEntry({
     id,
     updates: {
       type,
@@ -86,21 +86,21 @@ export const updateEntry = asyncHandler(async (req, res) => {
     userId: req.user._id,
   });
 
-  ApiResponse.success(res, entry, 'Entry updated');
+  ApiResponse.success(res, null, 'Entry updated');
 });
 
 // DELETE /entries/:id - move an entry to excluded entries.
 export const excludeEntry = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const entry = await entryService.excludeEntry({ id, userId: req.user._id });
-  ApiResponse.success(res, entry, 'Entry moved to excluded entries');
+  await entryService.excludeEntry({ id, userId: req.user._id });
+  ApiResponse.success(res, null, 'Entry moved to excluded entries');
 });
 
 // PATCH /entries/:id/restore - restore an excluded entry back to the cash book.
 export const restoreEntry = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const entry = await entryService.restoreEntry({ id });
-  ApiResponse.success(res, entry, 'Entry restored');
+  await entryService.restoreEntry({ id });
+  ApiResponse.success(res, null, 'Entry restored');
 });
 
 // DELETE /entries/:id/permanent - permanently remove an already excluded entry.

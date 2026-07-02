@@ -12,16 +12,20 @@ const rethrowDuplicate = (err) => {
 // List heads sorted by name (case-insensitively); active only unless activeOnly is false.
 export const listExpenseHeads = ({ activeOnly = true } = {}) => {
   const filter = activeOnly ? { isActive: true } : {};
-  return ExpenseHead.find(filter).sort({ name: 1 }).collation({ locale: 'en', strength: 2 }).lean();
+  return ExpenseHead.find(filter)
+    .select('name isActive')
+    .sort({ name: 1 })
+    .collation({ locale: 'en', strength: 2 })
+    .lean();
 };
 
 // Insert a head; the collation index rejects case-insensitive duplicate names (409).
 export const createExpenseHead = async ({ name, isActive }) => {
   try {
     // Uniqueness is enforced by the collation index — no pre-check query needed.
-    return await ExpenseHead.create({ name, isActive: isActive ?? true });
+    await ExpenseHead.create({ name, isActive: isActive ?? true });
   } catch (err) {
-    return rethrowDuplicate(err);
+    rethrowDuplicate(err);
   }
 };
 
@@ -32,15 +36,14 @@ export const updateExpenseHead = async (id, { name, isActive }) => {
   if (isActive !== undefined) set.isActive = isActive;
 
   try {
-    const item = await ExpenseHead.findByIdAndUpdate(
-      id,
+    const { matchedCount } = await ExpenseHead.updateOne(
+      { _id: id },
       { $set: set },
-      { new: true, runValidators: true },
+      { runValidators: true },
     );
-    if (!item) throw ApiError.notFound('Expense head not found');
-    return item;
+    if (!matchedCount) throw ApiError.notFound('Expense head not found');
   } catch (err) {
-    return rethrowDuplicate(err);
+    rethrowDuplicate(err);
   }
 };
 

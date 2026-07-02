@@ -13,15 +13,15 @@ export const listExpenseHeads = asyncHandler(async (req, res) => {
 // POST /expense-heads — create a new head.
 export const createExpenseHead = asyncHandler(async (req, res) => {
   const { name, isActive } = req.body;
-  const item = await expenseHeadService.createExpenseHead({ name, isActive });
-  ApiResponse.created(res, item, 'Expense head created');
+  await expenseHeadService.createExpenseHead({ name, isActive });
+  ApiResponse.created(res, null, 'Expense head created');
 });
 
 // PUT /expense-heads/:id — update a head's name and/or active state.
 export const updateExpenseHead = asyncHandler(async (req, res) => {
   const { name, isActive } = req.body;
-  const item = await expenseHeadService.updateExpenseHead(req.params.id, { name, isActive });
-  ApiResponse.success(res, item, 'Expense head updated');
+  await expenseHeadService.updateExpenseHead(req.params.id, { name, isActive });
+  ApiResponse.success(res, null, 'Expense head updated');
 });
 
 // DELETE /expense-heads/:id — remove a head (blocked if referenced by entries).

@@ -5,6 +5,12 @@ dotenv.config();
 
 const DB_NAME = process.env.MONGODB_DB_NAME || 'cashbook_db';
 
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const isProduction = NODE_ENV === 'production';
+
+// Longer-lived access tokens in dev for convenience; short-lived in production.
+const defaultAccessTokenExpiry = isProduction ? '15m' : '12h';
+
 /** Ensure the Atlas URI has a database name + standard query params. */
 export const normalizeMongoUri = (rawUri) => {
   if (!rawUri) return null;
@@ -22,13 +28,13 @@ export const normalizeMongoUri = (rawUri) => {
 };
 
 export const config = {
-  env: process.env.NODE_ENV || 'development',
+  env: NODE_ENV,
   port: parseInt(process.env.PORT, 10) || 5000,
   mongodbUri: normalizeMongoUri(process.env.MONGODB_URI),
   jwt: {
     secret: process.env.JWT_SECRET || 'dev-secret-change-me',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret',
-    expiresIn: process.env.JWT_EXPIRES_IN || '15m',
+    expiresIn: process.env.JWT_EXPIRES_IN || defaultAccessTokenExpiry,
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5175',

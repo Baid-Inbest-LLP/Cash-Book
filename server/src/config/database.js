@@ -11,7 +11,6 @@ const ATLAS_CHECKLIST = [
 /** Options tuned for MongoDB Atlas on Windows (TLS / IPv6 issues). */
 export const getConnectionOptions = () => ({
   serverSelectionTimeoutMS: 15000,
-  socketTimeoutMS: 45000,
   autoSelectFamily: false,
   family: 4,
 });
@@ -37,4 +36,8 @@ export const connectDatabase = async () => {
 
 mongoose.connection.on('disconnected', () => {
   console.log('MongoDB disconnected');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected');
 });

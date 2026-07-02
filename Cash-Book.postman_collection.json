@@ -21,7 +21,8 @@
     { "key": "companyId", "value": "", "type": "string" },
     { "key": "locationId", "value": "", "type": "string" },
     { "key": "expenseHeadId", "value": "", "type": "string" },
-    { "key": "userId", "value": "", "type": "string" }
+    { "key": "userId", "value": "", "type": "string" },
+    { "key": "entryId", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -358,6 +359,172 @@
               "path": ["expense-heads", "{{expenseHeadId}}"]
             },
             "description": "Superadmin only. Hard-deletes a head. Blocked with 409 if referenced by any entry (deactivate instead)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📒 Entries",
+      "description": "Cash book receipt/payment entries (`/entries`). All routes require auth; permanent delete is superadmin-only. Create/update/exclude/restore return only a success message (no entry payload) — the frontend refetches via React Query.",
+      "item": [
+        {
+          "name": "📋 List Entries",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "const first = res && res.data && res.data.entries && res.data.entries[0];",
+                  "if (first && first._id) pm.collectionVariables.set('entryId', first._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/entries?page=1&limit=50&type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50", "description": "Max 100." },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "`receipt` or `payment`."
+                },
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12." },
+                { "key": "company", "value": "", "description": "Company ObjectId." },
+                {
+                  "key": "expenseHead",
+                  "value": "",
+                  "description": "Expense head ObjectId."
+                },
+                {
+                  "key": "isExcluded",
+                  "value": "false",
+                  "description": "`true` shows the excluded/recycle-bin list."
+                },
+                { "key": "fromDate", "value": "", "description": "ISO date lower bound." },
+                { "key": "toDate", "value": "", "description": "ISO date upper bound." },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Description substring (case-insensitive)."
+                }
+              ]
+            },
+            "description": "Protected. Paginated entries with a balance summary (opening/closing balance, receipt/payment totals). Test script saves the first entry's `_id` to `entryId` for the update/exclude/restore requests."
+          },
+          "response": []
+        },
+        {
+          "name": "➕ Create Receipt",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2025-06-15\",\n  \"company\": \"{{companyId}}\",\n  \"amount\": 5000,\n  \"description\": \"Cash sale receipt\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/entries/receipt",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "receipt"]
+            },
+            "description": "Protected. Creates a receipt entry for an active company. Returns only a success message; run List Entries to fetch it."
+          },
+          "response": []
+        },
+        {
+          "name": "➕ Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2025-06-16\",\n  \"company\": \"{{companyId}}\",\n  \"expenseHead\": \"{{expenseHeadId}}\",\n  \"amount\": 1200,\n  \"description\": \"Office rent payment\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/entries/payment",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "payment"]
+            },
+            "description": "Protected. Creates a payment entry tied to an active company and expense head. Returns only a success message."
+          },
+          "response": []
+        },
+        {
+          "name": "✏️ Update Entry",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 5500,\n  \"description\": \"Updated receipt amount\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/entries/{{entryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "{{entryId}}"]
+            },
+            "description": "Protected. Updates any subset of fields (type, date, company, expenseHead, amount, description). At least one field is required. Payment entries require an expense head. Returns only a success message."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Exclude Entry",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/entries/{{entryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "{{entryId}}"]
+            },
+            "description": "Protected. Soft-deletes: moves the entry to the excluded/recycle-bin list (removed from balance calculations)."
+          },
+          "response": []
+        },
+        {
+          "name": "♻️ Restore Entry",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/entries/{{entryId}}/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "{{entryId}}", "restore"]
+            },
+            "description": "Protected. Restores an excluded entry back into the cash book."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Entry (Permanent)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/entries/{{entryId}}/permanent",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "{{entryId}}", "permanent"]
+            },
+            "description": "Superadmin only. Permanently deletes an entry. Blocked with 400 unless the entry has already been excluded."
           },
           "response": []
         }
