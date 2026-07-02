@@ -1,0 +1,718 @@
+{
+  "info": {
+    "_postman_id": "c4a1e2f0-1b2c-4d3e-9f80-abcdef123456",
+    "name": "💰 Cash Book API",
+    "description": "Cash Book backend API collection.\n\n## Getting started\n1. Ensure the server is running (`pnpm --filter server dev`). Base URL defaults to `http://localhost:5001/api/v1` — change the `baseUrl` collection variable if your port differs.\n2. Run **Auth → Login (Superadmin)**. Its test script auto-saves `accessToken` and `refreshToken` to collection variables.\n3. All protected requests inherit Bearer auth from the collection (`{{accessToken}}`) automatically.\n4. Create requests (company, expense head, register user) auto-save the new `_id` to a variable used by the follow-up GET/PUT/DELETE requests.\n\n## Auth model\n- Public: login, refresh, forgot/reset password, health (No Auth).\n- Protected: everything else (Bearer).\n- Superadmin-only mutations are noted in each request description.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5001/api/v1", "type": "string" },
+    { "key": "superadminEmail", "value": "superadmin@cashbook.com", "type": "string" },
+    { "key": "superadminPassword", "value": "super123", "type": "string" },
+    { "key": "accountantEmail", "value": "accountant@cashbook.com", "type": "string" },
+    { "key": "accountantPassword", "value": "accountant123", "type": "string" },
+    { "key": "accessToken", "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "resetToken", "value": "", "type": "string" },
+    { "key": "companyId", "value": "", "type": "string" },
+    { "key": "locationId", "value": "", "type": "string" },
+    { "key": "expenseHeadId", "value": "", "type": "string" },
+    { "key": "userId", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "Authentication and account endpoints (`/auth`).",
+      "item": [
+        {
+          "name": "🔑 Login (Superadmin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "if (res && res.data) {",
+                  "  if (res.data.accessToken) pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superadminEmail}}\",\n  \"password\": \"{{superadminPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Public. Authenticates and returns `{ user, accessToken, refreshToken }`. Tokens are auto-saved to collection variables."
+          },
+          "response": []
+        },
+        {
+          "name": "🔑 Login (Accountant)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "if (res && res.data) {",
+                  "  if (res.data.accessToken) pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "  if (res.data.refreshToken) pm.collectionVariables.set('refreshToken', res.data.refreshToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{accountantEmail}}\",\n  \"password\": \"{{accountantPassword}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Public. Log in as the accountant role to test non-superadmin permissions."
+          },
+          "response": []
+        },
+        {
+          "name": "♻️ Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "if (res && res.data && res.data.accessToken) {",
+                  "  pm.collectionVariables.set('accessToken', res.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Public. Exchanges a valid refresh token for a new access token (auto-saved)."
+          },
+          "response": []
+        },
+        {
+          "name": "👤 Get Current User (me)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Protected. Returns the authenticated user's profile."
+          },
+          "response": []
+        },
+        {
+          "name": "🆕 Register User (Superadmin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data._id) pm.collectionVariables.set('userId', res.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Accountant\",\n  \"email\": \"accountant2@cashbook.com\",\n  \"password\": \"changeme123\",\n  \"role\": \"accountant\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Superadmin only. Creates an accountant. Saves new user `_id` to `userId`."
+          },
+          "response": []
+        },
+        {
+          "name": "🔒 Change Password",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"super123\",\n  \"newPassword\": \"super1234\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            },
+            "description": "Protected. Changes the authenticated user's password."
+          },
+          "response": []
+        },
+        {
+          "name": "❓ Forgot Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "const url = res && res.data && res.data.resetUrl;",
+                  "if (url) {",
+                  "  const m = url.match(/token=([^&]+)/);",
+                  "  if (m) pm.collectionVariables.set('resetToken', m[1]);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{superadminEmail}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            },
+            "description": "Public. In development the response includes `resetUrl`; the test script extracts its token into `resetToken`."
+          },
+          "response": []
+        },
+        {
+          "name": "🔁 Reset Password",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"newpass123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            },
+            "description": "Public. Resets the password using the token captured by Forgot Password."
+          },
+          "response": []
+        },
+        {
+          "name": "🚪 Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Protected. Invalidates the stored refresh token."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏷️ Expense Heads",
+      "description": "Expense head master data (`/expense-heads`). Mutations are superadmin-only.",
+      "item": [
+        {
+          "name": "📋 List Expense Heads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/expense-heads?activeOnly=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["expense-heads"],
+              "query": [
+                {
+                  "key": "activeOnly",
+                  "value": "true",
+                  "description": "Set to `false` to include inactive heads."
+                }
+              ]
+            },
+            "description": "Protected. Lists heads sorted by name. Active only by default; `?activeOnly=false` returns all."
+          },
+          "response": []
+        },
+        {
+          "name": "➕ Create Expense Head",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "if (res && res.data && res.data._id) pm.collectionVariables.set('expenseHeadId', res.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rent\",\n  \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expense-heads",
+              "host": ["{{baseUrl}}"],
+              "path": ["expense-heads"]
+            },
+            "description": "Superadmin only. Creates a head. Names are unique case-insensitively (duplicate → 409). Saves `_id` to `expenseHeadId`."
+          },
+          "response": []
+        },
+        {
+          "name": "✏️ Update Expense Head",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Office Rent\",\n  \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/expense-heads/{{expenseHeadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["expense-heads", "{{expenseHeadId}}"]
+            },
+            "description": "Superadmin only. Updates name and/or isActive. 404 if missing, 409 on duplicate name."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Expense Head",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/expense-heads/{{expenseHeadId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["expense-heads", "{{expenseHeadId}}"]
+            },
+            "description": "Superadmin only. Hard-deletes a head. Blocked with 409 if referenced by any entry (deactivate instead)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🏢 Companies",
+      "description": "Rich company + locations module (`/companies`). Mutations are superadmin-only.",
+      "item": [
+        {
+          "name": "📋 List Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies?search=&isActive=&page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["companies"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Name/email/code substring (case-insensitive)."
+                },
+                { "key": "isActive", "value": "", "description": "`true` or `false`." },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50", "description": "Max 100." }
+              ]
+            },
+            "description": "Protected. Paginated list of companies with their locations."
+          },
+          "response": []
+        },
+        {
+          "name": "➕ Create Company",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "pm.test('status is 201', () => pm.response.to.have.status(201));",
+                  "if (res && res.data && res.data._id) pm.collectionVariables.set('companyId', res.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corp\",\n  \"companyCode\": \"ACME\",\n  \"email\": \"contact@acme.com\",\n  \"phone\": \"9876543210\",\n  \"taxId\": \"19ABCDE1234F1Z5\",\n  \"logo\": \"\",\n  \"isActive\": true,\n  \"locations\": [\n    {\n      \"label\": \"HQ\",\n      \"street\": \"1 Main Street\",\n      \"city\": \"Kolkata\",\n      \"state\": \"West Bengal\",\n      \"zipCode\": \"700001\",\n      \"country\": \"India\",\n      \"isDefault\": true\n    }\n  ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["companies"]
+            },
+            "description": "Superadmin only. Creates a company with at least one location. Saves `_id` to `companyId`."
+          },
+          "response": []
+        },
+        {
+          "name": "🔍 Get Company",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{companyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["companies", "{{companyId}}"]
+            },
+            "description": "Protected. Returns a single company with its locations."
+          },
+          "response": []
+        },
+        {
+          "name": "🖼️ Get Company Stamp",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{companyId}}/stamp",
+              "host": ["{{baseUrl}}"],
+              "path": ["companies", "{{companyId}}", "stamp"]
+            },
+            "description": "Protected. Returns whether a stamp exists and a data-URI preview."
+          },
+          "response": []
+        },
+        {
+          "name": "✏️ Update Company",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Acme Corporation\",\n  \"phone\": \"9000000000\",\n  \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{companyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["companies", "{{companyId}}"]
+            },
+            "description": "Superadmin only. Updates company fields; pass `locations` to sync branches."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Company",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/companies/{{companyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["companies", "{{companyId}}"]
+            },
+            "description": "Superadmin only. Deletes the company and all its locations."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🗂️ Masters",
+      "description": "Shared master data & lookups (`/masters`). Includes lightweight company/location CRUD and user management. Mutations are superadmin-only.",
+      "item": [
+        {
+          "name": "📚 Lookups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/lookups",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "lookups"]
+            },
+            "description": "Protected. Dropdown data: companies, locations, payment methods, roles, months, quarters."
+          },
+          "response": []
+        },
+        {
+          "name": "📋 List Companies (master)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "companies"]
+            },
+            "description": "Protected. Simple company list (active by default; `?activeOnly=false` for all)."
+          },
+          "response": []
+        },
+        {
+          "name": "➕ Create Company (master)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Master Co\",\n  \"code\": \"MSTCO\",\n  \"email\": \"master@co.com\",\n  \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/companies",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "companies"]
+            },
+            "description": "Superadmin only. Generic company create."
+          },
+          "response": []
+        },
+        {
+          "name": "✏️ Update Company (master)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Master Co Updated\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/companies/{{companyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "companies", "{{companyId}}"]
+            },
+            "description": "Superadmin only. Generic company update."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Company (master)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/companies/{{companyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "companies", "{{companyId}}"]
+            },
+            "description": "Superadmin only. Generic company delete."
+          },
+          "response": []
+        },
+        {
+          "name": "📋 List Locations (master)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "locations"]
+            },
+            "description": "Protected. Simple location list."
+          },
+          "response": []
+        },
+        {
+          "name": "➕ Create Location (master)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res && res.data && res.data._id) pm.collectionVariables.set('locationId', res.data._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": \"{{companyId}}\",\n  \"label\": \"BR1\",\n  \"name\": \"Branch 1\",\n  \"code\": \"BR1\",\n  \"city\": \"Jaipur\",\n  \"state\": \"Rajasthan\",\n  \"country\": \"India\",\n  \"isDefault\": false\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/locations",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "locations"]
+            },
+            "description": "Superadmin only. Creates a location for `companyId`. Saves `_id` to `locationId`."
+          },
+          "response": []
+        },
+        {
+          "name": "✏️ Update Location (master)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Bengaluru\",\n  \"state\": \"Karnataka\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/locations/{{locationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "locations", "{{locationId}}"]
+            },
+            "description": "Superadmin only. Generic location update."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Location (master)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/locations/{{locationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "locations", "{{locationId}}"]
+            },
+            "description": "Superadmin only. Generic location delete."
+          },
+          "response": []
+        },
+        {
+          "name": "📋 List Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "users"]
+            },
+            "description": "Superadmin only. Lists all users (passwords excluded)."
+          },
+          "response": []
+        },
+        {
+          "name": "✏️ Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Renamed Accountant\",\n  \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/masters/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "users", "{{userId}}"]
+            },
+            "description": "Superadmin only. Updates an accountant's name/email/isActive."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/masters/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["masters", "users", "{{userId}}"]
+            },
+            "description": "Superadmin only. Deletes an accountant (cannot delete self or superadmin)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "🩺 Health",
+      "description": "Service health check.",
+      "item": [
+        {
+          "name": "🩺 Health Check",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] },
+            "description": "Public. Returns API status and timestamp."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
