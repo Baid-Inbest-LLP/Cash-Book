@@ -15,7 +15,6 @@ import {
 
 const navItems = [
   { to: '/', label: 'Dashboard', end: true, Icon: DashboardIcon },
-  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   { to: '/entries', label: 'Cashbook Entries', Icon: CashbookEntriesIcon },
   { to: '/excluded-entries', label: 'Excluded Entries', Icon: ExcludedEntriesIcon },
   {
@@ -28,6 +27,7 @@ const navItems = [
       { to: '/reports/companies', label: 'Company Report' },
     ],
   },
+  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ];
 
