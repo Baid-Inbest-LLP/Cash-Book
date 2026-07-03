@@ -531,6 +531,82 @@
       ]
     },
     {
+      "name": "📊 Reports",
+      "description": "Read-only analytics (`/reports`). All require auth. Every report defaults to the current financial year when `financialYear` is omitted. Balance figures exclude excluded/recycle-bin entries.",
+      "item": [
+        {
+          "name": "📅 Monthwise Ledger",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/monthwise?financialYear=",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "monthwise"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                }
+              ]
+            },
+            "description": "Protected. 12-month running ledger (opening → receipts − payments → closing) plus a year `summary`. For the current FY it stops at the current month; past FYs return all 12."
+          },
+          "response": []
+        },
+        {
+          "name": "🏷️ Expense-Head Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/expense-heads?financialYear=&month=&company=",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "expense-heads"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId (optional) — narrow to one company."
+                }
+              ]
+            },
+            "description": "Protected. Payment totals grouped by expense head with `paymentAmount`, `paymentCount`, and share `percentage`. Optionally filtered by month and/or company."
+          },
+          "response": []
+        },
+        {
+          "name": "🏢 Companies Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/companies?financialYear=&month=",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "companies"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." }
+              ]
+            },
+            "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`. Optionally filtered by month."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "🏢 Companies",
       "description": "Rich company + locations module (`/companies`). Mutations are superadmin-only.",
       "item": [
