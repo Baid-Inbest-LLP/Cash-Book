@@ -17,6 +17,7 @@ const navItems = [
   { to: '/', label: 'Dashboard', end: true, Icon: DashboardIcon },
   { to: '/entries', label: 'Cashbook Entries', Icon: CashbookEntriesIcon },
   { to: '/excluded-entries', label: 'Excluded Entries', Icon: ExcludedEntriesIcon },
+  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   {
     label: 'Reports & Insights',
     basePath: '/reports',
@@ -27,7 +28,6 @@ const navItems = [
       { to: '/reports/companies', label: 'Company Report' },
     ],
   },
-  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ];
 
