@@ -1,34 +1,8 @@
-import mongoose from 'mongoose';
-import { getFinancialYear } from '../config/index.js';
 import { ENTRY_TYPES } from '../constants/entryTypes.js';
 import { Company, Entry, ExpenseHead } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
-
-// Convert validated ObjectId strings for aggregation-safe MongoDB filters.
-const toObjectId = (id) => new mongoose.Types.ObjectId(id);
-
-// Build a one-to-one lookup stage pair for lightweight referenced fields.
-const lookupOne = ({ from, localField, as, project }) => [
-  {
-    $lookup: {
-      from,
-      localField,
-      foreignField: '_id',
-      as,
-      pipeline: [{ $project: project }],
-    },
-  },
-  { $unwind: { path: `$${as}`, preserveNullAndEmptyArrays: true } },
-];
-
-// Derive financial year and calendar month from the entry date before saving.
-const getEntryPeriod = (date) => {
-  const entryDate = new Date(date);
-  return {
-    financialYear: getFinancialYear(entryDate),
-    month: entryDate.getMonth() + 1,
-  };
-};
+import { getFinancialYear, getFinancialYearAndMonth } from '../utils/financialYear.js';
+import { lookupOne, toObjectId } from '../utils/mongoAggregation.js';
 
 // Load an entry or fail with a consistent API error.
 const loadEntry = async ({ id }) => {
@@ -58,7 +32,7 @@ const createEntry = async ({ type, date, company, expenseHead, amount, descripti
   }
   await Promise.all(referenceChecks);
 
-  const period = getEntryPeriod(date);
+  const period = getFinancialYearAndMonth(date);
   await Entry.create({
     type,
     date,
@@ -213,7 +187,7 @@ export const updateEntry = async ({ id, updates, userId }) => {
 
   if (updates.date !== undefined) {
     entry.date = updates.date;
-    Object.assign(entry, getEntryPeriod(updates.date));
+    Object.assign(entry, getFinancialYearAndMonth(updates.date));
   }
   if (updates.type !== undefined) entry.type = nextType;
   if (updates.company !== undefined) entry.company = updates.company;

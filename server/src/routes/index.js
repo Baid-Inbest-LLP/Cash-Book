@@ -4,6 +4,7 @@ import masterRoutes from './master.routes.js';
 import companyRoutes from './company.routes.js';
 import expenseHeadRoutes from './expenseHead.routes.js';
 import entryRoutes from './entry.routes.js';
+import reportRoutes from './report.routes.js';
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use('/masters', masterRoutes);
 router.use('/companies', companyRoutes);
 router.use('/expense-heads', expenseHeadRoutes);
 router.use('/entries', entryRoutes);
+router.use('/reports', reportRoutes);
 
 export default router;

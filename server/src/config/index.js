@@ -51,22 +51,3 @@ export const config = {
     from: process.env.SMTP_FROM || 'Cash Book System <noreply@cashbook.local>',
   },
 };
-
-// Indian financial year: April to March
-export const getFinancialYear = (date = new Date()) => {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = d.getMonth();
-  if (month >= 3) {
-    return `${year}-${(year + 1).toString().slice(-2)}`;
-  }
-  return `${year - 1}-${year.toString().slice(-2)}`;
-};
-
-export const getFinancialYearRange = (fy) => {
-  const [startYear] = fy.split('-').map(Number);
-  return {
-    start: new Date(startYear, 3, 1),
-    end: new Date(startYear + 1, 2, 31, 23, 59, 59, 999),
-  };
-};

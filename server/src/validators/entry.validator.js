@@ -12,12 +12,21 @@ const normalizeDateInput = (value) => {
   return trimmed ? new Date(trimmed) : undefined;
 };
 
+// Entries record something that has already happened, so future dates are rejected.
+const isNotFuture = (date) => {
+  const endOfToday = new Date();
+  endOfToday.setHours(23, 59, 59, 999);
+  return date <= endOfToday;
+};
+
 const dateSchema = z.preprocess(
   normalizeDateInput,
-  z.date({
-    required_error: 'Date is required',
-    invalid_type_error: 'Valid date is required',
-  }),
+  z
+    .date({
+      required_error: 'Date is required',
+      invalid_type_error: 'Valid date is required',
+    })
+    .refine(isNotFuture, 'Date cannot be in the future'),
 );
 
 const optionalDateQuerySchema = z.preprocess(normalizeDateInput, z.date().optional());
