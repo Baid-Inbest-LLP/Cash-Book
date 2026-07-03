@@ -13,7 +13,7 @@ Internal Cash Book application — a MERN monorepo scaffold that shares the same
 
 ```
 Cash-Book/
-├── client/   # React app (Vite, port 5174)
+├── client/   # React app (Vite, port 5173)
 └── server/   # Express API (port 5001)
 ```
 
@@ -24,7 +24,7 @@ pnpm install
 pnpm dev          # runs client + server in parallel
 ```
 
-- Client: http://localhost:5174
+- Client: http://localhost:5173
 - API health: http://localhost:5001/api/v1/health
 
 Configure environment variables in `server/.env` and `client/.env` (see the `.env.example` files).
