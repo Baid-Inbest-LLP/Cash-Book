@@ -61,9 +61,8 @@ const numberQuerySchema = (schema) =>
     return Number(value);
   }, schema.optional());
 
-const baseEntryBodySchema = z.object({
+const baseCreateEntryBodySchema = z.object({
   date: dateSchema,
-  company: objectIdSchema,
   amount: amountSchema,
   description: createDescriptionSchema,
 });
@@ -99,9 +98,12 @@ export const listEntriesQuerySchema = z
     'fromDate cannot be after toDate',
   );
 
-export const createReceiptSchema = baseEntryBodySchema;
+export const createReceiptSchema = baseCreateEntryBodySchema.extend({
+  company: objectIdSchema.nullish(),
+});
 
-export const createPaymentSchema = baseEntryBodySchema.extend({
+export const createPaymentSchema = baseCreateEntryBodySchema.extend({
+  company: objectIdSchema,
   expenseHead: objectIdSchema,
 });
 
@@ -109,7 +111,7 @@ export const updateEntrySchema = z
   .object({
     type: entryTypeSchema.optional(),
     date: dateSchema.optional(),
-    company: objectIdSchema.optional(),
+    company: objectIdSchema.nullish(),
     expenseHead: objectIdSchema.nullish(),
     amount: amountSchema.optional(),
     description: descriptionSchema,

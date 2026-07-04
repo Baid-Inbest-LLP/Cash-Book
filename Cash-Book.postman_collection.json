@@ -469,7 +469,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"date\": \"2025-06-15\",\n  \"company\": \"{{companyId}}\",\n  \"amount\": 5000,\n  \"description\": \"Cash sale receipt\"\n}",
+              "raw": "{\n  \"date\": \"2025-06-15\",\n  \"amount\": 5000,\n  \"description\": \"Cash sale receipt\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -477,7 +477,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["entries", "receipt"]
             },
-            "description": "Protected. Creates a receipt entry for an active company. Returns only a success message; run List Entries to fetch it."
+            "description": "Protected. Creates a receipt entry. `company` is optional for receipts. Returns only a success message; run List Entries to fetch it."
           },
           "response": []
         },
@@ -515,7 +515,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["entries", "{{entryId}}"]
             },
-            "description": "Protected. Updates any subset of fields (type, date, company, expenseHead, amount, description). At least one field is required. Payment entries require an expense head. Returns only a success message."
+            "description": "Protected. Updates any subset of fields (type, date, company, expenseHead, amount, description). At least one field is required. Payment entries require both company and expense head; receipts may omit or clear company. Returns only a success message."
           },
           "response": []
         },

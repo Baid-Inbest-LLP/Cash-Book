@@ -11,7 +11,7 @@ const loadEntry = async ({ id }) => {
   return entry;
 };
 
-// Ensure entries are always linked to an active company.
+// Ensure referenced companies exist when supplied, and for all payments.
 const assertActiveCompany = async ({ companyId }) => {
   const exists = await Company.exists({ _id: companyId, isActive: true });
   if (!exists) throw ApiError.badRequest('Active company is required');
@@ -25,10 +25,14 @@ const assertActiveExpenseHead = async ({ expenseHeadId }) => {
 
 // Create either a receipt or payment entry after validating its references.
 const createEntry = async ({ type, date, company, expenseHead, amount, description, userId }) => {
-  const referenceChecks = [assertActiveCompany({ companyId: company })];
+  const referenceChecks = [];
 
   if (type === ENTRY_TYPES.PAYMENT) {
+    if (!company) throw ApiError.badRequest('Active company is required');
+    referenceChecks.push(assertActiveCompany({ companyId: company }));
     referenceChecks.push(assertActiveExpenseHead({ expenseHeadId: expenseHead }));
+  } else if (company) {
+    referenceChecks.push(assertActiveCompany({ companyId: company }));
   }
   await Promise.all(referenceChecks);
 
@@ -36,7 +40,7 @@ const createEntry = async ({ type, date, company, expenseHead, amount, descripti
   await Entry.create({
     type,
     date,
-    company,
+    company: company ?? null,
     expenseHead: type === ENTRY_TYPES.PAYMENT ? expenseHead : null,
     amount,
     description,
@@ -191,13 +195,16 @@ export const listEntries = async ({ filters = {} }) => {
 export const updateEntry = async ({ id, updates, userId }) => {
   const entry = await loadEntry({ id });
   const nextType = updates.type || entry.type;
-  const nextCompany = updates.company || entry.company;
+  const nextCompany = updates.company === undefined ? entry.company : updates.company;
   const nextExpenseHead =
     nextType === ENTRY_TYPES.PAYMENT ? (updates.expenseHead ?? entry.expenseHead) : null;
 
   const referenceChecks = [];
 
-  if (updates.company !== undefined) {
+  if (nextType === ENTRY_TYPES.PAYMENT) {
+    if (!nextCompany) throw ApiError.badRequest('Active company is required');
+    referenceChecks.push(assertActiveCompany({ companyId: nextCompany }));
+  } else if (updates.company !== undefined && nextCompany) {
     referenceChecks.push(assertActiveCompany({ companyId: nextCompany }));
   }
 

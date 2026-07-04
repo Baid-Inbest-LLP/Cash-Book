@@ -10,7 +10,15 @@ const entrySchema = new mongoose.Schema(
     financialYear: { type: String, required: true, trim: true }, // e.g. "2025-26"
     month: { type: Number, required: true, min: 1, max: 12 }, // calendar month 1-12
 
-    company: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', required: true },
+    // Company is mandatory for payments; receipts may optionally carry one.
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Company',
+      required() {
+        return this.type === ENTRY_TYPES.PAYMENT;
+      },
+      default: null,
+    },
 
     // Expense head applies to payments (expenses); receipts (income) have none.
     expenseHead: {
