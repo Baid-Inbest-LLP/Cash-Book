@@ -15,6 +15,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', validate(listEntriesQuerySchema, 'query'), controller.listEntries);
+router.get('/export', validate(listEntriesQuerySchema, 'query'), controller.exportEntries);
 router.post('/receipt', validate(createReceiptSchema), controller.createReceipt);
 router.post('/payment', validate(createPaymentSchema), controller.createPayment);
 router.put(

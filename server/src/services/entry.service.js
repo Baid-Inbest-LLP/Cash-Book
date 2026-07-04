@@ -142,6 +142,31 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
   };
 };
 
+// Fetch every entry matching the filters (no pagination) for an Excel export,
+// ordered chronologically so the file reads like a ledger.
+export const getEntriesForExport = ({ filters = {} }) => {
+  const filter = buildListFilter({ filters });
+  return Entry.aggregate([
+    { $match: filter },
+    { $sort: { date: 1, createdAt: 1 } },
+    ...lookupOne({
+      from: 'companies',
+      localField: 'company',
+      as: 'company',
+      project: { name: 1, code: 1 },
+    }),
+    ...lookupOne({
+      from: 'expenseheads',
+      localField: 'expenseHead',
+      as: 'expenseHead',
+      project: { name: 1 },
+    }),
+    {
+      $project: { type: 1, date: 1, company: 1, expenseHead: 1, amount: 1, description: 1 },
+    },
+  ]);
+};
+
 // List entries with pagination.
 export const listEntries = async ({ filters = {} }) => {
   const page = filters.page || 1;

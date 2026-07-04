@@ -1,6 +1,9 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { sendWorkbook } from '../utils/excel.js';
+import { getFinancialYear } from '../utils/financialYear.js';
 import * as entryService from '../services/entry.service.js';
+import { buildEntriesWorkbook } from '../services/export.service.js';
 
 // GET /entries - list entries with filters, pagination, and balance summary.
 export const listEntries = asyncHandler(async (req, res) => {
@@ -35,6 +38,16 @@ export const listEntries = asyncHandler(async (req, res) => {
   });
 
   ApiResponse.success(res, result);
+});
+
+// GET /entries/export - download the filtered entries as a branded Excel file.
+export const exportEntries = asyncHandler(async (req, res) => {
+  const query = req.validated?.query || {};
+  const financialYear = query.financialYear || getFinancialYear();
+  const { workbook, filename } = await buildEntriesWorkbook({
+    filters: { ...query, financialYear },
+  });
+  await sendWorkbook(res, workbook, filename);
 });
 
 // POST /entries/receipt - create a receipt entry.
