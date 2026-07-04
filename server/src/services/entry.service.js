@@ -224,10 +224,11 @@ export const updateEntry = async ({ id, updates, userId }) => {
   await entry.save();
 };
 
-// Move an entry to the excluded/recycle-bin list.
-export const excludeEntry = async ({ id, userId }) => {
-  const { matchedCount } = await Entry.updateOne(
-    { _id: id },
+// Move the selected entries to the excluded/recycle-bin list. Already-excluded ids are
+// skipped; returns how many were newly excluded.
+export const excludeEntries = async ({ ids, userId }) => {
+  const { modifiedCount } = await Entry.updateMany(
+    { _id: { $in: ids }, isExcluded: false },
     {
       $set: {
         isExcluded: true,
@@ -237,13 +238,13 @@ export const excludeEntry = async ({ id, userId }) => {
     },
   );
 
-  if (!matchedCount) throw ApiError.notFound('Entry not found');
+  return { count: modifiedCount };
 };
 
-// Restore an excluded entry back to normal cashbook calculations.
-export const restoreEntry = async ({ id }) => {
-  const { matchedCount } = await Entry.updateOne(
-    { _id: id, isExcluded: true },
+// Restore the selected excluded entries back to normal cashbook calculations.
+export const restoreEntries = async ({ ids }) => {
+  const { modifiedCount } = await Entry.updateMany(
+    { _id: { $in: ids }, isExcluded: true },
     {
       $set: {
         isExcluded: false,
@@ -252,23 +253,12 @@ export const restoreEntry = async ({ id }) => {
       },
     },
   );
-  if (matchedCount) return;
 
-  const exists = await Entry.exists({ _id: id });
-  if (exists) {
-    throw ApiError.badRequest('Only excluded entries can be restored');
-  }
-  throw ApiError.notFound('Entry not found');
+  return { count: modifiedCount };
 };
 
-// Permanently delete an entry only after it has been moved to excluded entries.
-export const deleteEntry = async ({ id }) => {
-  const entry = await Entry.findOneAndDelete({ _id: id, isExcluded: true }).lean();
-  if (entry) return entry;
-
-  const exists = await Entry.exists({ _id: id });
-  if (exists) {
-    throw ApiError.badRequest('Only excluded entries can be permanently deleted');
-  }
-  throw ApiError.notFound('Entry not found');
+// Permanently delete the selected entries — only those already moved to excluded entries.
+export const deleteEntries = async ({ ids }) => {
+  const { deletedCount } = await Entry.deleteMany({ _id: { $in: ids }, isExcluded: true });
+  return { count: deletedCount };
 };

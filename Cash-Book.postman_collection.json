@@ -520,44 +520,59 @@
           "response": []
         },
         {
-          "name": "🗑️ Exclude Entry",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/entries/{{entryId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}"]
-            },
-            "description": "Protected. Soft-deletes: moves the entry to the excluded/recycle-bin list (removed from balance calculations)."
-          },
-          "response": []
-        },
-        {
-          "name": "♻️ Restore Entry",
+          "name": "🗑️ Exclude Entries (bulk)",
           "request": {
             "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/entries/{{entryId}}/restore",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}", "restore"]
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "description": "Protected. Restores an excluded entry back into the cash book."
+            "url": {
+              "raw": "{{baseUrl}}/entries/exclude",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "exclude"]
+            },
+            "description": "Protected. Bulk soft-delete: moves the selected entries (`ids` array, 1–200) to the excluded/recycle-bin list. Already-excluded ids are skipped. Returns a count message."
           },
           "response": []
         },
         {
-          "name": "🗑️ Delete Entry (Permanent)",
+          "name": "♻️ Restore Entries (bulk)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/entries/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "restore"]
+            },
+            "description": "Protected. Bulk restore: returns the selected excluded entries (`ids` array) to the cash book. Only excluded ids are affected."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Entries (Permanent, bulk)",
           "request": {
             "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/entries/{{entryId}}/permanent",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}", "permanent"]
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "description": "Superadmin only. Permanently deletes an entry. Blocked with 400 unless the entry has already been excluded."
+            "url": {
+              "raw": "{{baseUrl}}/entries/permanent",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "permanent"]
+            },
+            "description": "Superadmin only. Permanently deletes the selected entries (`ids` array). Only entries already excluded are removed; the rest are skipped."
           },
           "response": []
         }

@@ -102,23 +102,26 @@ export const updateEntry = asyncHandler(async (req, res) => {
   ApiResponse.success(res, null, 'Entry updated');
 });
 
-// DELETE /entries/:id - move an entry to excluded entries.
-export const excludeEntry = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await entryService.excludeEntry({ id, userId: req.user._id });
-  ApiResponse.success(res, null, 'Entry moved to excluded entries');
+// Pluralise the entry count for user-facing messages.
+const entryLabel = (count) => `${count} entr${count === 1 ? 'y' : 'ies'}`;
+
+// PATCH /entries/exclude - move the selected entries to excluded entries.
+export const excludeEntries = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const { count } = await entryService.excludeEntries({ ids, userId: req.user._id });
+  ApiResponse.success(res, null, `${entryLabel(count)} moved to excluded entries`);
 });
 
-// PATCH /entries/:id/restore - restore an excluded entry back to the cash book.
-export const restoreEntry = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await entryService.restoreEntry({ id });
-  ApiResponse.success(res, null, 'Entry restored');
+// PATCH /entries/restore - restore the selected excluded entries back to the cash book.
+export const restoreEntries = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const { count } = await entryService.restoreEntries({ ids });
+  ApiResponse.success(res, null, `${entryLabel(count)} restored`);
 });
 
-// DELETE /entries/:id/permanent - permanently remove an already excluded entry.
-export const deleteEntry = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await entryService.deleteEntry({ id });
-  ApiResponse.success(res, null, 'Entry deleted permanently');
+// DELETE /entries/permanent - permanently remove the selected already-excluded entries.
+export const deleteEntries = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const { count } = await entryService.deleteEntries({ ids });
+  ApiResponse.success(res, null, `${entryLabel(count)} deleted permanently`);
 });

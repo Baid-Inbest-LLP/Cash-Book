@@ -72,6 +72,14 @@ export const entryIdParamSchema = z.object({
   id: objectIdSchema,
 });
 
+// Bulk actions (exclude/restore/permanent-delete) operate on a set of selected entries.
+export const entryIdsBodySchema = z.object({
+  ids: z
+    .array(objectIdSchema)
+    .min(1, 'Select at least one entry')
+    .max(200, 'At most 200 entries can be selected at once'),
+});
+
 export const listEntriesQuerySchema = z
   .object({
     page: numberQuerySchema(z.number().int().min(1)).default(1),

@@ -6,6 +6,7 @@ import {
   createPaymentSchema,
   createReceiptSchema,
   entryIdParamSchema,
+  entryIdsBodySchema,
   listEntriesQuerySchema,
   updateEntrySchema,
 } from '../validators/entry.validator.js';
@@ -18,19 +19,19 @@ router.get('/', validate(listEntriesQuerySchema, 'query'), controller.listEntrie
 router.get('/export', validate(listEntriesQuerySchema, 'query'), controller.exportEntries);
 router.post('/receipt', validate(createReceiptSchema), controller.createReceipt);
 router.post('/payment', validate(createPaymentSchema), controller.createPayment);
+router.patch('/exclude', validate(entryIdsBodySchema), controller.excludeEntries);
+router.patch('/restore', validate(entryIdsBodySchema), controller.restoreEntries);
+router.delete(
+  '/permanent',
+  authorize('superadmin'),
+  validate(entryIdsBodySchema),
+  controller.deleteEntries,
+);
 router.put(
   '/:id',
   validate(entryIdParamSchema, 'params'),
   validate(updateEntrySchema),
   controller.updateEntry,
-);
-router.delete('/:id', validate(entryIdParamSchema, 'params'), controller.excludeEntry);
-router.patch('/:id/restore', validate(entryIdParamSchema, 'params'), controller.restoreEntry);
-router.delete(
-  '/:id/permanent',
-  authorize('superadmin'),
-  validate(entryIdParamSchema, 'params'),
-  controller.deleteEntry,
 );
 
 export default router;
