@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { notifications } from '@mantine/notifications';
 import { login, clearError } from '../../store/slices/authSlice';
 import inbestLogo from '../../assets/white_inbest_logo.png';
+import PasswordInput from '../../components/common/PasswordInput';
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -78,10 +79,9 @@ export default function LoginPage() {
               >
                 Password
               </label>
-              <input
-                type="password"
-                className="input-field"
+              <PasswordInput
                 placeholder="••••••••"
+                autoComplete="current-password"
                 {...register('password', { required: 'Password is required' })}
               />
               {errors.password && (
