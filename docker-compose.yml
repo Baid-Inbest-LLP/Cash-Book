@@ -15,7 +15,7 @@ services:
       MONGODB_URI: ${MONGODB_URI}
       JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh}
-      CLIENT_URL: http://localhost:5173
+      FRONTEND_URL: http://localhost:5173
     volumes:
       - ./server/uploads:/app/uploads
 
