@@ -11,7 +11,7 @@ const loadEntry = async ({ id }) => {
   return entry;
 };
 
-// Ensure entries are always linked to an active company.
+// Ensure referenced companies exist when supplied, and for all payments.
 const assertActiveCompany = async ({ companyId }) => {
   const exists = await Company.exists({ _id: companyId, isActive: true });
   if (!exists) throw ApiError.badRequest('Active company is required');
@@ -25,10 +25,14 @@ const assertActiveExpenseHead = async ({ expenseHeadId }) => {
 
 // Create either a receipt or payment entry after validating its references.
 const createEntry = async ({ type, date, company, expenseHead, amount, description, userId }) => {
-  const referenceChecks = [assertActiveCompany({ companyId: company })];
+  const referenceChecks = [];
 
   if (type === ENTRY_TYPES.PAYMENT) {
+    if (!company) throw ApiError.badRequest('Active company is required');
+    referenceChecks.push(assertActiveCompany({ companyId: company }));
     referenceChecks.push(assertActiveExpenseHead({ expenseHeadId: expenseHead }));
+  } else if (company) {
+    referenceChecks.push(assertActiveCompany({ companyId: company }));
   }
   await Promise.all(referenceChecks);
 
@@ -36,7 +40,7 @@ const createEntry = async ({ type, date, company, expenseHead, amount, descripti
   await Entry.create({
     type,
     date,
-    company,
+    company: company ?? null,
     expenseHead: type === ENTRY_TYPES.PAYMENT ? expenseHead : null,
     amount,
     description,
@@ -142,6 +146,31 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
   };
 };
 
+// Fetch every entry matching the filters (no pagination) for an Excel export,
+// ordered chronologically so the file reads like a ledger.
+export const getEntriesForExport = ({ filters = {} }) => {
+  const filter = buildListFilter({ filters });
+  return Entry.aggregate([
+    { $match: filter },
+    { $sort: { date: 1, createdAt: 1 } },
+    ...lookupOne({
+      from: 'companies',
+      localField: 'company',
+      as: 'company',
+      project: { name: 1, code: 1 },
+    }),
+    ...lookupOne({
+      from: 'expenseheads',
+      localField: 'expenseHead',
+      as: 'expenseHead',
+      project: { name: 1 },
+    }),
+    {
+      $project: { type: 1, date: 1, company: 1, expenseHead: 1, amount: 1, description: 1 },
+    },
+  ]);
+};
+
 // List entries with pagination.
 export const listEntries = async ({ filters = {} }) => {
   const page = filters.page || 1;
@@ -166,13 +195,16 @@ export const listEntries = async ({ filters = {} }) => {
 export const updateEntry = async ({ id, updates, userId }) => {
   const entry = await loadEntry({ id });
   const nextType = updates.type || entry.type;
-  const nextCompany = updates.company || entry.company;
+  const nextCompany = updates.company === undefined ? entry.company : updates.company;
   const nextExpenseHead =
     nextType === ENTRY_TYPES.PAYMENT ? (updates.expenseHead ?? entry.expenseHead) : null;
 
   const referenceChecks = [];
 
-  if (updates.company !== undefined) {
+  if (nextType === ENTRY_TYPES.PAYMENT) {
+    if (!nextCompany) throw ApiError.badRequest('Active company is required');
+    referenceChecks.push(assertActiveCompany({ companyId: nextCompany }));
+  } else if (updates.company !== undefined && nextCompany) {
     referenceChecks.push(assertActiveCompany({ companyId: nextCompany }));
   }
 
@@ -199,10 +231,11 @@ export const updateEntry = async ({ id, updates, userId }) => {
   await entry.save();
 };
 
-// Move an entry to the excluded/recycle-bin list.
-export const excludeEntry = async ({ id, userId }) => {
-  const { matchedCount } = await Entry.updateOne(
-    { _id: id },
+// Move the selected entries to the excluded/recycle-bin list. Already-excluded ids are
+// skipped; returns how many were newly excluded.
+export const excludeEntries = async ({ ids, userId }) => {
+  const { modifiedCount } = await Entry.updateMany(
+    { _id: { $in: ids }, isExcluded: false },
     {
       $set: {
         isExcluded: true,
@@ -212,13 +245,13 @@ export const excludeEntry = async ({ id, userId }) => {
     },
   );
 
-  if (!matchedCount) throw ApiError.notFound('Entry not found');
+  return { count: modifiedCount };
 };
 
-// Restore an excluded entry back to normal cashbook calculations.
-export const restoreEntry = async ({ id }) => {
-  const { matchedCount } = await Entry.updateOne(
-    { _id: id, isExcluded: true },
+// Restore the selected excluded entries back to normal cashbook calculations.
+export const restoreEntries = async ({ ids }) => {
+  const { modifiedCount } = await Entry.updateMany(
+    { _id: { $in: ids }, isExcluded: true },
     {
       $set: {
         isExcluded: false,
@@ -227,23 +260,12 @@ export const restoreEntry = async ({ id }) => {
       },
     },
   );
-  if (matchedCount) return;
 
-  const exists = await Entry.exists({ _id: id });
-  if (exists) {
-    throw ApiError.badRequest('Only excluded entries can be restored');
-  }
-  throw ApiError.notFound('Entry not found');
+  return { count: modifiedCount };
 };
 
-// Permanently delete an entry only after it has been moved to excluded entries.
-export const deleteEntry = async ({ id }) => {
-  const entry = await Entry.findOneAndDelete({ _id: id, isExcluded: true }).lean();
-  if (entry) return entry;
-
-  const exists = await Entry.exists({ _id: id });
-  if (exists) {
-    throw ApiError.badRequest('Only excluded entries can be permanently deleted');
-  }
-  throw ApiError.notFound('Entry not found');
+// Permanently delete the selected entries — only those already moved to excluded entries.
+export const deleteEntries = async ({ ids }) => {
+  const { deletedCount } = await Entry.deleteMany({ _id: { $in: ids }, isExcluded: true });
+  return { count: deletedCount };
 };

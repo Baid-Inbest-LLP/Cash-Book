@@ -430,13 +430,46 @@
           "response": []
         },
         {
+          "name": "⬇️ Export Entries (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/entries/export?type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "export"],
+              "query": [
+                { "key": "type", "value": "", "description": "`receipt` or `payment`." },
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12." },
+                { "key": "company", "value": "", "description": "Company ObjectId." },
+                { "key": "expenseHead", "value": "", "description": "Expense head ObjectId." },
+                {
+                  "key": "isExcluded",
+                  "value": "false",
+                  "description": "`true` exports the excluded/recycle-bin list."
+                },
+                { "key": "fromDate", "value": "", "description": "ISO date lower bound." },
+                { "key": "toDate", "value": "", "description": "ISO date upper bound." },
+                { "key": "search", "value": "", "description": "Description text search." }
+              ]
+            },
+            "description": "Protected. Downloads all filtered entries (same filters as List Entries, no pagination) as a branded .xlsx. Use **Send → Send and Download** in Postman to save the file."
+          },
+          "response": []
+        },
+        {
           "name": "➕ Create Receipt",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"date\": \"2025-06-15\",\n  \"company\": \"{{companyId}}\",\n  \"amount\": 5000,\n  \"description\": \"Cash sale receipt\"\n}",
+              "raw": "{\n  \"date\": \"2025-06-15\",\n  \"amount\": 5000,\n  \"description\": \"Cash sale receipt\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -444,7 +477,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["entries", "receipt"]
             },
-            "description": "Protected. Creates a receipt entry for an active company. Returns only a success message; run List Entries to fetch it."
+            "description": "Protected. Creates a receipt entry. `company` is optional for receipts. Returns only a success message; run List Entries to fetch it."
           },
           "response": []
         },
@@ -482,49 +515,64 @@
               "host": ["{{baseUrl}}"],
               "path": ["entries", "{{entryId}}"]
             },
-            "description": "Protected. Updates any subset of fields (type, date, company, expenseHead, amount, description). At least one field is required. Payment entries require an expense head. Returns only a success message."
+            "description": "Protected. Updates any subset of fields (type, date, company, expenseHead, amount, description). At least one field is required. Payment entries require both company and expense head; receipts may omit or clear company. Returns only a success message."
           },
           "response": []
         },
         {
-          "name": "🗑️ Exclude Entry",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/entries/{{entryId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}"]
-            },
-            "description": "Protected. Soft-deletes: moves the entry to the excluded/recycle-bin list (removed from balance calculations)."
-          },
-          "response": []
-        },
-        {
-          "name": "♻️ Restore Entry",
+          "name": "🗑️ Exclude Entries (bulk)",
           "request": {
             "method": "PATCH",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/entries/{{entryId}}/restore",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}", "restore"]
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "description": "Protected. Restores an excluded entry back into the cash book."
+            "url": {
+              "raw": "{{baseUrl}}/entries/exclude",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "exclude"]
+            },
+            "description": "Protected. Bulk soft-delete: moves the selected entries (`ids` array, 1–200) to the excluded/recycle-bin list. Already-excluded ids are skipped. Returns a count message."
           },
           "response": []
         },
         {
-          "name": "🗑️ Delete Entry (Permanent)",
+          "name": "♻️ Restore Entries (bulk)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/entries/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "restore"]
+            },
+            "description": "Protected. Bulk restore: returns the selected excluded entries (`ids` array) to the cash book. Only excluded ids are affected."
+          },
+          "response": []
+        },
+        {
+          "name": "🗑️ Delete Entries (Permanent, bulk)",
           "request": {
             "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/entries/{{entryId}}/permanent",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}", "permanent"]
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
+              "options": { "raw": { "language": "json" } }
             },
-            "description": "Superadmin only. Permanently deletes an entry. Blocked with 400 unless the entry has already been excluded."
+            "url": {
+              "raw": "{{baseUrl}}/entries/permanent",
+              "host": ["{{baseUrl}}"],
+              "path": ["entries", "permanent"]
+            },
+            "description": "Superadmin only. Permanently deletes the selected entries (`ids` array). Only entries already excluded are removed; the rest are skipped."
           },
           "response": []
         }
@@ -601,6 +649,76 @@
               ]
             },
             "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`. Optionally filtered by month."
+          },
+          "response": []
+        },
+        {
+          "name": "⬇️ Export Monthwise (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/monthwise/export?financialYear=",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "monthwise", "export"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                }
+              ]
+            },
+            "description": "Protected. Downloads the monthwise report as a branded .xlsx. Use **Send → Send and Download**."
+          },
+          "response": []
+        },
+        {
+          "name": "⬇️ Export Expense-Head (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/expense-heads/export?financialYear=&month=&company=",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "expense-heads", "export"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId (optional) — narrow to one company."
+                }
+              ]
+            },
+            "description": "Protected. Downloads the expense-head report as a branded .xlsx. Use **Send → Send and Download**."
+          },
+          "response": []
+        },
+        {
+          "name": "⬇️ Export Company (XLSX)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/companies/export?financialYear=&month=",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "companies", "export"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." }
+              ]
+            },
+            "description": "Protected. Downloads the company report as a branded .xlsx. Use **Send → Send and Download**."
           },
           "response": []
         }

@@ -14,10 +14,21 @@ router.use(authenticate);
 
 router.get('/monthwise', validate(monthwiseQuerySchema, 'query'), controller.monthwise);
 router.get(
+  '/monthwise/export',
+  validate(monthwiseQuerySchema, 'query'),
+  controller.exportMonthwise,
+);
+router.get(
   '/expense-heads',
   validate(expenseHeadReportQuerySchema, 'query'),
   controller.expenseHeads,
 );
+router.get(
+  '/expense-heads/export',
+  validate(expenseHeadReportQuerySchema, 'query'),
+  controller.exportExpenseHeads,
+);
 router.get('/companies', validate(reportQuerySchema, 'query'), controller.companies);
+router.get('/companies/export', validate(reportQuerySchema, 'query'), controller.exportCompanies);
 
 export default router;

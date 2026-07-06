@@ -1,6 +1,9 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { sendWorkbook } from '../utils/excel.js';
+import { getFinancialYear } from '../utils/financialYear.js';
 import * as entryService from '../services/entry.service.js';
+import { buildEntriesWorkbook } from '../services/export.service.js';
 
 // GET /entries - list entries with filters, pagination, and balance summary.
 export const listEntries = asyncHandler(async (req, res) => {
@@ -35,6 +38,16 @@ export const listEntries = asyncHandler(async (req, res) => {
   });
 
   ApiResponse.success(res, result);
+});
+
+// GET /entries/export - download the filtered entries as a branded Excel file.
+export const exportEntries = asyncHandler(async (req, res) => {
+  const query = req.validated?.query || {};
+  const financialYear = query.financialYear || getFinancialYear();
+  const { workbook, filename } = await buildEntriesWorkbook({
+    filters: { ...query, financialYear },
+  });
+  await sendWorkbook(res, workbook, filename);
 });
 
 // POST /entries/receipt - create a receipt entry.
@@ -89,23 +102,26 @@ export const updateEntry = asyncHandler(async (req, res) => {
   ApiResponse.success(res, null, 'Entry updated');
 });
 
-// DELETE /entries/:id - move an entry to excluded entries.
-export const excludeEntry = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await entryService.excludeEntry({ id, userId: req.user._id });
-  ApiResponse.success(res, null, 'Entry moved to excluded entries');
+// Pluralise the entry count for user-facing messages.
+const entryLabel = (count) => `${count} entr${count === 1 ? 'y' : 'ies'}`;
+
+// PATCH /entries/exclude - move the selected entries to excluded entries.
+export const excludeEntries = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const { count } = await entryService.excludeEntries({ ids, userId: req.user._id });
+  ApiResponse.success(res, null, `${entryLabel(count)} moved to excluded entries`);
 });
 
-// PATCH /entries/:id/restore - restore an excluded entry back to the cash book.
-export const restoreEntry = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await entryService.restoreEntry({ id });
-  ApiResponse.success(res, null, 'Entry restored');
+// PATCH /entries/restore - restore the selected excluded entries back to the cash book.
+export const restoreEntries = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const { count } = await entryService.restoreEntries({ ids });
+  ApiResponse.success(res, null, `${entryLabel(count)} restored`);
 });
 
-// DELETE /entries/:id/permanent - permanently remove an already excluded entry.
-export const deleteEntry = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-  await entryService.deleteEntry({ id });
-  ApiResponse.success(res, null, 'Entry deleted permanently');
+// DELETE /entries/permanent - permanently remove the selected already-excluded entries.
+export const deleteEntries = asyncHandler(async (req, res) => {
+  const { ids } = req.body;
+  const { count } = await entryService.deleteEntries({ ids });
+  ApiResponse.success(res, null, `${entryLabel(count)} deleted permanently`);
 });

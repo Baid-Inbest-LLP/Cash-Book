@@ -1,58 +1,34 @@
-import { cloneElement } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import inbestTextLogo from '../../assets/inbest_text_logo.png';
 import inbestWhiteLogo from '../../assets/white_inbest_logo.png';
+import {
+  CashbookEntriesIcon,
+  ChevronRightIcon,
+  ControlCenterIcon,
+  DashboardIcon,
+  ExcludedEntriesIcon,
+  ReportsIcon,
+  SettingsIcon,
+} from '../icons/sidebarIcons';
 
 const navItems = [
+  { to: '/', label: 'Dashboard', end: true, Icon: DashboardIcon },
+  { to: '/entries', label: 'Cashbook Entries', Icon: CashbookEntriesIcon },
+  { to: '/excluded-entries', label: 'Excluded Entries', Icon: ExcludedEntriesIcon },
+  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   {
-    to: '/',
-    label: 'Dashboard',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-        />
-      </svg>
-    ),
+    label: 'Reports & Insights',
+    basePath: '/reports',
+    Icon: ReportsIcon,
+    children: [
+      { to: '/reports/monthwise', label: 'Monthwise Report' },
+      { to: '/reports/expense-heads', label: 'Expense Head Report' },
+      { to: '/reports/companies', label: 'Company Report' },
+    ],
   },
-  {
-    to: '/companies',
-    label: 'Companies',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-        />
-      </svg>
-    ),
-  },
-  {
-    to: '/settings',
-    label: 'Settings',
-    icon: (
-      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-        />
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-        />
-      </svg>
-    ),
-  },
+  { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ];
 
 const roleLabel = (role) => {
@@ -61,9 +37,20 @@ const roleLabel = (role) => {
   return role || '';
 };
 
+const linkClass = (isOpen, isActive) =>
+  `flex items-center rounded-lg text-md font-medium transition-colors ${
+    isOpen ? 'gap-3 justify-start px-3 py-2' : 'justify-center px-2 py-2.5'
+  } ${
+    isActive
+      ? 'bg-white/75 text-[#0b2f81] shadow-sm'
+      : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
+  }`;
+
 const Sidebar = ({ isOpen = true }) => {
   const { user } = useSelector((state) => state.auth);
-  const items = navItems;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [reportsOpen, setReportsOpen] = useState(() => location.pathname.startsWith('/reports'));
 
   return (
     <aside
@@ -89,29 +76,71 @@ const Sidebar = ({ isOpen = true }) => {
         </div>
       </div>
 
-      <nav className={`flex-1 py-4 space-y-1 ${isOpen ? 'px-3' : 'px-2'}`}>
-        {items.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            title={!isOpen ? item.label : undefined}
-            className={({ isActive }) =>
-              `flex items-center rounded-lg text-md font-medium transition-colors ${
-                isOpen ? 'gap-3 justify-start px-3 py-2' : 'justify-center px-2 py-2.5'
-              } ${
-                isActive
-                  ? 'bg-white/75 text-[#0b2f81] shadow-sm'
-                  : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
-              }`
-            }
-          >
-            {cloneElement(item.icon, {
-              className: `${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`,
-            })}
-            {isOpen && <span className="whitespace-nowrap">{item.label}</span>}
-          </NavLink>
-        ))}
+      <nav className={`flex-1 py-4 space-y-1 overflow-y-auto ${isOpen ? 'px-3' : 'px-2'}`}>
+        {navItems.map((item) => {
+          const { Icon } = item;
+          if (item.children) {
+            const isGroupActive = location.pathname.startsWith(item.basePath);
+            return (
+              <div key={item.label}>
+                <button
+                  type="button"
+                  title={!isOpen ? item.label : undefined}
+                  onClick={() =>
+                    isOpen ? setReportsOpen((prev) => !prev) : navigate(item.children[0].to)
+                  }
+                  className={`w-full ${linkClass(isOpen, isGroupActive)}`}
+                >
+                  <Icon className={`${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`} />
+                  {isOpen && (
+                    <span className="flex-1 text-left whitespace-nowrap">{item.label}</span>
+                  )}
+                  {isOpen && (
+                    <ChevronRightIcon
+                      className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${
+                        reportsOpen ? 'rotate-90' : ''
+                      }`}
+                    />
+                  )}
+                </button>
+
+                {isOpen && reportsOpen && (
+                  <div className="mt-1 space-y-1 pl-4">
+                    {item.children.map((child) => (
+                      <NavLink
+                        key={child.to}
+                        to={child.to}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 rounded-lg pl-4 pr-3 py-2 text-sm font-medium transition-colors ${
+                            isActive
+                              ? 'bg-white/75 text-[#0b2f81] shadow-sm'
+                              : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
+                          }`
+                        }
+                      >
+                        <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-current" />
+                        <span className="whitespace-nowrap">{child.label}</span>
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              title={!isOpen ? item.label : undefined}
+              className={({ isActive }) => linkClass(isOpen, isActive)}
+            >
+              <Icon className={`${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`} />
+              {isOpen && <span className="whitespace-nowrap">{item.label}</span>}
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div className={`py-4 border-t border-primary-800 ${isOpen ? 'px-4' : 'px-2'}`}>

@@ -61,15 +61,22 @@ const numberQuerySchema = (schema) =>
     return Number(value);
   }, schema.optional());
 
-const baseEntryBodySchema = z.object({
+const baseCreateEntryBodySchema = z.object({
   date: dateSchema,
-  company: objectIdSchema,
   amount: amountSchema,
   description: createDescriptionSchema,
 });
 
 export const entryIdParamSchema = z.object({
   id: objectIdSchema,
+});
+
+// Bulk actions (exclude/restore/permanent-delete) operate on a set of selected entries.
+export const entryIdsBodySchema = z.object({
+  ids: z
+    .array(objectIdSchema)
+    .min(1, 'Select at least one entry')
+    .max(200, 'At most 200 entries can be selected at once'),
 });
 
 export const listEntriesQuerySchema = z
@@ -91,9 +98,12 @@ export const listEntriesQuerySchema = z
     'fromDate cannot be after toDate',
   );
 
-export const createReceiptSchema = baseEntryBodySchema;
+export const createReceiptSchema = baseCreateEntryBodySchema.extend({
+  company: objectIdSchema.nullish(),
+});
 
-export const createPaymentSchema = baseEntryBodySchema.extend({
+export const createPaymentSchema = baseCreateEntryBodySchema.extend({
+  company: objectIdSchema,
   expenseHead: objectIdSchema,
 });
 
@@ -101,7 +111,7 @@ export const updateEntrySchema = z
   .object({
     type: entryTypeSchema.optional(),
     date: dateSchema.optional(),
-    company: objectIdSchema.optional(),
+    company: objectIdSchema.nullish(),
     expenseHead: objectIdSchema.nullish(),
     amount: amountSchema.optional(),
     description: descriptionSchema,

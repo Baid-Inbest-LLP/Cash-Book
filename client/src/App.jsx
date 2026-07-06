@@ -7,7 +7,12 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import HomePage from './pages/home/HomePage';
 import SettingsPage from './pages/settings/SettingsPage';
-import CompanyListPage from './pages/companies/CompanyListPage';
+import CompanyListPage from './pages/control-center/CompanyListPage';
+import EntriesPage from './pages/entries/EntriesPage';
+import ExcludedEntriesPage from './pages/entries/ExcludedEntriesPage';
+import MonthwiseReportPage from './pages/reports/MonthwiseReportPage';
+import ExpenseHeadReportPage from './pages/reports/ExpenseHeadReportPage';
+import CompanyReportPage from './pages/reports/CompanyReportPage';
 
 function PublicOnly({ children }) {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -44,8 +49,15 @@ export default function App() {
           }
         >
           <Route index element={<HomePage />} />
-          <Route path="companies" element={<CompanyListPage />} />
+          <Route path="control-center" element={<CompanyListPage />} />
+          <Route path="entries" element={<EntriesPage />} />
+          <Route path="excluded-entries" element={<ExcludedEntriesPage />} />
+          <Route path="reports/monthwise" element={<MonthwiseReportPage />} />
+          <Route path="reports/expense-heads" element={<ExpenseHeadReportPage />} />
+          <Route path="reports/companies" element={<CompanyReportPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          {/* Old path kept as a redirect for existing bookmarks. */}
+          <Route path="companies" element={<Navigate to="/control-center" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -10,7 +10,12 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
   HOME: '/',
-  COMPANIES: '/companies',
+  CONTROL_CENTER: '/control-center',
+  ENTRIES: '/entries',
+  EXCLUDED_ENTRIES: '/excluded-entries',
+  REPORTS_MONTHWISE: '/reports/monthwise',
+  REPORTS_EXPENSE_HEADS: '/reports/expense-heads',
+  REPORTS_COMPANIES: '/reports/companies',
   SETTINGS: '/settings',
 };
 
