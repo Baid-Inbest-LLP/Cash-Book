@@ -1,8 +1,8 @@
-import { useSelector } from 'react-redux';
+import { useMe } from '../../hooks/useAuth';
 import PageBanner from '../../components/common/PageBanner';
 
 export default function HomePage() {
-  const { user } = useSelector((state) => state.auth);
+  const { data: user } = useMe();
 
   return (
     <div>

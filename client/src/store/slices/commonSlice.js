@@ -1,16 +1,8 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { masterApi } from '../../api/master.api';
+import { createSlice } from '@reduxjs/toolkit';
 import { STORAGE_KEYS } from '../../constants';
 
-export const fetchLookups = createAsyncThunk('common/fetchLookups', async () => {
-  const { data } = await masterApi.lookups();
-  return data.data;
-});
-
 const initialState = {
-  lookups: null,
   theme: localStorage.getItem(STORAGE_KEYS.THEME) || 'light',
-  globalLoading: false,
   sidebarCollapsed: true,
   filters: {},
 };
@@ -26,9 +18,6 @@ const commonSlice = createSlice({
     toggleSidebar: (state) => {
       state.sidebarCollapsed = !state.sidebarCollapsed;
     },
-    setGlobalLoading: (state, action) => {
-      state.globalLoading = action.payload;
-    },
     setFilters: (state, action) => {
       state.filters = { ...state.filters, ...action.payload };
     },
@@ -36,13 +25,7 @@ const commonSlice = createSlice({
       state.filters = {};
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(fetchLookups.fulfilled, (state, action) => {
-      state.lookups = action.payload;
-    });
-  },
 });
 
-export const { setTheme, toggleSidebar, setGlobalLoading, setFilters, clearFilters } =
-  commonSlice.actions;
+export const { setTheme, toggleSidebar, setFilters, clearFilters } = commonSlice.actions;
 export default commonSlice.reducer;

@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 import { notifications } from '@mantine/notifications';
-import { authApi } from '../../api/auth.api';
-import { masterApi } from '../../api/master.api';
+import { useChangePassword, useMe, useRegister } from '../../hooks/useAuth';
+import { useDeleteUser, useUpdateUser, useUsers } from '../../hooks/useMasters';
+import { getApiErrorMessage } from '../../lib/queryClient';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import PageBanner from '../../components/common/PageBanner';
 import PasswordInput from '../../components/common/PasswordInput';
@@ -22,35 +22,20 @@ const roleLabel = (role) => {
 };
 
 export default function SettingsPage() {
-  const { user } = useSelector((state) => state.auth);
+  const { data: user } = useMe();
   const isSuperadmin = isSuperAdmin(user?.role);
   const canManageUsers = isSuperadmin;
 
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const { data } = await masterApi.users();
-      setUsers(data.data || []);
-    } catch (err) {
-      notifications.show({
-        message: err.response?.data?.message || 'Failed to load users',
-        color: 'red',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (canManageUsers) fetchUsers();
-  }, [canManageUsers]);
+  const { data: users = [], isLoading: loading, refetch: refetchUsers } = useUsers(canManageUsers);
+  const registerUser = useRegister();
+  const changePassword = useChangePassword();
+  const updateUserMutation = useUpdateUser();
+  const deleteUserMutation = useDeleteUser();
 
   const {
     register: registerCreate,
@@ -91,7 +76,7 @@ export default function SettingsPage() {
 
   const onCreateUser = async (data) => {
     try {
-      await authApi.register({
+      await registerUser.mutateAsync({
         name: data.name,
         email: data.email,
         password: data.password,
@@ -103,10 +88,10 @@ export default function SettingsPage() {
       });
       setShowCreate(false);
       resetCreate();
-      fetchUsers();
+      refetchUsers();
     } catch (err) {
       notifications.show({
-        message: err.response?.data?.message || 'Failed to create user',
+        message: getApiErrorMessage(err, 'Failed to create user'),
         color: 'red',
       });
     }
@@ -118,7 +103,7 @@ export default function SettingsPage() {
       return;
     }
     try {
-      await authApi.changePassword({
+      await changePassword.mutateAsync({
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
@@ -127,7 +112,7 @@ export default function SettingsPage() {
       setShowPasswordModal(false);
     } catch (err) {
       notifications.show({
-        message: err.response?.data?.message || 'Failed to update password',
+        message: getApiErrorMessage(err, 'Failed to update password'),
         color: 'red',
       });
     }
@@ -160,17 +145,19 @@ export default function SettingsPage() {
   const onUpdateUser = async (data) => {
     if (!editingUser) return;
     try {
-      await masterApi.updateUser(editingUser._id, {
-        name: data.name,
-        email: data.email,
-        isActive: Boolean(data.isActive),
+      await updateUserMutation.mutateAsync({
+        id: editingUser._id,
+        data: {
+          name: data.name,
+          email: data.email,
+          isActive: Boolean(data.isActive),
+        },
       });
       notifications.show({ message: 'User updated', color: 'green' });
       closeEditUser();
-      fetchUsers();
     } catch (err) {
       notifications.show({
-        message: err.response?.data?.message || 'Failed to update user',
+        message: getApiErrorMessage(err, 'Failed to update user'),
         color: 'red',
       });
     }
@@ -186,13 +173,12 @@ export default function SettingsPage() {
   const handleDelete = async () => {
     if (!confirmDelete || !canDelete) return;
     try {
-      await masterApi.deleteUser(confirmDelete._id);
+      await deleteUserMutation.mutateAsync(confirmDelete._id);
       notifications.show({ message: 'User deleted', color: 'green' });
       setConfirmDelete(null);
-      fetchUsers();
     } catch (err) {
       notifications.show({
-        message: err.response?.data?.message || 'Failed to delete user',
+        message: getApiErrorMessage(err, 'Failed to delete user'),
         color: 'red',
       });
     }

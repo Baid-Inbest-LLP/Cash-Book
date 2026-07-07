@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useMe } from '../../hooks/useAuth';
 import inbestTextLogo from '../../assets/inbest_text_logo.png';
 import inbestWhiteLogo from '../../assets/white_inbest_logo.png';
 import {
@@ -47,7 +47,7 @@ const linkClass = (isOpen, isActive) =>
   }`;
 
 const Sidebar = ({ isOpen = true }) => {
-  const { user } = useSelector((state) => state.auth);
+  const { data: user } = useMe();
   const location = useLocation();
   const navigate = useNavigate();
   const [reportsOpen, setReportsOpen] = useState(() => location.pathname.startsWith('/reports'));
