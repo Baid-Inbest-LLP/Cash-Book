@@ -23,10 +23,8 @@ export const useCompanyStamp = (id, enabled = true) =>
     staleTime: 5 * 60 * 1000,
   });
 
-// Company changes also affect the master lookups (company dropdowns), so refresh both.
 const invalidateCompanyData = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: ['companies'] });
-  queryClient.invalidateQueries({ queryKey: queryKeys.lookups });
 };
 
 export const useCreateCompany = () => {

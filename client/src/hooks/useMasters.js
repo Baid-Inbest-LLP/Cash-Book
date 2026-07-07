@@ -2,14 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { masterApi } from '../api/master.api';
 import { queryKeys } from '../lib/queryKeys';
 
-// Dropdown data (companies, locations, roles, months, quarters).
-export const useLookups = () =>
-  useQuery({
-    queryKey: queryKeys.lookups,
-    queryFn: async () => (await masterApi.lookups()).data.data,
-    staleTime: 5 * 60 * 1000,
-  });
-
 export const useUsers = (enabled = true) =>
   useQuery({
     queryKey: queryKeys.users,

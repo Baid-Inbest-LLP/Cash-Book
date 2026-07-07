@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
 import { useMe } from '../../hooks/useAuth';
 import { useCompanies, useDeleteCompany } from '../../hooks/useCompanies';
@@ -13,11 +14,17 @@ export default function CompanyListPage() {
   const { data: user } = useMe();
   const canManage = isSuperAdmin(user?.role);
   const [search, setSearch] = useState('');
+  const [debouncedSearch] = useDebouncedValue(search.trim(), 300);
   const [showForm, setShowForm] = useState(false);
   const [editCompany, setEditCompany] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const { data, isLoading: loading, isError, error: queryError } = useCompanies({ search });
+  const {
+    data,
+    isLoading: loading,
+    isError,
+    error: queryError,
+  } = useCompanies(debouncedSearch ? { search: debouncedSearch } : undefined);
   const companies = data?.companies ?? [];
   const total = data?.total ?? 0;
   const error = isError ? getApiErrorMessage(queryError, 'Failed to fetch companies') : null;
