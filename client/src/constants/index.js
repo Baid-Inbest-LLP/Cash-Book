@@ -11,6 +11,8 @@ export const ROUTES = {
   RESET_PASSWORD: '/reset-password',
   HOME: '/',
   CONTROL_CENTER: '/control-center',
+  CONTROL_CENTER_COMPANIES: '/control-center/companies',
+  CONTROL_CENTER_EXPENSE_HEADS: '/control-center/expense-heads',
   ENTRIES: '/entries',
   EXCLUDED_ENTRIES: '/excluded-entries',
   REPORTS_MONTHWISE: '/reports/monthwise',

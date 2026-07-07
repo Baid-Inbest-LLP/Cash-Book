@@ -19,8 +19,11 @@ export const DashboardIcon = ({ className }) => (
 
 export const ControlCenterIcon = ({ className }) => (
   <Svg className={className}>
-    <Path d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-    <Path d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+    <Path d="M3 21h18" />
+    <Path d="M5 21V7l7-4 7 4v14" />
+    <Path d="M9 10h6" />
+    <Path d="M9 14h6" />
+    <Path d="M10 21v-4a2 2 0 012-2 2 2 0 012 2v4" />
   </Svg>
 );
 

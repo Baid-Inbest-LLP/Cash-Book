@@ -7,7 +7,9 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import HomePage from './pages/home/HomePage';
 import SettingsPage from './pages/settings/SettingsPage';
+import ControlCenterLayout from './pages/control-center/ControlCenterLayout';
 import CompanyListPage from './pages/control-center/CompanyListPage';
+import ExpenseHeadManagementPage from './pages/control-center/ExpenseHeadManagementPage';
 import EntriesPage from './pages/entries/EntriesPage';
 import ExcludedEntriesPage from './pages/entries/ExcludedEntriesPage';
 import MonthwiseReportPage from './pages/reports/MonthwiseReportPage';
@@ -48,7 +50,11 @@ export default function App() {
           }
         >
           <Route index element={<HomePage />} />
-          <Route path="control-center" element={<CompanyListPage />} />
+          <Route path="control-center" element={<ControlCenterLayout />}>
+            <Route index element={<Navigate to="companies" replace />} />
+            <Route path="companies" element={<CompanyListPage />} />
+            <Route path="expense-heads" element={<ExpenseHeadManagementPage />} />
+          </Route>
           <Route path="entries" element={<EntriesPage />} />
           <Route path="excluded-entries" element={<ExcludedEntriesPage />} />
           <Route path="reports/monthwise" element={<MonthwiseReportPage />} />
@@ -56,7 +62,7 @@ export default function App() {
           <Route path="reports/companies" element={<CompanyReportPage />} />
           <Route path="settings" element={<SettingsPage />} />
           {/* Old path kept as a redirect for existing bookmarks. */}
-          <Route path="companies" element={<Navigate to="/control-center" replace />} />
+          <Route path="companies" element={<Navigate to="/control-center/companies" replace />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
