@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
-import { logout } from '../../store/slices/authSlice';
+import { useLogout } from '../../hooks/useAuth';
 import { setTheme } from '../../store/slices/commonSlice';
 import ConfirmModal from '../common/ConfirmModal';
 
@@ -10,6 +10,7 @@ const Navbar = ({ sidebarOpen, onToggleSidebar }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { theme } = useSelector((state) => state.common);
+  const logoutMutation = useLogout();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const toggleTheme = () => {
@@ -17,11 +18,14 @@ const Navbar = ({ sidebarOpen, onToggleSidebar }) => {
     dispatch(setTheme(next));
   };
 
-  const handleLogoutConfirm = async () => {
-    await dispatch(logout());
-    notifications.show({ message: 'Logged out successfully', color: 'green' });
-    navigate('/login');
-    setShowLogoutConfirm(false);
+  const handleLogoutConfirm = () => {
+    logoutMutation.mutate(undefined, {
+      onSettled: () => {
+        notifications.show({ message: 'Logged out successfully', color: 'green' });
+        navigate('/login');
+        setShowLogoutConfirm(false);
+      },
+    });
   };
 
   return (

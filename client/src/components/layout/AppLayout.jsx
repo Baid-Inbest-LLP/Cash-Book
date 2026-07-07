@@ -1,20 +1,16 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
-import { fetchLookups } from '../../store/slices/commonSlice';
-import { fetchMe } from '../../store/slices/authSlice';
+import { useMe } from '../../hooks/useAuth';
+import { useLookups } from '../../hooks/useMasters';
 
 export default function AppLayout() {
-  const dispatch = useDispatch();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    dispatch(fetchMe());
-    dispatch(fetchLookups());
-  }, [dispatch]);
+  // Warm the shared caches once the authenticated shell mounts.
+  useMe();
+  useLookups();
 
   return (
     <div className="app-layout flex h-screen overflow-hidden bg-gray-50">

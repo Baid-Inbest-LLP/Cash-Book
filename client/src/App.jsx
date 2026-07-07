@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { isAuthenticated } from './lib/session';
 import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
 import LoginPage from './pages/auth/LoginPage';
@@ -15,8 +15,7 @@ import ExpenseHeadReportPage from './pages/reports/ExpenseHeadReportPage';
 import CompanyReportPage from './pages/reports/CompanyReportPage';
 
 function PublicOnly({ children }) {
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  if (isAuthenticated) return <Navigate to="/" replace />;
+  if (isAuthenticated()) return <Navigate to="/" replace />;
   return children;
 }
 

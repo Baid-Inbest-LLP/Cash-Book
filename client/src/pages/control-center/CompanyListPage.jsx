@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useState, useCallback } from 'react';
 import { notifications } from '@mantine/notifications';
-import { fetchCompanies, deleteCompany } from '../../store/slices/companiesSlice';
-import { fetchLookups } from '../../store/slices/commonSlice';
+import { useMe } from '../../hooks/useAuth';
+import { useCompanies, useDeleteCompany } from '../../hooks/useCompanies';
+import { getApiErrorMessage } from '../../lib/queryClient';
 import CompanyForm from './CompanyForm';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import PageBanner from '../../components/common/PageBanner';
@@ -10,34 +10,28 @@ import Skeleton, { SkeletonText } from '../../components/common/Skeleton';
 import { isSuperAdmin } from '../../constants/roles';
 
 export default function CompanyListPage() {
-  const dispatch = useDispatch();
-  const {
-    companies = [],
-    total = 0,
-    loading = false,
-    error,
-  } = useSelector((state) => state.companies ?? {});
-  const { user } = useSelector((state) => state.auth);
+  const { data: user } = useMe();
   const canManage = isSuperAdmin(user?.role);
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editCompany, setEditCompany] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  useEffect(() => {
-    dispatch(fetchCompanies({ search }));
-  }, [dispatch, search]);
+  const { data, isLoading: loading, isError, error: queryError } = useCompanies({ search });
+  const companies = data?.companies ?? [];
+  const total = data?.total ?? 0;
+  const error = isError ? getApiErrorMessage(queryError, 'Failed to fetch companies') : null;
 
-  const handleDelete = async () => {
+  const deleteCompany = useDeleteCompany();
+
+  const handleDelete = () => {
     if (!confirmDelete) return;
-    const result = await dispatch(deleteCompany(confirmDelete.id));
-    setConfirmDelete(null);
-    if (deleteCompany.fulfilled.match(result)) {
-      notifications.show({ message: 'Company deleted', color: 'green' });
-      dispatch(fetchLookups());
-    } else {
-      notifications.show({ message: result.payload || 'Delete failed', color: 'red' });
-    }
+    deleteCompany.mutate(confirmDelete.id, {
+      onSuccess: () => notifications.show({ message: 'Company deleted', color: 'green' }),
+      onError: (err) =>
+        notifications.show({ message: getApiErrorMessage(err, 'Delete failed'), color: 'red' }),
+      onSettled: () => setConfirmDelete(null),
+    });
   };
 
   const cancelDelete = useCallback(() => setConfirmDelete(null), []);
@@ -50,8 +44,6 @@ export default function CompanyListPage() {
   const handleClose = () => {
     setShowForm(false);
     setEditCompany(null);
-    dispatch(fetchCompanies({ search }));
-    dispatch(fetchLookups());
   };
 
   return (

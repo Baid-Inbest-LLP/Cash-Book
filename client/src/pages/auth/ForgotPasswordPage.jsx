@@ -2,33 +2,34 @@ import { Link } from 'react-router-dom';
 import { Paper, Title, Text, TextInput, Button, Stack, Center, Box, Alert } from '@mantine/core';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-import { authApi } from '../../api/auth.api';
 import { notifications } from '@mantine/notifications';
+import { useForgotPassword } from '../../hooks/useAuth';
+import { getApiErrorMessage } from '../../lib/queryClient';
 
 export default function ForgotPasswordPage() {
   const { register, handleSubmit } = useForm();
-  const [loading, setLoading] = useState(false);
+  const forgotPassword = useForgotPassword();
   const [resetUrl, setResetUrl] = useState(null);
+  const loading = forgotPassword.isPending;
 
-  const onSubmit = async ({ email }) => {
-    setLoading(true);
-    try {
-      const { data } = await authApi.forgotPassword(email);
-      notifications.show({
-        title: 'Check your email',
-        message: data.message || 'If the email exists, a reset link was sent.',
-        color: 'green',
-      });
-      if (data.data?.resetUrl) setResetUrl(data.data.resetUrl);
-    } catch (err) {
-      notifications.show({
-        title: 'Error',
-        message: err.response?.data?.message || 'Request failed',
-        color: 'red',
-      });
-    } finally {
-      setLoading(false);
-    }
+  const onSubmit = ({ email }) => {
+    forgotPassword.mutate(email, {
+      onSuccess: (data) => {
+        notifications.show({
+          title: 'Check your email',
+          message: data.message || 'If the email exists, a reset link was sent.',
+          color: 'green',
+        });
+        if (data.data?.resetUrl) setResetUrl(data.data.resetUrl);
+      },
+      onError: (err) => {
+        notifications.show({
+          title: 'Error',
+          message: getApiErrorMessage(err, 'Request failed'),
+          color: 'red',
+        });
+      },
+    });
   };
 
   return (

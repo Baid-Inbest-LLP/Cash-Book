@@ -1,36 +1,39 @@
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Paper, Title, Text, PasswordInput, Button, Stack, Center, Box } from '@mantine/core';
 import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { authApi } from '../../api/auth.api';
 import { notifications } from '@mantine/notifications';
+import { useResetPassword } from '../../hooks/useAuth';
+import { getApiErrorMessage } from '../../lib/queryClient';
 
 export default function ResetPasswordPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const token = params.get('token');
   const { register, handleSubmit } = useForm();
-  const [loading, setLoading] = useState(false);
+  const resetPassword = useResetPassword();
+  const loading = resetPassword.isPending;
 
-  const onSubmit = async ({ password }) => {
+  const onSubmit = ({ password }) => {
     if (!token) {
       notifications.show({ title: 'Invalid link', message: 'Missing token', color: 'red' });
       return;
     }
-    setLoading(true);
-    try {
-      await authApi.resetPassword({ token, password });
-      notifications.show({ title: 'Success', message: 'Password updated', color: 'green' });
-      navigate('/login');
-    } catch (err) {
-      notifications.show({
-        title: 'Error',
-        message: err.response?.data?.message || 'Reset failed',
-        color: 'red',
-      });
-    } finally {
-      setLoading(false);
-    }
+    resetPassword.mutate(
+      { token, password },
+      {
+        onSuccess: () => {
+          notifications.show({ title: 'Success', message: 'Password updated', color: 'green' });
+          navigate('/login');
+        },
+        onError: (err) => {
+          notifications.show({
+            title: 'Error',
+            message: getApiErrorMessage(err, 'Reset failed'),
+            color: 'red',
+          });
+        },
+      },
+    );
   };
 
   return (

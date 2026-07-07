@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
-import { createCompany, updateCompany } from '../../store/slices/companiesSlice';
-import { companiesApi } from '../../api/company.api';
+import { useCompanyStamp, useCreateCompany, useUpdateCompany } from '../../hooks/useCompanies';
+import { getApiErrorMessage } from '../../lib/queryClient';
 
 const readImageFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
@@ -30,6 +30,18 @@ const emptyLocation = (isFirst = false) => ({
   isDefault: isFirst,
 });
 
+const buildDefaultValues = (company) => ({
+  name: company?.name || '',
+  companyCode: company?.companyCode || '',
+  email: company?.email || '',
+  phone: company?.phone || '',
+  taxId: company?.taxId || '',
+  isActive: company ? company.isActive !== false : true,
+  locations: company?.locations?.length
+    ? company.locations.map((l) => ({ ...l, label: (l.label || '').toUpperCase() }))
+    : [emptyLocation(true)],
+});
+
 const Field = ({ label, required, error, children }) => (
   <div>
     <label className="company-form-field-label">
@@ -41,58 +53,41 @@ const Field = ({ label, required, error, children }) => (
 );
 
 export default function CompanyForm({ company, onClose }) {
-  const dispatch = useDispatch();
   const isEdit = Boolean(company);
-  const [submitting, setSubmitting] = useState(false);
+  const createCompany = useCreateCompany();
+  const updateCompany = useUpdateCompany();
+  const submitting = createCompany.isPending || updateCompany.isPending;
 
-  const [form, setForm] = useState({
-    name: '',
-    companyCode: '',
-    email: '',
-    phone: '',
-    taxId: '',
-    isActive: true,
-    locations: [emptyLocation(true)],
-  });
+  const {
+    register,
+    control,
+    handleSubmit,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = useForm({ defaultValues: buildDefaultValues(company) });
 
-  const [errors, setErrors] = useState({});
+  const { fields, append, remove } = useFieldArray({ control, name: 'locations' });
+  // fields[] only holds each row's initial values; watch for the live values (badges, headers).
+  const locations = useWatch({ control, name: 'locations' }) || [];
+
+  // Parent always toggles `company` and `showForm` together, so this remounts fresh per
+  // add/edit — no effect needed to reset state when `company` changes.
   const [stampFile, setStampFile] = useState(null);
-  const [stampPreview, setStampPreview] = useState('');
-  const [stampLoading, setStampLoading] = useState(false);
+  const [localStampPreview, setLocalStampPreview] = useState('');
   const [clearStamp, setClearStamp] = useState(false);
 
+  const {
+    data: fetchedStamp,
+    isFetching: stampLoading,
+    isError: stampError,
+  } = useCompanyStamp(company?._id, Boolean(company?.hasStamp));
+
+  const stampPreview = clearStamp ? '' : localStampPreview || fetchedStamp || '';
+
   useEffect(() => {
-    if (company) {
-      setForm({
-        name: company.name || '',
-        companyCode: company.companyCode || '',
-        email: company.email || '',
-        phone: company.phone || '',
-        taxId: company.taxId || '',
-        isActive: company.isActive !== false,
-        locations: company.locations?.length
-          ? company.locations.map((l) => ({ ...l }))
-          : [emptyLocation(true)],
-      });
-      setStampFile(null);
-      setClearStamp(false);
-      setStampPreview('');
-      if (company.hasStamp) {
-        setStampLoading(true);
-        companiesApi
-          .getStamp(company._id)
-          .then((res) => setStampPreview(res.data?.data?.stampPreview || ''))
-          .catch(() =>
-            notifications.show({ message: 'Could not load company stamp', color: 'red' }),
-          )
-          .finally(() => setStampLoading(false));
-      }
-    } else {
-      setStampFile(null);
-      setStampPreview('');
-      setClearStamp(false);
-    }
-  }, [company]);
+    if (stampError) notifications.show({ message: 'Could not load company stamp', color: 'red' });
+  }, [stampError]);
 
   const onStampFileChange = async (e) => {
     const file = e.target.files?.[0];
@@ -108,98 +103,47 @@ export default function CompanyForm({ company, onClose }) {
     setStampFile(file);
     setClearStamp(false);
     try {
-      setStampPreview(await readImageFileAsDataUrl(file));
+      setLocalStampPreview(await readImageFileAsDataUrl(file));
     } catch {
       notifications.show({ message: 'Could not preview stamp', color: 'red' });
     }
   };
 
-  const validate = () => {
-    const errs = {};
-
-    if (!form.name.trim()) errs.name = 'Company name is required';
-    if (!form.companyCode.trim()) errs.companyCode = 'Company code is required';
-    if (!form.email.trim()) errs.email = 'Email is required';
-    else if (!EMAIL_REGEX.test(form.email)) errs.email = 'Enter a valid email address';
-    if (!form.phone.trim()) errs.phone = 'Phone number is required';
-    else if (!PHONE_REGEX.test(form.phone.replace(/\s/g, ''))) {
-      errs.phone = 'Enter a valid Indian phone number (e.g. 9876543210 or +919876543210)';
-    }
-    if (!form.taxId.trim()) errs.taxId = 'GST No is required';
-    else if (!GST_REGEX.test(form.taxId.toUpperCase())) {
-      errs.taxId = 'Enter a valid GST number (e.g. 27AAPFU0939F1ZV)';
-    }
-
-    form.locations.forEach((loc, i) => {
-      if (!loc.label.trim()) errs[`loc_${i}_label`] = 'Location name is required';
-      if (!loc.street.trim()) errs[`loc_${i}_street`] = 'Street address is required';
-      if (!loc.city.trim()) errs[`loc_${i}_city`] = 'City is required';
-      if (!loc.state.trim()) errs[`loc_${i}_state`] = 'State is required';
-      if (!loc.zipCode.trim()) errs[`loc_${i}_zipCode`] = 'ZIP code is required';
-      if (!loc.country.trim()) errs[`loc_${i}_country`] = 'Country is required';
-    });
-
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleChange = (field, value) => {
-    setForm((p) => ({ ...p, [field]: value }));
-    if (errors[field])
-      setErrors((e) => {
-        const n = { ...e };
-        delete n[field];
-        return n;
-      });
-  };
-
-  const handleLocationChange = (idx, field, value) => {
-    setForm((p) => {
-      const locations = [...p.locations];
-      locations[idx] = { ...locations[idx], [field]: value };
-      return { ...p, locations };
-    });
-    const key = `loc_${idx}_${field}`;
-    if (errors[key])
-      setErrors((e) => {
-        const n = { ...e };
-        delete n[key];
-        return n;
-      });
+  const registerUpper = (name, rules) => {
+    const field = register(name, rules);
+    return {
+      ...field,
+      onChange: (e) => {
+        e.target.value = e.target.value.toUpperCase();
+        return field.onChange(e);
+      },
+    };
   };
 
   const setDefault = (idx) => {
-    setForm((p) => ({
-      ...p,
-      locations: p.locations.map((l, i) => ({ ...l, isDefault: i === idx })),
-    }));
+    locations.forEach((_, i) => setValue(`locations.${i}.isDefault`, i === idx));
   };
 
-  const addLocation = () => {
-    setForm((p) => ({ ...p, locations: [...p.locations, emptyLocation(false)] }));
-  };
+  const addLocation = () => append(emptyLocation(false));
 
   const removeLocation = (idx) => {
-    if (form.locations.length <= 1) {
+    if (fields.length <= 1) {
       notifications.show({ message: 'At least one location required', color: 'red' });
       return;
     }
-    setForm((p) => {
-      const locations = p.locations.filter((_, i) => i !== idx);
-      if (!locations.some((l) => l.isDefault)) locations[0].isDefault = true;
-      return { ...p, locations };
-    });
+    remove(idx);
+    const remaining = getValues('locations');
+    if (remaining.length && !remaining.some((l) => l.isDefault)) {
+      setValue('locations.0.isDefault', true);
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) {
-      notifications.show({ message: 'Please fix the errors before submitting', color: 'red' });
-      return;
-    }
-
-    setSubmitting(true);
-    const payload = { ...form, taxId: form.taxId.toUpperCase() };
+  const onSubmit = async (data) => {
+    const payload = {
+      ...data,
+      companyCode: data.companyCode.toUpperCase(),
+      taxId: data.taxId.toUpperCase(),
+    };
     if (clearStamp) {
       payload.clearStamp = true;
     } else if (stampFile) {
@@ -207,26 +151,26 @@ export default function CompanyForm({ company, onClose }) {
         payload.stampImage = await readImageFileAsDataUrl(stampFile);
       } catch {
         notifications.show({ message: 'Could not read stamp image', color: 'red' });
-        setSubmitting(false);
         return;
       }
     }
 
-    const action = isEdit
-      ? dispatch(updateCompany({ id: company._id, data: payload }))
-      : dispatch(createCompany(payload));
-
-    const result = await action;
-    setSubmitting(false);
-
-    if ((isEdit ? updateCompany : createCompany).fulfilled.match(result)) {
+    try {
+      if (isEdit) {
+        await updateCompany.mutateAsync({ id: company._id, data: payload });
+      } else {
+        await createCompany.mutateAsync(payload);
+      }
       notifications.show({
         message: isEdit ? 'Company updated' : 'Company created',
         color: 'green',
       });
       onClose();
-    } else {
-      notifications.show({ message: result.payload || 'Something went wrong', color: 'red' });
+    } catch (err) {
+      notifications.show({
+        message: getApiErrorMessage(err, 'Something went wrong'),
+        color: 'red',
+      });
     }
   };
 
@@ -256,57 +200,65 @@ export default function CompanyForm({ company, onClose }) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           <div>
             <h3 className="company-form-section-title mb-3">Company Information</h3>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Field label="Company Name" required error={errors.name}>
+                <Field label="Company Name" required error={errors.name?.message}>
                   <input
                     className={inputCls(errors.name)}
                     placeholder="Baid Inbest Llp"
-                    value={form.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    {...register('name', { required: 'Company name is required' })}
                   />
                 </Field>
               </div>
 
-              <Field label="Company Code" required error={errors.companyCode}>
+              <Field label="Company Code" required error={errors.companyCode?.message}>
                 <input
                   className={`${inputCls(errors.companyCode)} font-mono`}
                   placeholder="e.g. BILLP"
-                  value={form.companyCode}
-                  onChange={(e) => handleChange('companyCode', e.target.value.toUpperCase())}
+                  {...registerUpper('companyCode', { required: 'Company code is required' })}
                 />
               </Field>
 
-              <Field label="Email" required error={errors.email}>
+              <Field label="Email" required error={errors.email?.message}>
                 <input
                   type="email"
                   className={inputCls(errors.email)}
                   placeholder="info@company.com"
-                  value={form.email}
-                  onChange={(e) => handleChange('email', e.target.value)}
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: { value: EMAIL_REGEX, message: 'Enter a valid email address' },
+                  })}
                 />
               </Field>
 
-              <Field label="Phone" required error={errors.phone}>
+              <Field label="Phone" required error={errors.phone?.message}>
                 <input
                   className={inputCls(errors.phone)}
                   placeholder="9876543210 or +919876543210"
                   maxLength={13}
-                  value={form.phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
+                  {...register('phone', {
+                    required: 'Phone number is required',
+                    validate: (value) =>
+                      PHONE_REGEX.test(value.replace(/\s/g, '')) ||
+                      'Enter a valid Indian phone number (e.g. 9876543210 or +919876543210)',
+                  })}
                 />
               </Field>
 
-              <Field label="GST No" required error={errors.taxId}>
+              <Field label="GST No" required error={errors.taxId?.message}>
                 <input
                   className={`${inputCls(errors.taxId)} uppercase`}
                   placeholder="e.g. 27AAPFU0939F1ZV"
                   maxLength={15}
-                  value={form.taxId}
-                  onChange={(e) => handleChange('taxId', e.target.value.toUpperCase())}
+                  {...registerUpper('taxId', {
+                    required: 'GST No is required',
+                    validate: (value) =>
+                      GST_REGEX.test(value.toUpperCase()) ||
+                      'Enter a valid GST number (e.g. 27AAPFU0939F1ZV)',
+                  })}
                 />
               </Field>
             </div>
@@ -316,8 +268,7 @@ export default function CompanyForm({ company, onClose }) {
                 type="checkbox"
                 id="companyActive"
                 className="rounded"
-                checked={form.isActive}
-                onChange={(e) => handleChange('isActive', e.target.checked)}
+                {...register('isActive')}
               />
               <label htmlFor="companyActive" className="company-form-checkbox-label">
                 Active company
@@ -356,7 +307,7 @@ export default function CompanyForm({ company, onClose }) {
                       onClick={() => {
                         setClearStamp(true);
                         setStampFile(null);
-                        setStampPreview('');
+                        setLocalStampPreview('');
                       }}
                     >
                       Remove stamp
@@ -385,126 +336,132 @@ export default function CompanyForm({ company, onClose }) {
             </div>
 
             <div className="space-y-4">
-              {form.locations.map((loc, idx) => (
-                <div
-                  key={loc._id || `new-${idx}`}
-                  className={`company-location-form-card ${
-                    loc.isDefault ? 'company-location-form-card--default' : ''
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`company-location-index ${
-                          loc.isDefault ? 'company-location-index--default' : ''
-                        }`}
-                      >
-                        {idx + 1}
+              {fields.map((field, idx) => {
+                const loc = locations[idx] || field;
+                const locErrors = errors.locations?.[idx] || {};
+                return (
+                  <div
+                    key={field.id}
+                    className={`company-location-form-card ${
+                      loc.isDefault ? 'company-location-form-card--default' : ''
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`company-location-index ${
+                            loc.isDefault ? 'company-location-index--default' : ''
+                          }`}
+                        >
+                          {idx + 1}
+                        </div>
+                        <span className="company-location-form-title">
+                          {(loc.label || `Location ${idx + 1}`)?.toUpperCase?.()}
+                        </span>
+                        {loc.isDefault && (
+                          <span className="company-location-default-pill">Default</span>
+                        )}
                       </div>
-                      <span className="company-location-form-title">
-                        {(loc.label || `Location ${idx + 1}`)?.toUpperCase?.()}
-                      </span>
-                      {loc.isDefault && (
-                        <span className="company-location-default-pill">Default</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {!loc.isDefault && (
-                        <button
-                          type="button"
-                          onClick={() => setDefault(idx)}
-                          className="company-location-set-default"
-                        >
-                          Set as default
-                        </button>
-                      )}
-                      {form.locations.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeLocation(idx)}
-                          className="company-location-remove-btn"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                      <div className="flex items-center gap-2">
+                        {!loc.isDefault && (
+                          <button
+                            type="button"
+                            onClick={() => setDefault(idx)}
+                            className="company-location-set-default"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </button>
-                      )}
+                            Set as default
+                          </button>
+                        )}
+                        {fields.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeLocation(idx)}
+                            className="company-location-remove-btn"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="col-span-2">
-                      <Field label="Location Name" required error={errors[`loc_${idx}_label`]}>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="col-span-2">
+                        <Field label="Location Name" required error={locErrors.label?.message}>
+                          <input
+                            className={inputCls(locErrors.label)}
+                            placeholder='e.g. "HQ", "BRO 1"'
+                            {...registerUpper(`locations.${idx}.label`, {
+                              required: 'Location name is required',
+                            })}
+                          />
+                        </Field>
+                      </div>
+
+                      <div className="col-span-2">
+                        <Field label="Street Address" required error={locErrors.street?.message}>
+                          <input
+                            className={inputCls(locErrors.street)}
+                            placeholder="123 Main Street"
+                            {...register(`locations.${idx}.street`, {
+                              required: 'Street address is required',
+                            })}
+                          />
+                        </Field>
+                      </div>
+
+                      <Field label="City" required error={locErrors.city?.message}>
                         <input
-                          className={inputCls(errors[`loc_${idx}_label`])}
-                          placeholder='e.g. "HQ", "BRO 1"'
-                          value={loc.label?.toUpperCase?.() || ''}
-                          onChange={(e) =>
-                            handleLocationChange(idx, 'label', e.target.value.toUpperCase())
-                          }
+                          className={inputCls(locErrors.city)}
+                          placeholder="City"
+                          {...register(`locations.${idx}.city`, { required: 'City is required' })}
+                        />
+                      </Field>
+
+                      <Field label="State / Province" required error={locErrors.state?.message}>
+                        <input
+                          className={inputCls(locErrors.state)}
+                          placeholder="State"
+                          {...register(`locations.${idx}.state`, {
+                            required: 'State is required',
+                          })}
+                        />
+                      </Field>
+
+                      <Field label="ZIP / Postal Code" required error={locErrors.zipCode?.message}>
+                        <input
+                          className={inputCls(locErrors.zipCode)}
+                          placeholder="ZIP Code"
+                          {...register(`locations.${idx}.zipCode`, {
+                            required: 'ZIP code is required',
+                          })}
+                        />
+                      </Field>
+
+                      <Field label="Country" required error={locErrors.country?.message}>
+                        <input
+                          className={inputCls(locErrors.country)}
+                          placeholder="Country"
+                          {...register(`locations.${idx}.country`, {
+                            required: 'Country is required',
+                          })}
                         />
                       </Field>
                     </div>
-
-                    <div className="col-span-2">
-                      <Field label="Street Address" required error={errors[`loc_${idx}_street`]}>
-                        <input
-                          className={inputCls(errors[`loc_${idx}_street`])}
-                          placeholder="123 Main Street"
-                          value={loc.street}
-                          onChange={(e) => handleLocationChange(idx, 'street', e.target.value)}
-                        />
-                      </Field>
-                    </div>
-
-                    <Field label="City" required error={errors[`loc_${idx}_city`]}>
-                      <input
-                        className={inputCls(errors[`loc_${idx}_city`])}
-                        placeholder="City"
-                        value={loc.city}
-                        onChange={(e) => handleLocationChange(idx, 'city', e.target.value)}
-                      />
-                    </Field>
-
-                    <Field label="State / Province" required error={errors[`loc_${idx}_state`]}>
-                      <input
-                        className={inputCls(errors[`loc_${idx}_state`])}
-                        placeholder="State"
-                        value={loc.state}
-                        onChange={(e) => handleLocationChange(idx, 'state', e.target.value)}
-                      />
-                    </Field>
-
-                    <Field label="ZIP / Postal Code" required error={errors[`loc_${idx}_zipCode`]}>
-                      <input
-                        className={inputCls(errors[`loc_${idx}_zipCode`])}
-                        placeholder="ZIP Code"
-                        value={loc.zipCode}
-                        onChange={(e) => handleLocationChange(idx, 'zipCode', e.target.value)}
-                      />
-                    </Field>
-
-                    <Field label="Country" required error={errors[`loc_${idx}_country`]}>
-                      <input
-                        className={inputCls(errors[`loc_${idx}_country`])}
-                        placeholder="Country"
-                        value={loc.country}
-                        onChange={(e) => handleLocationChange(idx, 'country', e.target.value)}
-                      />
-                    </Field>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

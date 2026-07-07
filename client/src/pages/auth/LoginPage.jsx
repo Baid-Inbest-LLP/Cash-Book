@@ -1,15 +1,16 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { notifications } from '@mantine/notifications';
-import { login, clearError } from '../../store/slices/authSlice';
+import { useLogin } from '../../hooks/useAuth';
+import { getApiErrorMessage } from '../../lib/queryClient';
+import { isAuthenticated } from '../../lib/session';
 import inbestLogo from '../../assets/white_inbest_logo.png';
 
 export default function LoginPage() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const loginMutation = useLogin();
   const { theme } = useSelector((state) => state.common);
   const {
     register,
@@ -17,18 +18,22 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm();
   const isDark = theme === 'dark';
+  const loading = loginMutation.isPending;
+  const error = loginMutation.isError
+    ? getApiErrorMessage(loginMutation.error, 'Login failed')
+    : null;
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/', { replace: true });
-    return () => dispatch(clearError());
-  }, [isAuthenticated, navigate, dispatch]);
+    if (isAuthenticated()) navigate('/', { replace: true });
+  }, [navigate]);
 
-  const onSubmit = async (data) => {
-    const result = await dispatch(login(data));
-    if (login.fulfilled.match(result)) {
-      notifications.show({ message: 'Welcome back!', color: 'green' });
-      navigate('/');
-    }
+  const onSubmit = (data) => {
+    loginMutation.mutate(data, {
+      onSuccess: () => {
+        notifications.show({ message: 'Welcome back!', color: 'green' });
+        navigate('/');
+      },
+    });
   };
 
   return (
