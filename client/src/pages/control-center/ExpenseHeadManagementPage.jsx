@@ -128,7 +128,7 @@ export default function ExpenseHeadManagementPage() {
       <ConfirmModal
         open={!!confirmDelete}
         title="Delete Expense Head"
-        message={`Are you sure you want to delete "${confirmDelete?.name}"? This cannot be undone. If it is used by existing entries, deactivate it instead.`}
+        message={`Are you sure you want to delete "${confirmDelete?.name}"? This cannot be restored.`}
         confirmLabel="Delete"
         variant="danger"
         onConfirm={handleDelete}

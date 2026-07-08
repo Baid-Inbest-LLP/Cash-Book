@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useMe } from '../../hooks/useAuth';
+import { isAccountant, isSuperAdmin } from '../../constants/roles';
 import inbestTextLogo from '../../assets/inbest_text_logo.png';
 import inbestWhiteLogo from '../../assets/white_inbest_logo.png';
+import superAdminAvatar from '../../assets/superAdmin.webp';
+import accountantAvatar from '../../assets/shree_blue.webp';
 import {
   CashbookEntriesIcon,
   ChevronRightIcon,
@@ -46,8 +49,15 @@ const linkClass = (isOpen, isActive) =>
       : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
   }`;
 
+const avatarForRole = (role) => {
+  if (isSuperAdmin(role)) return superAdminAvatar;
+  if (isAccountant(role)) return accountantAvatar;
+  return null;
+};
+
 const Sidebar = ({ isOpen = true }) => {
   const { data: user } = useMe();
+  const avatarSrc = avatarForRole(user?.role);
   const location = useLocation();
   const navigate = useNavigate();
   const [reportsOpen, setReportsOpen] = useState(() => location.pathname.startsWith('/reports'));
@@ -143,20 +153,28 @@ const Sidebar = ({ isOpen = true }) => {
         })}
       </nav>
 
-      <div className={`py-4 border-t border-primary-800 ${isOpen ? 'px-4' : 'px-2'}`}>
+      <div
+        className={`py-4 border-t border-primary-800 transition-[padding] duration-300 ease-in-out ${isOpen ? 'px-4' : 'px-2'}`}
+      >
         <div
-          className={`flex items-center ${isOpen ? 'gap-3' : 'justify-center'}`}
+          className={`flex items-center gap-3 ${isOpen ? '' : 'justify-center'}`}
           title={!isOpen ? user?.name : undefined}
         >
-          <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-lg font-semibold">
-            {user?.name?.charAt(0).toUpperCase()}
+          <div className="w-10 h-10 flex-shrink-0 bg-white rounded-full flex items-center justify-center text-lg font-semibold overflow-hidden">
+            {avatarSrc ? (
+              <img src={avatarSrc} alt={roleLabel(user?.role)} className="w-full h-full object-cover" />
+            ) : (
+              user?.name?.charAt(0).toUpperCase()
+            )}
           </div>
-          {isOpen && (
-            <div className="flex-1 min-w-0">
-              <p className="text-md font-medium text-white truncate">{user?.name}</p>
-              <p className="text-sm text-gray-400 truncate">{roleLabel(user?.role)}</p>
-            </div>
-          )}
+          <div
+            className={`min-w-0 overflow-hidden transition-all duration-300 ease-in-out ${
+              isOpen ? 'w-full opacity-100' : 'w-0 opacity-0'
+            }`}
+          >
+            <p className="text-md font-medium text-white truncate whitespace-nowrap">{user?.name}</p>
+            <p className="text-sm text-gray-400 truncate whitespace-nowrap">{roleLabel(user?.role)}</p>
+          </div>
         </div>
       </div>
     </aside>
