@@ -67,7 +67,7 @@ export default function ExpenseHeadManagementPage() {
       header: 'Status',
       align: 'center',
       render: (head) => (
-        <span className={head.isActive ? 'company-status-active' : 'company-status-inactive'}>
+        <span className={head.isActive ? 'company-status-active' : 'badge-rejected'}>
           {head.isActive ? 'Active' : 'Inactive'}
         </span>
       ),
