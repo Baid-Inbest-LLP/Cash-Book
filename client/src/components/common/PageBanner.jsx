@@ -23,10 +23,22 @@ const keyIcon = (
   </svg>
 );
 
+const exportIcon = (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+    />
+  </svg>
+);
+
 const resolveActionIcon = (icon) => {
   if (icon === false || icon === 'none') return null;
   if (icon === 'arrow') return arrowRightIcon;
   if (icon === 'key') return keyIcon;
+  if (icon === 'export') return exportIcon;
   return plusIcon;
 };
 
@@ -50,7 +62,7 @@ const renderActionContent = (act) => {
 };
 
 const actionClassName =
-  'inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-800 rounded-xl text-sm font-bold hover:bg-primary-50 active:scale-95 transition-all duration-150 shadow-lg shadow-primary-900/30 flex-shrink-0';
+  'inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-800 rounded-xl text-sm font-bold hover:bg-primary-50 active:scale-95 transition-all duration-150 shadow-lg shadow-primary-900/30 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
 
 export default function PageBanner({ title, subtitle, action = null, className = '' }) {
   const actionsList = Array.isArray(action) ? action : action ? [action] : [];
@@ -78,6 +90,7 @@ export default function PageBanner({ title, subtitle, action = null, className =
                   key={act.label}
                   type="button"
                   onClick={act.onClick}
+                  disabled={act.disabled}
                   className={actionClassName}
                 >
                   {renderActionContent(act)}

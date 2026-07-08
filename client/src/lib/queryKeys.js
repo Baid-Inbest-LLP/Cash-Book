@@ -4,5 +4,6 @@ export const queryKeys = {
   companies: (params) => ['companies', 'list', params ?? {}],
   companyStamp: (id) => ['companies', 'stamp', id],
   expenseHeads: (params) => ['expenseHeads', 'list', params ?? {}],
+  entries: (params) => ['entries', 'list', params ?? {}],
   users: ['masters', 'users'],
 };

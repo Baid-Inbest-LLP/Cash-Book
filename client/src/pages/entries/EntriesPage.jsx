@@ -1,12 +1,5 @@
-import ComingSoon from '../../components/common/ComingSoon';
+import EntryListView from './EntryListView';
 
-const EntriesPage = () => {
-  return (
-    <ComingSoon
-      title="Cashbook Entries"
-      subtitle="Record and manage cash book receipts and payments."
-    />
-  );
-};
-
-export default EntriesPage;
+export default function EntriesPage() {
+  return <EntryListView isExcluded={false} />;
+}

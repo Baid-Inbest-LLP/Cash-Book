@@ -42,12 +42,16 @@ export default function ExpenseHeadForm({ expenseHead, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+      onClick={submitting ? undefined : onClose}
+    >
       <div
         className="company-form-panel max-w-lg"
         role="dialog"
         aria-modal="true"
         aria-labelledby="expense-head-form-title"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="company-form-header">
           <div>

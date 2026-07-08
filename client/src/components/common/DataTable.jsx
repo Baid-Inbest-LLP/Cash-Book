@@ -16,7 +16,7 @@ function SelectionCheckbox({ checked, indeterminate = false, onChange, ariaLabel
     <input
       ref={setRef}
       type="checkbox"
-      className="rounded"
+      className="rounded cursor-pointer"
       checked={checked}
       onChange={onChange}
       aria-label={ariaLabel}
@@ -105,7 +105,8 @@ export default function DataTable({
                 {columns.map((col, i) => (
                   <th
                     key={col.key ?? i}
-                    className={`${alignClass(col.align)} ${col.headerClassName ?? ''}`.trim()}
+                    style={col.width ? { width: col.width } : undefined}
+                    className={`${alignClass(col.headerAlign ?? col.align)} ${col.headerClassName ?? ''}`.trim()}
                   >
                     {col.header}
                   </th>

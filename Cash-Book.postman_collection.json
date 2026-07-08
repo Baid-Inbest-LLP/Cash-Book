@@ -432,7 +432,7 @@
                 }
               ]
             },
-            "description": "Protected. Paginated entries with a balance summary (opening/closing balance, receipt/payment totals). Test script saves the first entry's `_id` to `entryId` for the update/exclude/restore requests."
+            "description": "Protected. Paginated entries (defaults to the current financial year, isExcluded=false, when those filters are omitted). No balance/running-total is computed here. Test script saves the first entry's `_id` to `entryId` for the update/exclude/restore requests."
           },
           "response": []
         },

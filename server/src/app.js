@@ -15,6 +15,7 @@ app.use(
   cors({
     origin: config.clientUrl,
     credentials: true,
+    exposedHeaders: ['Content-Disposition'],
   }),
 );
 app.use(morgan(config.env === 'development' ? 'dev' : 'combined'));

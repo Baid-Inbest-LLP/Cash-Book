@@ -177,8 +177,11 @@ export default function CompanyForm({ company, onClose }) {
   const inputCls = (err) => `input-field text-sm ${err ? 'border-red-400 focus:ring-red-400' : ''}`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-black/40 backdrop-blur-sm overflow-y-auto">
-      <div className="company-form-panel">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-10 bg-black/40 backdrop-blur-sm overflow-y-auto"
+      onClick={submitting ? undefined : onClose}
+    >
+      <div className="company-form-panel" onClick={(e) => e.stopPropagation()}>
         <div className="company-form-header">
           <div>
             <h2 className="company-form-title">{isEdit ? 'Edit Company' : 'Add New Company'}</h2>

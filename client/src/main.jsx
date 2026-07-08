@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
+
+import './index.css';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/dropzone/styles.css';
@@ -14,7 +16,6 @@ import { lightTheme, darkTheme } from './theme';
 import ThemeProvider from './components/providers/ThemeProvider';
 import { STORAGE_KEYS } from './constants';
 import App from './App';
-import './index.css';
 
 const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);

@@ -36,7 +36,7 @@ const amountSchema = z.coerce.number().positive('Amount must be greater than 0')
 const descriptionSchema = z
   .string()
   .trim()
-  .max(500, 'Description must be at most 500 characters')
+  .max(50, 'Description must be at most 50 characters')
   .optional();
 
 const createDescriptionSchema = descriptionSchema.default('');
