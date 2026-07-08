@@ -84,7 +84,7 @@ const buildListFilter = ({ filters }) => {
   if (filters.month) filter.month = filters.month;
   if (filters.company) filter.company = toObjectId(filters.company);
   if (filters.expenseHead) filter.expenseHead = toObjectId(filters.expenseHead);
-  if (filters.search) filter.$text = { $search: filters.search };
+  if (filters.search) filter.description = { $regex: filters.search, $options: 'i' };
 
   if (filters.fromDate || filters.toDate) {
     filter.date = {};

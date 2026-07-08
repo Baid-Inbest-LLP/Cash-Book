@@ -53,7 +53,4 @@ entrySchema.index({ company: 1 });
 // (Balance Engine, dashboard, and month-wise reports).
 entrySchema.index({ financialYear: 1, isExcluded: 1, date: 1 });
 
-// Full-text index for description search (word/stem based, case-insensitive).
-entrySchema.index({ description: 'text' });
-
 export const Entry = mongoose.model('Entry', entrySchema);
