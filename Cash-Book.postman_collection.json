@@ -274,7 +274,7 @@
     },
     {
       "name": "🏷️ Expense Heads",
-      "description": "Expense head master data (`/expense-heads`). Mutations are superadmin-only.",
+      "description": "Expense head master data (`/expense-heads`). All routes just require auth — any role (superadmin or accountant) can create/update/delete.",
       "item": [
         {
           "name": "📋 List Expense Heads",
@@ -282,7 +282,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/expense-heads?activeOnly=true",
+              "raw": "{{baseUrl}}/expense-heads?activeOnly=true&search=&page=1&limit=50",
               "host": ["{{baseUrl}}"],
               "path": ["expense-heads"],
               "query": [
@@ -290,10 +290,17 @@
                   "key": "activeOnly",
                   "value": "true",
                   "description": "Set to `false` to include inactive heads."
-                }
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Name substring (case-insensitive)."
+                },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "50", "description": "Max 100." }
               ]
             },
-            "description": "Protected. Lists heads sorted by name. Active only by default; `?activeOnly=false` returns all."
+            "description": "Protected. Paginated list of heads sorted by name, with a `pagination` block ({ page, pages, total, limit }). Active only by default; `?activeOnly=false` returns all. `search` filters by name substring."
           },
           "response": []
         },
@@ -325,7 +332,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["expense-heads"]
             },
-            "description": "Superadmin only. Creates a head. Names are unique case-insensitively (duplicate → 409). Saves `_id` to `expenseHeadId`."
+            "description": "Protected (any role). Creates a head. Names are unique case-insensitively (duplicate → 409). Saves `_id` to `expenseHeadId`."
           },
           "response": []
         },
@@ -344,7 +351,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["expense-heads", "{{expenseHeadId}}"]
             },
-            "description": "Superadmin only. Updates name and/or isActive. 404 if missing, 409 on duplicate name."
+            "description": "Protected (any role). Updates name and/or isActive. 404 if missing, 409 on duplicate name."
           },
           "response": []
         },
@@ -358,7 +365,7 @@
               "host": ["{{baseUrl}}"],
               "path": ["expense-heads", "{{expenseHeadId}}"]
             },
-            "description": "Superadmin only. Hard-deletes a head. Blocked with 409 if referenced by any entry (deactivate instead)."
+            "description": "Protected (any role). Hard-deletes a head. Blocked with 409 if referenced by any entry (deactivate instead)."
           },
           "response": []
         }

@@ -9,14 +9,27 @@ const rethrowDuplicate = (err) => {
   throw err;
 };
 
-// List heads sorted by name (case-insensitively); active only unless activeOnly is false.
-export const listExpenseHeads = ({ activeOnly = true } = {}) => {
+// List heads sorted by name (case-insensitively); active only unless activeOnly is false,
+// optionally narrowed by a case-insensitive name search, and paginated.
+export const listExpenseHeads = async ({
+  activeOnly = true,
+  search,
+  page = 1,
+  limit = 50,
+} = {}) => {
   const filter = activeOnly ? { isActive: true } : {};
-  return ExpenseHead.find(filter)
+  if (search) filter.name = { $regex: search, $options: 'i' };
+
+  const total = await ExpenseHead.countDocuments(filter);
+  const items = await ExpenseHead.find(filter)
     .select('name isActive')
     .sort({ name: 1 })
     .collation({ locale: 'en', strength: 2 })
+    .skip((page - 1) * limit)
+    .limit(limit)
     .lean();
+
+  return { items, total };
 };
 
 // Insert a head; the collation index rejects case-insensitive duplicate names (409).

@@ -1,3 +1,5 @@
+export const DEFAULT_PAGE_SIZE = Number(import.meta.env.VITE_PAGE_SIZE) || 10;
+
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: 'cashbook_access_token',
   REFRESH_TOKEN: 'cashbook_refresh_token',

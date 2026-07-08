@@ -256,6 +256,7 @@
   }
 
   .table-wrapper table {
+    table-layout: fixed;
     @apply w-full text-sm;
   }
 
@@ -700,11 +701,11 @@
   }
 
   .settings-action-btn--enabled {
-    @apply text-gray-400 hover:text-primary-600;
+    @apply text-primary-600;
   }
 
   .settings-action-btn--delete-enabled {
-    @apply text-gray-400 hover:text-red-600;
+    @apply text-red-600;
   }
 
   .settings-action-btn--disabled {
@@ -1610,11 +1611,11 @@
   color: #909296 !important;
 }
 
-[data-theme='dark'] #root .settings-action-btn--enabled:hover {
+[data-theme='dark'] #root .settings-action-btn--enabled {
   color: #60a5fa !important;
 }
 
-[data-theme='dark'] #root .settings-action-btn--delete-enabled:hover {
+[data-theme='dark'] #root .settings-action-btn--delete-enabled {
   color: #f87171 !important;
 }
 

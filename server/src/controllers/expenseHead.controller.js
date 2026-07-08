@@ -2,12 +2,22 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import * as expenseHeadService from '../services/expenseHead.service.js';
 
-// GET /expense-heads — list heads (active only unless ?activeOnly=false).
+// GET /expense-heads — list heads (active only unless ?activeOnly=false), with
+// optional name search and pagination.
 export const listExpenseHeads = asyncHandler(async (req, res) => {
-  const items = await expenseHeadService.listExpenseHeads({
-    activeOnly: req.query.activeOnly !== 'false',
+  const { activeOnly, search, page, limit } = req.validated.query;
+  const { items, total } = await expenseHeadService.listExpenseHeads({
+    activeOnly,
+    search,
+    page,
+    limit,
   });
-  ApiResponse.success(res, items);
+  ApiResponse.paginated(res, items, {
+    page,
+    pages: Math.ceil(total / limit) || 1,
+    total,
+    limit,
+  });
 });
 
 // POST /expense-heads — create a new head.

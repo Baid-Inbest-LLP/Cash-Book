@@ -3,5 +3,6 @@ export const queryKeys = {
   me: ['auth', 'me'],
   companies: (params) => ['companies', 'list', params ?? {}],
   companyStamp: (id) => ['companies', 'stamp', id],
+  expenseHeads: (params) => ['expenseHeads', 'list', params ?? {}],
   users: ['masters', 'users'],
 };
