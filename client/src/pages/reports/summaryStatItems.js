@@ -2,7 +2,12 @@ import { formatCurrency } from '../../utils/format';
 import { paymentsIcon, receiptsIcon, trendDownIcon, trendUpIcon, walletIcon } from './reportIcons';
 
 export const buildSummaryStatItems = (summary) => [
-  { label: 'Opening balance', value: formatCurrency(summary.fyOpeningBalance), icon: walletIcon },
+  {
+    label: 'Opening balance',
+    value: formatCurrency(summary.fyOpeningBalance),
+    valueClassName: 'text-primary-600',
+    icon: walletIcon,
+  },
   {
     label: 'Total receipts',
     value: formatCurrency(summary.totalReceipts),
