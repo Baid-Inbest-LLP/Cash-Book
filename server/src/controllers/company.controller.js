@@ -4,6 +4,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { Company, Location } from '../models/index.js';
 import { buildLocationName } from '../utils/locationFormat.js';
 import { processStampUpload, stampBase64ToDataUri } from '../utils/processStampImage.js';
+import { escapeRegex } from '../utils/searchUtils.js';
 
 const toLocationDto = (loc) => ({
   _id: loc._id,
@@ -117,10 +118,11 @@ export const getCompanies = asyncHandler(async (req, res) => {
 
   if (isActive !== undefined) filter.isActive = isActive === 'true';
   if (search) {
+    const searchRegex = escapeRegex(search);
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { code: { $regex: search, $options: 'i' } },
+      { name: { $regex: searchRegex, $options: 'i' } },
+      { email: { $regex: searchRegex, $options: 'i' } },
+      { code: { $regex: searchRegex, $options: 'i' } },
     ];
   }
 

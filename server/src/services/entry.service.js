@@ -3,6 +3,7 @@ import { Company, Entry, ExpenseHead } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { getFinancialYear, getFinancialYearAndMonth } from '../utils/financialYear.js';
 import { lookupOne, toObjectId } from '../utils/mongoAggregation.js';
+import { escapeRegex } from '../utils/searchUtils.js';
 
 // Load an entry or fail with a consistent API error.
 const loadEntry = async ({ id }) => {
@@ -84,7 +85,7 @@ const buildListFilter = ({ filters }) => {
   if (filters.month) filter.month = filters.month;
   if (filters.company) filter.company = toObjectId(filters.company);
   if (filters.expenseHead) filter.expenseHead = toObjectId(filters.expenseHead);
-  if (filters.search) filter.description = { $regex: filters.search, $options: 'i' };
+  if (filters.search) filter.description = { $regex: escapeRegex(filters.search), $options: 'i' };
 
   if (filters.fromDate || filters.toDate) {
     filter.date = {};

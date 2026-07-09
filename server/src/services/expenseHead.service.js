@@ -1,5 +1,6 @@
 import { ExpenseHead, Entry } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
+import { escapeRegex } from '../utils/searchUtils.js';
 
 const DUPLICATE_MESSAGE = 'An expense head with this name already exists';
 
@@ -18,7 +19,7 @@ export const listExpenseHeads = async ({
   limit = 50,
 } = {}) => {
   const filter = activeOnly ? { isActive: true } : {};
-  if (search) filter.name = { $regex: search, $options: 'i' };
+  if (search) filter.name = { $regex: escapeRegex(search), $options: 'i' };
 
   const total = await ExpenseHead.countDocuments(filter);
   const items = await ExpenseHead.find(filter)
