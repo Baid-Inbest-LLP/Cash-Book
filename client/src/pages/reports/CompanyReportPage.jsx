@@ -34,7 +34,7 @@ export default function CompanyReportPage() {
     { key: 'paymentCount', header: 'Payments Count', align: 'center', render: (row) => row.paymentCount },
     {
       key: 'percentage',
-      header: 'Share',
+      header: 'Share(%)',
       headerAlign: 'center',
       width: '180px',
       render: (row) => <ShareBar percentage={row.percentage} />,

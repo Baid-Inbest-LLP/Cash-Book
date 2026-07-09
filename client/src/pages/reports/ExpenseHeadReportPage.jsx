@@ -69,7 +69,7 @@ export default function ExpenseHeadReportPage() {
 		},
 		{
 			key: "percentage",
-			header: "Share (%)",
+			header: "Share(%)",
 			headerAlign: "center",
 			width: "180px",
 			render: (row) => <ShareBar percentage={row.percentage} />,
