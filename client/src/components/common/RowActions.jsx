@@ -20,6 +20,17 @@ const deleteIcon = (
   </svg>
 );
 
+const restoreIcon = (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M4 4v5h5M4 9a8 8 0 1 1 2.343 6.657"
+    />
+  </svg>
+);
+
 function ActionButton({ icon, onClick, disabled, title, ariaLabel, enabledClass }) {
   return (
     <button
@@ -35,8 +46,16 @@ function ActionButton({ icon, onClick, disabled, title, ariaLabel, enabledClass 
   );
 }
 
-// Edit/delete icon-button pair for a table's Actions column; omit onEdit/onDelete to hide a button.
-export default function RowActions({ onEdit, onDelete, editProps = {}, deleteProps = {}, className = '' }) {
+// Edit/restore/delete icon-button trio for a table's Actions column; omit a handler to hide its button.
+export default function RowActions({
+  onEdit,
+  onRestore,
+  onDelete,
+  editProps = {},
+  restoreProps = {},
+  deleteProps = {},
+  className = '',
+}) {
   return (
     <div className={`flex items-center justify-center gap-0.5 ${className}`.trim()}>
       {onEdit && (
@@ -47,6 +66,16 @@ export default function RowActions({ onEdit, onDelete, editProps = {}, deletePro
           disabled={editProps.disabled}
           title={editProps.title ?? 'Edit'}
           ariaLabel={editProps.ariaLabel ?? 'Edit'}
+        />
+      )}
+      {onRestore && (
+        <ActionButton
+          icon={restoreIcon}
+          onClick={onRestore}
+          enabledClass="settings-action-btn--enabled"
+          disabled={restoreProps.disabled}
+          title={restoreProps.title ?? 'Restore'}
+          ariaLabel={restoreProps.ariaLabel ?? 'Restore'}
         />
       )}
       {onDelete && (

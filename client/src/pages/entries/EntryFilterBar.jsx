@@ -33,7 +33,7 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
     <div className="card p-4 mb-4">
       <div className="flex flex-wrap items-center gap-3">
         <select
-          className="input-field grow basis-[130px] min-w-[130px]"
+          className="input-field grow basis-[130px] min-w-[130px] cursor-pointer"
           value={filters.type}
           onChange={(e) => set({ type: e.target.value })}
         >
@@ -43,7 +43,7 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
         </select>
 
         <select
-          className="input-field grow basis-[130px] min-w-[130px]"
+          className="input-field grow basis-[130px] min-w-[130px] cursor-pointer"
           value={filters.financialYear}
           onChange={(e) => set({ financialYear: e.target.value })}
         >
@@ -55,7 +55,7 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
         </select>
 
         <select
-          className="input-field grow basis-[130px] min-w-[130px]"
+          className="input-field grow basis-[130px] min-w-[130px] cursor-pointer"
           value={filters.month}
           onChange={(e) => set({ month: e.target.value })}
         >
@@ -68,7 +68,7 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
         </select>
 
         <select
-          className="input-field grow basis-[150px] min-w-[150px]"
+          className="input-field grow basis-[150px] min-w-[150px] cursor-pointer"
           value={filters.company}
           onChange={(e) => set({ company: e.target.value })}
         >
@@ -81,7 +81,7 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
         </select>
 
         <select
-          className="input-field grow basis-[150px] min-w-[150px]"
+          className="input-field grow basis-[150px] min-w-[150px] cursor-pointer"
           value={filters.expenseHead}
           onChange={(e) => set({ expenseHead: e.target.value })}
         >

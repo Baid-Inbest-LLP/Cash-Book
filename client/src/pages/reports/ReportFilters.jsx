@@ -4,7 +4,7 @@ import { FY_MONTH_ORDER, MONTHS } from '../../constants';
 export function FinancialYearSelect({ value, onChange, options }) {
   return (
     <select
-      className="input-field grow basis-[130px] min-w-[130px]"
+      className="input-field grow basis-[130px] min-w-[130px] cursor-pointer"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >
@@ -20,7 +20,7 @@ export function FinancialYearSelect({ value, onChange, options }) {
 export function MonthSelect({ value, onChange }) {
   return (
     <select
-      className="input-field grow basis-[130px] min-w-[130px]"
+      className="input-field grow basis-[130px] min-w-[130px] cursor-pointer"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >
@@ -40,7 +40,7 @@ export function CompanySelect({ value, onChange }) {
 
   return (
     <select
-      className="input-field grow basis-[150px] min-w-[150px]"
+      className="input-field grow basis-[150px] min-w-[150px] cursor-pointer"
       value={value}
       onChange={(e) => onChange(e.target.value)}
     >
