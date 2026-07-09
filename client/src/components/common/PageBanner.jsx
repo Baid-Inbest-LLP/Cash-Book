@@ -61,8 +61,19 @@ const renderActionContent = (act) => {
   );
 };
 
-const actionClassName =
-  'inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-800 rounded-xl text-sm font-bold hover:bg-primary-50 active:scale-95 transition-all duration-150 shadow-lg shadow-primary-900/30 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
+const actionBaseClassName =
+  'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-all duration-150 shadow-lg flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
+
+// Color variants for banner actions — 'default' keeps the original white/primary look;
+// 'receipt'/'payment' match the emerald/red convention used for money in/out elsewhere in the app.
+const actionVariantClassName = {
+  default: 'bg-white text-primary-800 hover:bg-primary-50 shadow-primary-900/30',
+  receipt: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shadow-emerald-900/20',
+  payment: 'bg-red-50 text-red-700 hover:bg-red-100 shadow-red-900/20',
+};
+
+const resolveActionClassName = (variant) =>
+  `${actionBaseClassName} ${actionVariantClassName[variant] || actionVariantClassName.default}`;
 
 export default function PageBanner({ title, subtitle, action = null, className = '' }) {
   const actionsList = Array.isArray(action) ? action : action ? [action] : [];
@@ -82,7 +93,7 @@ export default function PageBanner({ title, subtitle, action = null, className =
           <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
             {actionsList.map((act) =>
               act.to ? (
-                <Link key={`${act.to}-${act.label}`} to={act.to} className={actionClassName}>
+                <Link key={`${act.to}-${act.label}`} to={act.to} className={resolveActionClassName(act.variant)}>
                   {renderActionContent(act)}
                 </Link>
               ) : (
@@ -91,7 +102,7 @@ export default function PageBanner({ title, subtitle, action = null, className =
                   type="button"
                   onClick={act.onClick}
                   disabled={act.disabled}
-                  className={actionClassName}
+                  className={resolveActionClassName(act.variant)}
                 >
                   {renderActionContent(act)}
                 </button>

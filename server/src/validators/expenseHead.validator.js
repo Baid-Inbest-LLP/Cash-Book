@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const capitalizeFirst = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
 const booleanQuerySchema = z.preprocess((value) => {
   if (value === undefined || value === '') return undefined;
   if (value === 'true') return true;
@@ -25,7 +27,8 @@ export const createExpenseHeadSchema = z.object({
     .string()
     .trim()
     .min(1, 'Expense head name is required')
-    .max(100, 'Name must be at most 100 characters'),
+    .max(100, 'Name must be at most 100 characters')
+    .transform(capitalizeFirst),
   isActive: z.boolean().optional(),
 });
 
@@ -35,6 +38,7 @@ export const updateExpenseHeadSchema = z.object({
     .trim()
     .min(1, 'Name cannot be empty')
     .max(100, 'Name must be at most 100 characters')
+    .transform(capitalizeFirst)
     .optional(),
   isActive: z.boolean().optional(),
 });

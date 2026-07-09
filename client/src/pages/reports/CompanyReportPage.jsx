@@ -25,7 +25,6 @@ export default function CompanyReportPage() {
 
   const columns = [
     { key: 'company', header: 'Company', render: (row) => row.company?.name || '-' },
-    { key: 'code', header: 'Code', align: 'center', render: (row) => row.company?.code || '-' },
     {
       key: 'paymentAmount',
       header: 'Payment Amount',

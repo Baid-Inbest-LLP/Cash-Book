@@ -147,7 +147,7 @@ export default function EntryListView({ isExcluded }) {
         </span>
       ),
     },
-    { key: 'company', header: 'Company', align: 'center', render: (e) => e.company?.name || '-' },
+    { key: 'company', header: 'Company', align: 'center', render: (e) => e.company?.code || '-' },
     {
       key: 'expenseHead',
       header: 'Expense Head',
@@ -203,8 +203,8 @@ export default function EntryListView({ isExcluded }) {
           ...(isExcluded
             ? []
             : [
-                { onClick: () => openCreate('receipt'), label: 'Add Receipt' },
-                { onClick: () => openCreate('payment'), label: 'Add Payment' },
+                { onClick: () => openCreate('receipt'), label: 'Add Receipt', variant: 'receipt' },
+                { onClick: () => openCreate('payment'), label: 'Add Payment', variant: 'payment' },
               ]),
           {
             onClick: handleExport,
