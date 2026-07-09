@@ -71,7 +71,7 @@ export default function ExpenseHeadReportPage() {
       {isLoading ? (
         <StatTiles loading />
       ) : (
-        data && <StatTiles items={buildSummaryStatItems(data.summary)} />
+        data && <StatTiles items={buildSummaryStatItems(data.summary, { month })} />
       )}
 
       <DataTable

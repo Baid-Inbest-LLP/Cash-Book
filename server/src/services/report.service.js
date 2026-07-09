@@ -1,13 +1,16 @@
 import { ENTRY_TYPES } from '../constants/entryTypes.js';
 import { Entry, OpeningBalance } from '../models/index.js';
-import { getPreviousFinancialYear } from '../utils/financialYear.js';
+import { FY_MONTH_ORDER, getPreviousFinancialYear } from '../utils/financialYear.js';
 import { lookupOne, toObjectId } from '../utils/mongoAggregation.js';
 import { buildMonthlyLedger, buildReportMatch, percentage } from '../utils/reportUtils.js';
 
-// Net cash movement (receipts - payments) for a financial year, excluded entries removed.
-const aggregateNetMovement = async (financialYear) => {
+// Net cash movement (receipts - payments) for a FY, optionally narrowed to `months`.
+const aggregateNetMovement = async (financialYear, months) => {
+  const match = buildReportMatch({ financialYear });
+  if (months) match.month = { $in: months };
+
   const [totals] = await Entry.aggregate([
-    { $match: buildReportMatch({ financialYear }) },
+    { $match: match },
     {
       $group: {
         _id: null,
@@ -23,11 +26,7 @@ const aggregateNetMovement = async (financialYear) => {
   return (totals?.receipts || 0) - (totals?.payments || 0);
 };
 
-/*
- * Opening balance for a financial year: use the stored record when present,
- * otherwise seed one from the previous year's closing balance
- * (its opening + net movement).
- */
+// FY opening balance: the stored record, or seeded from the previous FY's closing balance.
 const resolveFYOpeningBalance = async (financialYear) => {
   const existing = await OpeningBalance.findOne({ financialYear }).select('openingBalance').lean();
   if (existing) return existing.openingBalance;
@@ -50,11 +49,7 @@ const resolveFYOpeningBalance = async (financialYear) => {
   return fyOpeningBalance;
 };
 
-/*
- * Sum receipts/payments per month for a financial year, optionally narrowed to a
- * company. Receipts are never tied to a company, so the filter only excludes
- * payment entries for other companies — receipts pass through untouched.
- */
+// Sum receipts/payments per month; `company` narrows payments only, receipts pass through untouched.
 const aggregateMonthlyTotals = ({ financialYear, company }) => {
   const companyObjectId = company ? toObjectId(company) : null;
   const match = {
@@ -74,14 +69,18 @@ const aggregateMonthlyTotals = ({ financialYear, company }) => {
   ]);
 };
 
-/*
- * Payment breakdown by a reference field (company/expenseHead) plus the period's
- * opening/closing balance summary, in one aggregation. Both derive from the same
- * matched entries, so a $facet computes them in a single DB round trip instead of two.
- * Receipts are never tied to a company (they're intentionally optional on that field),
- * so the company filter only narrows payments; receipts always reflect the full
- * financialYear/month scope regardless of it.
- */
+// FY opening balance, or rolled forward to the selected month if one is given.
+const resolvePeriodOpeningBalance = async ({ financialYear, month, fyOpeningBalance }) => {
+  if (!month) return fyOpeningBalance;
+
+  const priorMonths = FY_MONTH_ORDER.slice(0, FY_MONTH_ORDER.indexOf(month));
+  if (priorMonths.length === 0) return fyOpeningBalance;
+
+  const priorNetMovement = await aggregateNetMovement(financialYear, priorMonths);
+  return fyOpeningBalance + priorNetMovement;
+};
+
+// Payment breakdown by company/expenseHead plus the period summary, in one $facet aggregation.
 const getReportBreakdown = async ({ financialYear, month, company, groupField, lookupConfig }) => {
   const baseMatch = buildReportMatch({ financialYear, month });
   const companyObjectId = company ? toObjectId(company) : null;
@@ -141,14 +140,16 @@ const getReportBreakdown = async ({ financialYear, month, company, groupField, l
 
   const items = breakdown.map((row) => ({ ...row, percentage: percentage(row.paymentAmount, totalPayments) }));
 
+  const periodOpeningBalance = await resolvePeriodOpeningBalance({ financialYear, month, fyOpeningBalance });
+
   const summary = {
-    fyOpeningBalance,
+    openingBalance: periodOpeningBalance,
     totalReceipts,
     totalPayments,
     receiptCount,
     paymentCount,
     netMovement,
-    fyClosingBalance: fyOpeningBalance + netMovement,
+    closingBalance: periodOpeningBalance + netMovement,
   };
 
   return { items, summary };

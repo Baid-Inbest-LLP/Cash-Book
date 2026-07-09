@@ -39,3 +39,5 @@ export const MONTHS = [
 ];
 
 export const QUARTERS = ['Q1', 'Q2', 'Q3', 'Q4'];
+
+export const FY_MONTH_ORDER = [4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3];

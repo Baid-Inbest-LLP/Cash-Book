@@ -1,5 +1,5 @@
 import { DatePickerInput } from '@mantine/dates';
-import { MONTHS } from '../../constants';
+import { FY_MONTH_ORDER, MONTHS } from '../../constants';
 import { getFinancialYearOptions } from '../../utils/financialYear';
 
 const EMPTY_FILTERS = {
@@ -60,9 +60,9 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
           onChange={(e) => set({ month: e.target.value })}
         >
           <option value="">All Months</option>
-          {MONTHS.map((m, i) => (
-            <option key={m} value={i + 1}>
-              {m}
+          {FY_MONTH_ORDER.map((num) => (
+            <option key={num} value={num}>
+              {MONTHS[num - 1]}
             </option>
           ))}
         </select>

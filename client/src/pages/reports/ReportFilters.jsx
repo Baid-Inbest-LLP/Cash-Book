@@ -1,5 +1,5 @@
 import { useCompanies } from '../../hooks/useCompanies';
-import { MONTHS } from '../../constants';
+import { FY_MONTH_ORDER, MONTHS } from '../../constants';
 
 export function FinancialYearSelect({ value, onChange, options }) {
   return (
@@ -25,9 +25,9 @@ export function MonthSelect({ value, onChange }) {
       onChange={(e) => onChange(e.target.value)}
     >
       <option value="">All Months</option>
-      {MONTHS.map((m, i) => (
-        <option key={m} value={i + 1}>
-          {m}
+      {FY_MONTH_ORDER.map((num) => (
+        <option key={num} value={num}>
+          {MONTHS[num - 1]}
         </option>
       ))}
     </select>

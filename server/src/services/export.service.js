@@ -109,11 +109,11 @@ export const buildMonthwiseWorkbook = async ({ financialYear, company }) => {
     ],
     rows,
     totals: {
-      openingBalance: summary.fyOpeningBalance,
+      openingBalance: summary.openingBalance,
       receipts: summary.totalReceipts,
       payments: summary.totalPayments,
       netMovement: summary.netMovement,
-      closingBalance: summary.fyClosingBalance,
+      closingBalance: summary.closingBalance,
     },
   });
 

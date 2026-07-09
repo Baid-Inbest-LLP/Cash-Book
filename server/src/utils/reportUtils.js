@@ -75,10 +75,10 @@ export const buildMonthlyLedger = ({ financialYear, fyOpeningBalance, monthlyTot
 
   const netMovement = totals.totalReceipts - totals.totalPayments;
   const summary = {
-    fyOpeningBalance,
+    openingBalance: fyOpeningBalance,
     ...totals,
     netMovement,
-    fyClosingBalance: fyOpeningBalance + netMovement,
+    closingBalance: fyOpeningBalance + netMovement,
   };
 
   return { months, summary };

@@ -611,7 +611,7 @@
                 }
               ]
             },
-            "description": "Protected. 12-month running ledger (opening → receipts − payments → closing) plus a `summary` (fyOpeningBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, fyClosingBalance). For the current FY it stops at the current month; past FYs return all 12. `fyOpeningBalance`/`fyClosingBalance` always reflect the full FY regardless of the `company` filter."
+            "description": "Protected. 12-month running ledger (opening → receipts − payments → closing) plus a `summary` (openingBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, closingBalance). For the current FY it stops at the current month; past FYs return all 12. `openingBalance`/`closingBalance` in the summary always reflect the full FY regardless of the `company` filter."
           },
           "response": []
         },
@@ -638,7 +638,7 @@
                 }
               ]
             },
-            "description": "Protected. Payment totals grouped by expense head with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (fyOpeningBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, fyClosingBalance) reflecting the current filters. `company` only narrows `totalPayments`/payment breakdown — `totalReceipts` is never tied to a company, so it's unaffected. Optionally filtered by month and/or company."
+            "description": "Protected. Payment totals grouped by expense head with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (openingBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, closingBalance) reflecting the current filters. `openingBalance`/`closingBalance` are FY-wide when `month` is omitted, or scoped to that single month when it's passed. `company` only narrows `totalPayments`/payment breakdown — `totalReceipts` is never tied to a company, so it's unaffected. Optionally filtered by month and/or company."
           },
           "response": []
         },
@@ -660,7 +660,7 @@
                 { "key": "month", "value": "", "description": "1–12 (optional)." }
               ]
             },
-            "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (fyOpeningBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, fyClosingBalance) reflecting the current filters. Optionally filtered by month."
+            "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (openingBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, closingBalance) reflecting the current filters. `openingBalance`/`closingBalance` are FY-wide when `month` is omitted, or scoped to that single month when it's passed. Optionally filtered by month."
           },
           "response": []
         },

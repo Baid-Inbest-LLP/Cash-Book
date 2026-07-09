@@ -65,7 +65,7 @@ export default function CompanyReportPage() {
       {isLoading ? (
         <StatTiles loading />
       ) : (
-        data && <StatTiles items={buildSummaryStatItems(data.summary)} />
+        data && <StatTiles items={buildSummaryStatItems(data.summary, { month })} />
       )}
 
       <DataTable
