@@ -5,7 +5,7 @@ import Navbar from './Navbar';
 import { useMe } from '../../hooks/useAuth';
 
 export default function AppLayout() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Warm the authenticated user cache once the shell mounts.
   useMe();
