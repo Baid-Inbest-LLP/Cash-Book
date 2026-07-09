@@ -9,7 +9,7 @@ function StatTile({ label, value, valueClassName = 'text-gray-900', icon, iconCl
         </div>
       )}
       <div className="min-w-0">
-        <p className="text-xs font-medium text-gray-500">{label}</p>
+        <p className="text-sm font-medium text-gray-500">{label}</p>
         <p className={`text-2xl font-semibold mt-1 ${valueClassName}`}>{value}</p>
       </div>
     </div>
