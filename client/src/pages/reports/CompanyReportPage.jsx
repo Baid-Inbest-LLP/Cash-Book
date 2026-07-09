@@ -62,7 +62,11 @@ export default function CompanyReportPage() {
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
 
-      {data && <StatTiles items={buildSummaryStatItems(data.summary)} />}
+      {isLoading ? (
+        <StatTiles loading />
+      ) : (
+        data && <StatTiles items={buildSummaryStatItems(data.summary)} />
+      )}
 
       <DataTable
         columns={columns}

@@ -83,7 +83,11 @@ export default function MonthwiseReportPage() {
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
 
-      {summary && <StatTiles items={buildSummaryStatItems(summary)} />}
+      {isLoading ? (
+        <StatTiles loading />
+      ) : (
+        summary && <StatTiles items={buildSummaryStatItems(summary)} />
+      )}
 
       <DataTable
         columns={columns}
