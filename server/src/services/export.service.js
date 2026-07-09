@@ -83,8 +83,8 @@ export const buildEntriesWorkbook = async ({ filters }) => {
   return { workbook, filename: `cashbook-entries-${financialYear}.xlsx` };
 };
 
-export const buildMonthwiseWorkbook = async ({ financialYear }) => {
-  const { months, summary } = await getMonthwiseReport({ financialYear });
+export const buildMonthwiseWorkbook = async ({ financialYear, company }) => {
+  const { months, summary } = await getMonthwiseReport({ financialYear, company });
 
   const rows = months.map((row) => ({
     month: monthName(row.month),
@@ -165,7 +165,7 @@ const buildBreakdownWorkbook = ({
 };
 
 export const buildExpenseHeadWorkbook = async ({ financialYear, month, company }) => {
-  const { totalPayments, expenseHeads } = await getExpenseHeadReport({
+  const { summary, expenseHeads } = await getExpenseHeadReport({
     financialYear,
     month,
     company,
@@ -174,7 +174,7 @@ export const buildExpenseHeadWorkbook = async ({ financialYear, month, company }
   return buildBreakdownWorkbook({
     financialYear,
     month,
-    totalPayments,
+    totalPayments: summary.totalPayments,
     items: expenseHeads.map((item) => ({ ...item, label: item.expenseHead?.name || '-' })),
     firstColumn: { header: 'Expense Head', width: 30 },
     sheetName: 'Expense Heads',
@@ -184,12 +184,12 @@ export const buildExpenseHeadWorkbook = async ({ financialYear, month, company }
 };
 
 export const buildCompanyWorkbook = async ({ financialYear, month }) => {
-  const { totalPayments, companies } = await getCompanyReport({ financialYear, month });
+  const { summary, companies } = await getCompanyReport({ financialYear, month });
 
   return buildBreakdownWorkbook({
     financialYear,
     month,
-    totalPayments,
+    totalPayments: summary.totalPayments,
     items: companies.map((item) => ({ ...item, label: companyLabel(item.company) })),
     firstColumn: { header: 'Company', width: 30 },
     sheetName: 'Companies',

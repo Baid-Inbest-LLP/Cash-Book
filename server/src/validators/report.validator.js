@@ -26,7 +26,7 @@ export const expenseHeadReportQuerySchema = reportQuerySchema.extend({
   company: objectIdSchema.optional(),
 });
 
-// The 12-month ledger spans the whole year, so it only takes a financial year.
 export const monthwiseQuerySchema = z.object({
   financialYear: financialYearSchema.optional(),
+  company: objectIdSchema.optional(),
 });

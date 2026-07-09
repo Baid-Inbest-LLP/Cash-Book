@@ -595,7 +595,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reports/monthwise?financialYear=",
+              "raw": "{{baseUrl}}/reports/monthwise?financialYear=&company=",
               "host": ["{{baseUrl}}"],
               "path": ["reports", "monthwise"],
               "query": [
@@ -603,10 +603,15 @@
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId (optional). Narrows each month's `payments` only — `receipts` are never tied to a company, so they're unaffected."
                 }
               ]
             },
-            "description": "Protected. 12-month running ledger (opening → receipts − payments → closing) plus a year `summary`. For the current FY it stops at the current month; past FYs return all 12."
+            "description": "Protected. 12-month running ledger (opening → receipts − payments → closing) plus a `summary` (fyOpeningBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, fyClosingBalance). For the current FY it stops at the current month; past FYs return all 12. `fyOpeningBalance`/`fyClosingBalance` always reflect the full FY regardless of the `company` filter."
           },
           "response": []
         },
@@ -633,7 +638,7 @@
                 }
               ]
             },
-            "description": "Protected. Payment totals grouped by expense head with `paymentAmount`, `paymentCount`, and share `percentage`. Optionally filtered by month and/or company."
+            "description": "Protected. Payment totals grouped by expense head with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (fyOpeningBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, fyClosingBalance) reflecting the current filters. `company` only narrows `totalPayments`/payment breakdown — `totalReceipts` is never tied to a company, so it's unaffected. Optionally filtered by month and/or company."
           },
           "response": []
         },
@@ -655,7 +660,7 @@
                 { "key": "month", "value": "", "description": "1–12 (optional)." }
               ]
             },
-            "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`. Optionally filtered by month."
+            "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (fyOpeningBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, fyClosingBalance) reflecting the current filters. Optionally filtered by month."
           },
           "response": []
         },
@@ -665,7 +670,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reports/monthwise/export?financialYear=",
+              "raw": "{{baseUrl}}/reports/monthwise/export?financialYear=&company=",
               "host": ["{{baseUrl}}"],
               "path": ["reports", "monthwise", "export"],
               "query": [
@@ -673,6 +678,11 @@
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId (optional). Narrows each month's `payments` only — `receipts` are unaffected."
                 }
               ]
             },

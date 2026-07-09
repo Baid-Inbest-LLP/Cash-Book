@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { entriesApi } from '../api/entry.api';
 import { queryKeys } from '../lib/queryKeys';
+import { downloadBlobResponse, notifyExportError } from '../utils/download';
 
 export const useEntries = (params) =>
   useQuery({
@@ -67,21 +68,11 @@ export const useDeleteEntriesPermanent = () => {
   });
 };
 
-// Triggers a browser download of the filtered entries as .xlsx; the filename comes
-// from the server's Content-Disposition header.
 export const useExportEntries = () =>
   useMutation({
     mutationFn: async (params) => {
       const response = await entriesApi.export(params);
-      const disposition = response.headers['content-disposition'] || '';
-      const filename = disposition.match(/filename="?([^"]+)"?/)?.[1] || 'entries-export.xlsx';
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      downloadBlobResponse(response, 'entries-export.xlsx');
     },
+    onError: notifyExportError,
   });

@@ -116,12 +116,7 @@ export default function EntryListView({ isExcluded }) {
       afterSettled: () => setConfirmDeletePermanent(false),
     });
 
-  const handleExport = () => {
-    exportEntries.mutate(queryParams, {
-      onError: (err) =>
-        notifications.show({ message: getApiErrorMessage(err, 'Export failed'), color: 'red' }),
-    });
-  };
+  const handleExport = () => exportEntries.mutate(queryParams);
 
   const openCreate = (type) => {
     setFormType(type);
