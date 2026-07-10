@@ -108,7 +108,7 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
 
         <input
           className="input-field grow basis-[180px] min-w-[180px]"
-          placeholder="Search description..."
+          placeholder="Search by description..."
           value={filters.search}
           onChange={(e) => set({ search: e.target.value })}
         />

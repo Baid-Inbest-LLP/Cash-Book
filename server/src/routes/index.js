@@ -5,6 +5,7 @@ import companyRoutes from './company.routes.js';
 import expenseHeadRoutes from './expenseHead.routes.js';
 import entryRoutes from './entry.routes.js';
 import reportRoutes from './report.routes.js';
+import dashboardRoutes from './dashboard.routes.js';
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use('/companies', companyRoutes);
 router.use('/expense-heads', expenseHeadRoutes);
 router.use('/entries', entryRoutes);
 router.use('/reports', reportRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 export default router;

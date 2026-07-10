@@ -742,6 +742,101 @@
       ]
     },
     {
+      "name": "📈 Dashboard",
+      "description": "Chart-ready breakdowns for the client dashboard (`/dashboard`). All require auth. Each defaults to the current financial year when `financialYear` is omitted; figures exclude excluded/recycle-bin entries. These mirror the underlying `/reports` breakdowns but return a lean `{ label, amount, percentage }`-style array, for direct chart consumption.",
+      "item": [
+        {
+          "name": "🏢 Expense by Company",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/expense-by-company?financialYear=&month=",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "expense-by-company"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." }
+              ]
+            },
+            "description": "Protected. Payment totals grouped by company: `data: [{ company, code, amount, percentage }]`."
+          },
+          "response": []
+        },
+        {
+          "name": "🏷️ Expense by Expense Head",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/expense-by-expense-head?financialYear=&month=",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "expense-by-expense-head"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." }
+              ]
+            },
+            "description": "Protected. Payment totals grouped by expense head: `data: [{ expenseHead, amount, percentage }]`."
+          },
+          "response": []
+        },
+        {
+          "name": "📅 Expense by Month",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/expense-by-month?financialYear=",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "expense-by-month"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                }
+              ]
+            },
+            "description": "Protected. Payment totals grouped by month for the whole FY: `data: [{ month, amount, percentage }]`. For the current FY it stops at the current month; past FYs return all 12."
+          },
+          "response": []
+        },
+        {
+          "name": "🏆 Top Expense Heads",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/top-expense-heads?financialYear=&month=&page=1&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "top-expense-heads"],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                { "key": "month", "value": "", "description": "1–12 (optional)." },
+                { "key": "page", "value": "1", "description": "Defaults to 1." },
+                { "key": "limit", "value": "5", "description": "Max 100. Defaults to 5." }
+              ]
+            },
+            "description": "Protected. Expense heads ranked by payment amount (descending), paginated: `data: [{ expenseHead, amount }]` plus a `pagination` block ({ page, pages, total, limit }). No `percentage` — a paginated page is a subset, so a share-of-total figure wouldn't sum to 100 across what's shown."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "🏢 Companies",
       "description": "Rich company + locations module (`/companies`). Mutations are superadmin-only.",
       "item": [

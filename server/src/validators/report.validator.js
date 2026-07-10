@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-const financialYearSchema = z
+export const financialYearSchema = z
   .string()
   .trim()
   .regex(/^\d{4}-\d{2}$/, 'Financial year must be in YYYY-YY format');
