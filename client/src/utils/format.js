@@ -89,6 +89,17 @@ export const formatAmountInWords = (value) => {
   return num < 0 ? `Minus ${words}` : words;
 };
 
+/** Compact Indian rupee figure for chart axes (e.g. ₹12L, ₹1.2Cr). */
+export const formatCompactCurrency = (value) => {
+  const num = Number(value) || 0;
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(num);
+};
+
 export const formatNumber = (value, decimals = 2) => {
   const num = Number(value) || 0;
   return new Intl.NumberFormat('en-IN', {

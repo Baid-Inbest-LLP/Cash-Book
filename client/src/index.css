@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Dashboard chart color tokens. --chart-primary is the single hue used for
+ * magnitude-only charts (one series — bar-by-company, area-by-month); the
+ * --chart-series-* slots are the fixed-order categorical palette for
+ * part-to-whole charts with multiple named slices (the expense-head doughnut).
+ * Dark steps swap via the existing [data-theme='dark'] convention below.
+ */
+:root {
+  --chart-primary: #2563eb;
+  --chart-series-1: #2a78d6;
+  --chart-series-2: #1baf7a;
+  --chart-series-3: #eda100;
+  --chart-series-4: #008300;
+  --chart-series-5: #4a3aa7;
+  --chart-series-6: #e34948;
+  --chart-series-7: #e87ba4;
+  --chart-series-other: #9ca3af;
+  --chart-grid: #e1e0d9;
+  --chart-axis: #c3c2b7;
+  --chart-tick: #898781;
+  --chart-surface: #ffffff;
+}
+
+/* Recharts' SVG surface is focusable for keyboard accessibility; suppress the
+ * browser's default focus-ring box so clicking a chart doesn't show a border. */
+.recharts-wrapper:focus,
+.recharts-wrapper *:focus,
+.recharts-surface:focus {
+  outline: none;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -973,6 +1004,22 @@
 }
 
 /* ── Dark theme overrides ── */
+[data-theme='dark'] {
+  --chart-primary: #3b82f6;
+  --chart-series-1: #3987e5;
+  --chart-series-2: #199e70;
+  --chart-series-3: #c98500;
+  --chart-series-4: #008300;
+  --chart-series-5: #9085e9;
+  --chart-series-6: #e66767;
+  --chart-series-7: #d55181;
+  --chart-series-other: #6b7280;
+  --chart-grid: #2c2c2a;
+  --chart-axis: #383835;
+  --chart-tick: #898781;
+  --chart-surface: #25262b;
+}
+
 [data-theme='dark'] body {
   background-color: #1a1b1e;
   color: #c1c2c5;

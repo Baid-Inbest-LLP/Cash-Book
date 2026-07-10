@@ -8,5 +8,8 @@ export const queryKeys = {
   monthwiseReport: (params) => ['reports', 'monthwise', params ?? {}],
   expenseHeadReport: (params) => ['reports', 'expenseHeads', params ?? {}],
   companyReport: (params) => ['reports', 'companies', params ?? {}],
+  expenseByCompany: (params) => ['dashboard', 'expenseByCompany', params ?? {}],
+  expenseByExpenseHead: (params) => ['dashboard', 'expenseByExpenseHead', params ?? {}],
+  expenseByMonth: (params) => ['dashboard', 'expenseByMonth', params ?? {}],
   users: ['masters', 'users'],
 };
