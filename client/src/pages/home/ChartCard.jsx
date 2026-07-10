@@ -3,7 +3,7 @@ import Skeleton from '../../components/common/Skeleton';
 export function ChartCardHeader({ icon, badgeClassName, title, children }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <h3 className="flex items-center gap-2.5 text-lg font-semibold text-gray-700">
+      <h3 className="flex items-center gap-2.5 text-lg font-semibold text-gray-700 dashboard-heading">
         <span className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${badgeClassName}`}>
           {icon}
         </span>

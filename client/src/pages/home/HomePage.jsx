@@ -1,6 +1,8 @@
 import ExpenseByCompanyChart from './ExpenseByCompanyChart';
 import ExpenseByExpenseHeadChart from './ExpenseByExpenseHeadChart';
 import ExpenseByMonthChart from './ExpenseByMonthChart';
+import TopExpenseHeadsTable from './TopExpenseHeadsTable';
+import RecentEntriesTable from './RecentEntriesTable';
 
 export default function HomePage() {
   return (
@@ -11,6 +13,11 @@ export default function HomePage() {
       </div>
 
       <ExpenseByMonthChart />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+        <TopExpenseHeadsTable />
+        <RecentEntriesTable />
+      </div>
     </div>
   );
 }

@@ -58,9 +58,9 @@ function SliceLegend({ slices }) {
       {slices.map((s) => (
         <li key={s.name} className="flex items-center gap-2 whitespace-nowrap">
           <span className="inline-block w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: s.color }} />
-          <span className="text-gray-600">{s.name}</span>
-          <span className="text-gray-400">·</span>
-          <span className="font-semibold text-gray-900">{s.percentage}%</span>
+          <span className="text-gray-600 dashboard-legend-name">{s.name}</span>
+          <span className="text-gray-400 dashboard-legend-sep">·</span>
+          <span className="font-semibold text-gray-900 dashboard-legend-value">{s.percentage}%</span>
         </li>
       ))}
     </ul>
@@ -119,8 +119,8 @@ export default function ExpenseByExpenseHeadChart() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-xs text-gray-500">Total</span>
-              <span className="text-lg font-semibold text-gray-900">{formatCompactCurrency(total)}</span>
+              <span className="text-xs text-gray-500 dashboard-total-label">Total</span>
+              <span className="text-lg font-semibold text-gray-900 dashboard-total-value">{formatCompactCurrency(total)}</span>
             </div>
           </div>
           <SliceLegend slices={slices} />

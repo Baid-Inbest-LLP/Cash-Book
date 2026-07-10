@@ -11,5 +11,6 @@ export const queryKeys = {
   expenseByCompany: (params) => ['dashboard', 'expenseByCompany', params ?? {}],
   expenseByExpenseHead: (params) => ['dashboard', 'expenseByExpenseHead', params ?? {}],
   expenseByMonth: (params) => ['dashboard', 'expenseByMonth', params ?? {}],
+  topExpenseHeads: (params) => ['dashboard', 'topExpenseHeads', params ?? {}],
   users: ['masters', 'users'],
 };

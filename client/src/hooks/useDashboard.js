@@ -19,3 +19,9 @@ export const useExpenseByMonth = (params) =>
     queryKey: queryKeys.expenseByMonth(params),
     queryFn: async () => (await dashboardApi.expenseByMonth(params)).data.data,
   });
+
+export const useTopExpenseHeads = (params) =>
+  useQuery({
+    queryKey: queryKeys.topExpenseHeads(params),
+    queryFn: async () => (await dashboardApi.topExpenseHeads(params)).data.data,
+  });

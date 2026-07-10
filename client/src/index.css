@@ -1094,6 +1094,23 @@
   color: #fb923c !important;
 }
 
+/*
+ * The two rules above only match when the color class sits directly on the
+ * <td> — every actual table (entries, reports, dashboard) instead colors a
+ * <span> nested inside the cell, so these descendant versions cover that.
+ */
+[data-theme='dark'] #root .table-wrapper .text-emerald-700 {
+  color: #34d399 !important;
+}
+
+[data-theme='dark'] #root .table-wrapper .text-red-600 {
+  color: #f87171 !important;
+}
+
+[data-theme='dark'] #root .table-wrapper .text-gray-600 {
+  color: #909296 !important;
+}
+
 [data-theme='dark'] #root .table-serial-link,
 [data-theme='dark'] #root .expense-list-serial-link {
   color: #60a5fa !important;
@@ -1428,6 +1445,37 @@
   background-color: rgb(248 113 113 / 0.12) !important;
   border-color: rgb(248 113 113 / 0.35) !important;
   color: #fca5a5 !important;
+}
+
+[data-theme='dark'] #root .dashboard-heading,
+[data-theme='dark'] #root .dashboard-total-value,
+[data-theme='dark'] #root .dashboard-legend-value,
+[data-theme='dark'] #root .dashboard-tooltip-title,
+[data-theme='dark'] #root .dashboard-tooltip-value {
+  color: #c1c2c5;
+}
+
+[data-theme='dark'] #root .dashboard-total-label,
+[data-theme='dark'] #root .dashboard-legend-name,
+[data-theme='dark'] #root .dashboard-legend-sep,
+[data-theme='dark'] #root .dashboard-tooltip-label {
+  color: #909296;
+}
+
+[data-theme='dark'] #root .stat-tile-label {
+  color: #909296;
+}
+
+[data-theme='dark'] #root .stat-tile-value.text-gray-900 {
+  color: #c1c2c5;
+}
+
+[data-theme='dark'] #root .stat-tile-value.text-emerald-700 {
+  color: #34d399;
+}
+
+[data-theme='dark'] #root .stat-tile-value.text-red-600 {
+  color: #f87171;
 }
 
 [data-theme='dark'] #root .control-center-tab {
