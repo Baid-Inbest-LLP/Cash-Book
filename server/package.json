@@ -6,9 +6,7 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "build": "echo \"Server runs directly with Node\"",
-    "seed": "node src/seed/index.js",
-    "seed:companies": "node src/seed/runCompanies.js"
+    "build": "echo \"Server runs directly with Node\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

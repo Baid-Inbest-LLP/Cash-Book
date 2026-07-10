@@ -2,7 +2,7 @@ import { useEntries } from '../../hooks/useEntries';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { formatCurrency, formatDate } from '../../utils/format';
 import DataTable from '../../components/common/DataTable';
-import { recentEntriesIcon } from './dashboardIcons';
+import { recentEntriesIcon } from '../../components/icons/dashboardIcons';
 
 const RECENT_LIMIT = 5;
 

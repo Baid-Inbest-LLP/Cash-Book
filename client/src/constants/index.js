@@ -9,8 +9,6 @@ export const STORAGE_KEYS = {
 
 export const ROUTES = {
   LOGIN: '/login',
-  FORGOT_PASSWORD: '/forgot-password',
-  RESET_PASSWORD: '/reset-password',
   HOME: '/',
   CONTROL_CENTER: '/control-center',
   CONTROL_CENTER_COMPANIES: '/control-center/companies',

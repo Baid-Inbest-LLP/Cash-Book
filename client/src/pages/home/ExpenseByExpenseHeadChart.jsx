@@ -13,7 +13,7 @@ import {
 } from './chartColors';
 import { ChartCardHeader, ChartCardState } from './ChartCard';
 import { ChartTooltipCard, ChartTooltipRow } from './ChartTooltip';
-import { pieChartIcon } from './dashboardIcons';
+import { pieChartIcon } from '../../components/icons/dashboardIcons';
 
 // Past the fixed categorical slot count, fold the tail into a single neutral
 // "Other" slice rather than generating/reusing a hue for it.

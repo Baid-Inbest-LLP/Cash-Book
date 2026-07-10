@@ -16,7 +16,7 @@ import {
 } from './chartColors';
 import { ChartCardHeader, ChartCardState } from './ChartCard';
 import { ChartTooltipCard, ChartTooltipRow } from './ChartTooltip';
-import { companyIcon } from './dashboardIcons';
+import { companyIcon } from '../../components/icons/dashboardIcons';
 
 const truncate = (text, max = 12) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
 

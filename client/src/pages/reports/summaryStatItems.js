@@ -5,7 +5,7 @@ import {
 	trendDownIcon,
 	trendUpIcon,
 	walletIcon,
-} from "./reportIcons";
+} from "../../components/icons/reportIcons";
 
 export const buildSummaryStatItems = (summary, { month } = {}) => {
 	const label = (text) => (month ? text : `FY ${text}`);

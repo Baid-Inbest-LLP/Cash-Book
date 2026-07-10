@@ -1,7 +1,3 @@
-// Sidebar navigation icons.
-//
-// Defined as React components (not static .svg files) so they inherit
-// `currentColor` for the active/hover theming and accept a `className` for sizing.
 
 const Svg = ({ className = 'w-5 h-5', children }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">

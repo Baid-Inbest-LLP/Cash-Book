@@ -46,9 +46,3 @@ export const useRegister = () =>
 
 export const useChangePassword = () =>
   useMutation({ mutationFn: async (data) => (await authApi.changePassword(data)).data });
-
-export const useForgotPassword = () =>
-  useMutation({ mutationFn: async (email) => (await authApi.forgotPassword(email)).data });
-
-export const useResetPassword = () =>
-  useMutation({ mutationFn: async (data) => (await authApi.resetPassword(data)).data });

@@ -36,9 +36,7 @@ api.interceptors.response.use(
       const authUrl = originalRequest.url || '';
       if (
         authUrl.includes('/auth/login') ||
-        authUrl.includes('/auth/register') ||
-        authUrl.includes('/auth/forgot-password') ||
-        authUrl.includes('/auth/reset-password')
+        authUrl.includes('/auth/register')
       ) {
         return Promise.reject(error);
       }

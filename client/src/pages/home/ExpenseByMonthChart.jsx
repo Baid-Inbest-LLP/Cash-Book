@@ -16,7 +16,7 @@ import {
 } from './chartColors';
 import { ChartCardHeader, ChartCardState } from './ChartCard';
 import { ChartTooltipCard, ChartTooltipRow } from './ChartTooltip';
-import { monthlyTrendIcon } from './dashboardIcons';
+import { monthlyTrendIcon } from '../../components/icons/dashboardIcons';
 
 const monthLabel = (month) => MONTHS[month - 1]?.slice(0, 3) ?? month;
 

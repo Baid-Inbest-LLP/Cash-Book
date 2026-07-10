@@ -4,7 +4,7 @@ import { getApiErrorMessage } from '../../lib/queryClient';
 import { formatCurrency } from '../../utils/format';
 import DataTable from '../../components/common/DataTable';
 import { FinancialYearSelect, MonthSelect } from '../reports/ReportFilters';
-import { topRankIcon } from './dashboardIcons';
+import { topRankIcon } from '../../components/icons/dashboardIcons';
 
 const TOP_LIMIT = 5;
 

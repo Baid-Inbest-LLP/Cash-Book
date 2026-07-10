@@ -3,8 +3,6 @@ import { isAuthenticated } from './lib/session';
 import AppLayout from './components/layout/AppLayout';
 import ProtectedRoute from './routes/ProtectedRoute';
 import LoginPage from './pages/auth/LoginPage';
-import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
-import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import HomePage from './pages/home/HomePage';
 import SettingsPage from './pages/settings/SettingsPage';
 import ControlCenterLayout from './pages/control-center/ControlCenterLayout';
@@ -33,15 +31,6 @@ export default function App() {
             </PublicOnly>
           }
         />
-        <Route
-          path="/forgot-password"
-          element={
-            <PublicOnly>
-              <ForgotPasswordPage />
-            </PublicOnly>
-          }
-        />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           element={
             <ProtectedRoute>
