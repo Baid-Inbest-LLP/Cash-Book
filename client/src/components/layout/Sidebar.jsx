@@ -41,7 +41,7 @@ const roleLabel = (role) => {
 };
 
 const linkClass = (isOpen, isActive) =>
-  `flex items-center rounded-lg text-md font-medium transition-colors ${
+  `flex min-w-0 items-center overflow-hidden rounded-lg text-md font-medium transition-colors ${
     isOpen ? 'gap-3 justify-start px-3 py-2' : 'justify-center px-2 py-2.5'
   } ${
     isActive
@@ -65,7 +65,7 @@ const Sidebar = ({ isOpen = true }) => {
   return (
     <aside
       data-open={isOpen}
-      className={`flex-shrink-0 bg-gradient-to-br from-[#0b2f81] via-[#1446a0] to-[#1d5fb3] text-white flex flex-col h-full transition-[width] duration-300 ease-in-out will-change-[width] ${
+      className={`flex-shrink-0 overflow-hidden bg-gradient-to-br from-[#0b2f81] via-[#1446a0] to-[#1d5fb3] text-white flex flex-col h-full transition-[width] duration-300 ease-in-out will-change-[width] ${
         isOpen ? 'w-64' : 'w-20'
       }`}
     >
@@ -86,7 +86,11 @@ const Sidebar = ({ isOpen = true }) => {
         </div>
       </div>
 
-      <nav className={`flex-1 py-4 space-y-1 overflow-y-auto ${isOpen ? 'px-3' : 'px-2'}`}>
+      <nav
+        className={`flex-1 overflow-x-hidden overflow-y-auto py-4 space-y-1 ${
+          isOpen ? 'px-3' : 'px-2'
+        }`}
+      >
         {navItems.map((item) => {
           const { Icon } = item;
           if (item.children) {
@@ -103,7 +107,9 @@ const Sidebar = ({ isOpen = true }) => {
                 >
                   <Icon className={`${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`} />
                   {isOpen && (
-                    <span className="flex-1 text-left whitespace-nowrap">{item.label}</span>
+                    <span className="flex-1 overflow-hidden text-left text-ellipsis whitespace-nowrap">
+                      {item.label}
+                    </span>
                   )}
                   {isOpen && (
                     <ChevronRightIcon
@@ -147,7 +153,11 @@ const Sidebar = ({ isOpen = true }) => {
               className={({ isActive }) => linkClass(isOpen, isActive)}
             >
               <Icon className={`${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`} />
-              {isOpen && <span className="whitespace-nowrap">{item.label}</span>}
+              {isOpen && (
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap">
+                  {item.label}
+                </span>
+              )}
             </NavLink>
           );
         })}
