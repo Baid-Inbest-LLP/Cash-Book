@@ -47,22 +47,23 @@ export default function RecentEntriesTable() {
     },
   ];
 
+  const header = (
+    <h3 className="flex items-center gap-2.5 text-lg font-semibold text-gray-700 dashboard-heading">
+      <span className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
+        {recentEntriesIcon}
+      </span>
+      Recent Entries
+    </h3>
+  );
+
   return (
     <div className="flex flex-col h-full">
-      <div className="card p-4 mb-4">
-        <h3 className="flex items-center gap-2.5 text-lg font-semibold text-gray-700 dashboard-heading">
-          <span className="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
-            {recentEntriesIcon}
-          </span>
-          Recent Entries
-        </h3>
-      </div>
-
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
 
       <div className="flex-1">
         <DataTable
           className="h-full"
+          header={header}
           columns={columns}
           data={entries}
           loading={isLoading}

@@ -27,6 +27,14 @@ export const expenseByMonth = asyncHandler(async (req, res) => {
   ApiResponse.success(res, { financialYear, data });
 });
 
+// GET /dashboard/stats - FY opening/closing balance and receipt/payment totals.
+export const stats = asyncHandler(async (req, res) => {
+  const { financialYear: requestedFinancialYear } = req.validated?.query || {};
+  const financialYear = requestedFinancialYear || getFinancialYear();
+  const data = await dashboardService.getDashboardStats({ financialYear });
+  ApiResponse.success(res, { financialYear, data });
+});
+
 // GET /dashboard/top-expense-heads - top expense heads by payment amount, paginated.
 export const topExpenseHeads = asyncHandler(async (req, res) => {
   const { financialYear: requestedFinancialYear, month, page, limit } = req.validated?.query || {};

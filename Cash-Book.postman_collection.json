@@ -7,22 +7,80 @@
   },
   "auth": {
     "type": "bearer",
-    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:5001/api/v1", "type": "string" },
-    { "key": "superadminEmail", "value": "superadmin@cashbook.com", "type": "string" },
-    { "key": "superadminPassword", "value": "super123", "type": "string" },
-    { "key": "accountantEmail", "value": "accountant@cashbook.com", "type": "string" },
-    { "key": "accountantPassword", "value": "accountant123", "type": "string" },
-    { "key": "accessToken", "value": "", "type": "string" },
-    { "key": "refreshToken", "value": "", "type": "string" },
-    { "key": "resetToken", "value": "", "type": "string" },
-    { "key": "companyId", "value": "", "type": "string" },
-    { "key": "locationId", "value": "", "type": "string" },
-    { "key": "expenseHeadId", "value": "", "type": "string" },
-    { "key": "userId", "value": "", "type": "string" },
-    { "key": "entryId", "value": "", "type": "string" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "superadminEmail",
+      "value": "superadmin@cashbook.com",
+      "type": "string"
+    },
+    {
+      "key": "superadminPassword",
+      "value": "super123",
+      "type": "string"
+    },
+    {
+      "key": "accountantEmail",
+      "value": "accountant@cashbook.com",
+      "type": "string"
+    },
+    {
+      "key": "accountantPassword",
+      "value": "accountant123",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "resetToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "companyId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "locationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "expenseHeadId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "entryId",
+      "value": "",
+      "type": "string"
+    }
   ],
   "item": [
     {
@@ -48,18 +106,34 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{superadminEmail}}\",\n  \"password\": \"{{superadminPassword}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "Public. Authenticates and returns `{ user, accessToken, refreshToken }`. Tokens are auto-saved to collection variables."
           },
@@ -84,18 +158,34 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{accountantEmail}}\",\n  \"password\": \"{{accountantPassword}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
             },
             "description": "Public. Log in as the accountant role to test non-superadmin permissions."
           },
@@ -119,18 +209,34 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/refresh",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "refresh"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
             },
             "description": "Public. Exchanges a valid refresh token for a new access token (auto-saved)."
           },
@@ -143,8 +249,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/auth/me",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "me"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
             },
             "description": "Protected. Returns the authenticated user's profile."
           },
@@ -166,16 +277,30 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"New Accountant\",\n  \"email\": \"accountant2@cashbook.com\",\n  \"password\": \"changeme123\",\n  \"role\": \"accountant\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/register",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "register"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
             },
             "description": "Superadmin only. Creates an accountant. Saves new user `_id` to `userId`."
           },
@@ -185,16 +310,30 @@
           "name": "🔒 Change Password",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"currentPassword\": \"super123\",\n  \"newPassword\": \"super1234\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/change-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "change-password"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
             },
             "description": "Protected. Changes the authenticated user's password."
           },
@@ -219,18 +358,34 @@
             }
           ],
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"{{superadminEmail}}\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/forgot-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "forgot-password"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
             },
             "description": "Public. In development the response includes `resetUrl`; the test script extracts its token into `resetToken`."
           },
@@ -239,18 +394,34 @@
         {
           "name": "🔁 Reset Password",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"password\": \"newpass123\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/auth/reset-password",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "reset-password"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
             },
             "description": "Public. Resets the password using the token captured by Forgot Password."
           },
@@ -263,8 +434,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/auth/logout",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "logout"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
             },
             "description": "Protected. Invalidates the stored refresh token."
           },
@@ -283,8 +459,12 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/expense-heads?activeOnly=true&search=&page=1&limit=50",
-              "host": ["{{baseUrl}}"],
-              "path": ["expense-heads"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expense-heads"
+              ],
               "query": [
                 {
                   "key": "activeOnly",
@@ -296,8 +476,15 @@
                   "value": "",
                   "description": "Name substring (case-insensitive)."
                 },
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "50", "description": "Max 100." }
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Max 100."
+                }
               ]
             },
             "description": "Protected. Paginated list of heads sorted by name, with a `pagination` block ({ page, pages, total, limit }). Active only by default; `?activeOnly=false` returns all. `search` filters by name substring."
@@ -321,16 +508,29 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Rent\",\n  \"isActive\": true\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/expense-heads",
-              "host": ["{{baseUrl}}"],
-              "path": ["expense-heads"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expense-heads"
+              ]
             },
             "description": "Protected (any role). Creates a head. Names are unique case-insensitively (duplicate → 409). Saves `_id` to `expenseHeadId`."
           },
@@ -340,16 +540,30 @@
           "name": "✏️ Update Expense Head",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Office Rent\",\n  \"isActive\": true\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/expense-heads/{{expenseHeadId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["expense-heads", "{{expenseHeadId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expense-heads",
+                "{{expenseHeadId}}"
+              ]
             },
             "description": "Protected (any role). Updates name and/or isActive. 404 if missing, 409 on duplicate name."
           },
@@ -362,8 +576,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/expense-heads/{{expenseHeadId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["expense-heads", "{{expenseHeadId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "expense-heads",
+                "{{expenseHeadId}}"
+              ]
             },
             "description": "Protected (any role). Hard-deletes a head. Blocked with 409 if referenced by any entry (deactivate instead)."
           },
@@ -396,11 +615,22 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/entries?page=1&limit=50&type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries"
+              ],
               "query": [
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "50", "description": "Max 100." },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Max 100."
+                },
                 {
                   "key": "type",
                   "value": "",
@@ -411,8 +641,16 @@
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12." },
-                { "key": "company", "value": "", "description": "Company ObjectId." },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId."
+                },
                 {
                   "key": "expenseHead",
                   "value": "",
@@ -423,8 +661,16 @@
                   "value": "false",
                   "description": "`true` shows the excluded/recycle-bin list."
                 },
-                { "key": "fromDate", "value": "", "description": "ISO date lower bound." },
-                { "key": "toDate", "value": "", "description": "ISO date upper bound." },
+                {
+                  "key": "fromDate",
+                  "value": "",
+                  "description": "ISO date lower bound."
+                },
+                {
+                  "key": "toDate",
+                  "value": "",
+                  "description": "ISO date upper bound."
+                },
                 {
                   "key": "search",
                   "value": "",
@@ -443,26 +689,59 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/entries/export?type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "export"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "export"
+              ],
               "query": [
-                { "key": "type", "value": "", "description": "`receipt` or `payment`." },
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "`receipt` or `payment`."
+                },
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12." },
-                { "key": "company", "value": "", "description": "Company ObjectId." },
-                { "key": "expenseHead", "value": "", "description": "Expense head ObjectId." },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId."
+                },
+                {
+                  "key": "expenseHead",
+                  "value": "",
+                  "description": "Expense head ObjectId."
+                },
                 {
                   "key": "isExcluded",
                   "value": "false",
                   "description": "`true` exports the excluded/recycle-bin list."
                 },
-                { "key": "fromDate", "value": "", "description": "ISO date lower bound." },
-                { "key": "toDate", "value": "", "description": "ISO date upper bound." },
-                { "key": "search", "value": "", "description": "Description text search." }
+                {
+                  "key": "fromDate",
+                  "value": "",
+                  "description": "ISO date lower bound."
+                },
+                {
+                  "key": "toDate",
+                  "value": "",
+                  "description": "ISO date upper bound."
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Description text search."
+                }
               ]
             },
             "description": "Protected. Downloads all filtered entries (same filters as List Entries, no pagination) as a branded .xlsx. Use **Send → Send and Download** in Postman to save the file."
@@ -473,16 +752,30 @@
           "name": "➕ Create Receipt",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"2025-06-15\",\n  \"amount\": 5000,\n  \"description\": \"Cash sale receipt\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/entries/receipt",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "receipt"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "receipt"
+              ]
             },
             "description": "Protected. Creates a receipt entry. `company` is optional for receipts. Returns only a success message; run List Entries to fetch it."
           },
@@ -492,16 +785,30 @@
           "name": "➕ Create Payment",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"date\": \"2025-06-16\",\n  \"company\": \"{{companyId}}\",\n  \"expenseHead\": \"{{expenseHeadId}}\",\n  \"amount\": 1200,\n  \"description\": \"Office rent payment\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/entries/payment",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "payment"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "payment"
+              ]
             },
             "description": "Protected. Creates a payment entry tied to an active company and expense head. Returns only a success message."
           },
@@ -511,16 +818,30 @@
           "name": "✏️ Update Entry",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"amount\": 5500,\n  \"description\": \"Updated receipt amount\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/entries/{{entryId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "{{entryId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "{{entryId}}"
+              ]
             },
             "description": "Protected. Updates any subset of fields (type, date, company, expenseHead, amount, description). At least one field is required. Payment entries require both company and expense head; receipts may omit or clear company. Returns only a success message."
           },
@@ -530,16 +851,30 @@
           "name": "🗑️ Exclude Entries (bulk)",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/entries/exclude",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "exclude"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "exclude"
+              ]
             },
             "description": "Protected. Bulk soft-delete: moves the selected entries (`ids` array, 1–200) to the excluded/recycle-bin list. Already-excluded ids are skipped. Returns a count message."
           },
@@ -549,16 +884,30 @@
           "name": "♻️ Restore Entries (bulk)",
           "request": {
             "method": "PATCH",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/entries/restore",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "restore"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "restore"
+              ]
             },
             "description": "Protected. Bulk restore: returns the selected excluded entries (`ids` array) to the cash book. Only excluded ids are affected."
           },
@@ -568,16 +917,30 @@
           "name": "🗑️ Delete Entries (Permanent, bulk)",
           "request": {
             "method": "DELETE",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"ids\": [\"{{entryId}}\"]\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/entries/permanent",
-              "host": ["{{baseUrl}}"],
-              "path": ["entries", "permanent"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "permanent"
+              ]
             },
             "description": "Superadmin only. Permanently deletes the selected entries (`ids` array). Only entries already excluded are removed; the rest are skipped."
           },
@@ -596,8 +959,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/reports/monthwise?financialYear=&company=",
-              "host": ["{{baseUrl}}"],
-              "path": ["reports", "monthwise"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "monthwise"
+              ],
               "query": [
                 {
                   "key": "financialYear",
@@ -622,15 +990,24 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/reports/expense-heads?financialYear=&month=&company=",
-              "host": ["{{baseUrl}}"],
-              "path": ["reports", "expense-heads"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "expense-heads"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                },
                 {
                   "key": "company",
                   "value": "",
@@ -649,15 +1026,24 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/reports/companies?financialYear=&month=",
-              "host": ["{{baseUrl}}"],
-              "path": ["reports", "companies"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "companies"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." }
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                }
               ]
             },
             "description": "Protected. Payment totals grouped by company with `paymentAmount`, `paymentCount`, and share `percentage`, plus a `summary` (openingBalance, totalReceipts, totalPayments, receiptCount, paymentCount, netMovement, closingBalance) reflecting the current filters. `openingBalance`/`closingBalance` are FY-wide when `month` is omitted, or scoped to that single month when it's passed. Optionally filtered by month."
@@ -671,8 +1057,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/reports/monthwise/export?financialYear=&company=",
-              "host": ["{{baseUrl}}"],
-              "path": ["reports", "monthwise", "export"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "monthwise",
+                "export"
+              ],
               "query": [
                 {
                   "key": "financialYear",
@@ -697,15 +1089,25 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/reports/expense-heads/export?financialYear=&month=&company=",
-              "host": ["{{baseUrl}}"],
-              "path": ["reports", "expense-heads", "export"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "expense-heads",
+                "export"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                },
                 {
                   "key": "company",
                   "value": "",
@@ -724,15 +1126,25 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/reports/companies/export?financialYear=&month=",
-              "host": ["{{baseUrl}}"],
-              "path": ["reports", "companies", "export"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "companies",
+                "export"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." }
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                }
               ]
             },
             "description": "Protected. Downloads the company report as a branded .xlsx. Use **Send → Send and Download**."
@@ -746,21 +1158,56 @@
       "description": "Chart-ready breakdowns for the client dashboard (`/dashboard`). All require auth. Each defaults to the current financial year when `financialYear` is omitted; figures exclude excluded/recycle-bin entries. These mirror the underlying `/reports` breakdowns but return a lean `{ label, amount, percentage }`-style array, for direct chart consumption.",
       "item": [
         {
+          "name": "📊 Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/stats?financialYear=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "stats"
+              ],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                }
+              ]
+            },
+            "description": "Protected. FY-level stat card totals: data: { openingBalance, totalReceipts, totalPayments, netMovement, closingBalance }."
+          },
+          "response": []
+        },
+        {
           "name": "🏢 Expense by Company",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/dashboard/expense-by-company?financialYear=&month=",
-              "host": ["{{baseUrl}}"],
-              "path": ["dashboard", "expense-by-company"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "expense-by-company"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." }
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                }
               ]
             },
             "description": "Protected. Payment totals grouped by company: `data: [{ company, code, amount, percentage }]`."
@@ -774,15 +1221,24 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/dashboard/expense-by-expense-head?financialYear=&month=",
-              "host": ["{{baseUrl}}"],
-              "path": ["dashboard", "expense-by-expense-head"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "expense-by-expense-head"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." }
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                }
               ]
             },
             "description": "Protected. Payment totals grouped by expense head: `data: [{ expenseHead, amount, percentage }]`."
@@ -796,8 +1252,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/dashboard/expense-by-month?financialYear=",
-              "host": ["{{baseUrl}}"],
-              "path": ["dashboard", "expense-by-month"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "expense-by-month"
+              ],
               "query": [
                 {
                   "key": "financialYear",
@@ -817,17 +1278,34 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/dashboard/top-expense-heads?financialYear=&month=&page=1&limit=5",
-              "host": ["{{baseUrl}}"],
-              "path": ["dashboard", "top-expense-heads"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "top-expense-heads"
+              ],
               "query": [
                 {
                   "key": "financialYear",
                   "value": "",
                   "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
                 },
-                { "key": "month", "value": "", "description": "1–12 (optional)." },
-                { "key": "page", "value": "1", "description": "Defaults to 1." },
-                { "key": "limit", "value": "5", "description": "Max 100. Defaults to 5." }
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Defaults to 1."
+                },
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "description": "Max 100. Defaults to 5."
+                }
               ]
             },
             "description": "Protected. Expense heads ranked by payment amount (descending), paginated: `data: [{ expenseHead, amount }]` plus a `pagination` block ({ page, pages, total, limit }). No `percentage` — a paginated page is a subset, so a share-of-total figure wouldn't sum to 100 across what's shown."
@@ -847,17 +1325,32 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/companies?search=&isActive=&page=1&limit=50",
-              "host": ["{{baseUrl}}"],
-              "path": ["companies"],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ],
               "query": [
                 {
                   "key": "search",
                   "value": "",
                   "description": "Name/email/code substring (case-insensitive)."
                 },
-                { "key": "isActive", "value": "", "description": "`true` or `false`." },
-                { "key": "page", "value": "1" },
-                { "key": "limit", "value": "50", "description": "Max 100." }
+                {
+                  "key": "isActive",
+                  "value": "",
+                  "description": "`true` or `false`."
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Max 100."
+                }
               ]
             },
             "description": "Protected. Paginated list of companies with their locations."
@@ -881,16 +1374,29 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Acme Corp\",\n  \"companyCode\": \"ACME\",\n  \"email\": \"contact@acme.com\",\n  \"phone\": \"9876543210\",\n  \"taxId\": \"19ABCDE1234F1Z5\",\n  \"logo\": \"\",\n  \"isActive\": true,\n  \"locations\": [\n    {\n      \"label\": \"HQ\",\n      \"street\": \"1 Main Street\",\n      \"city\": \"Kolkata\",\n      \"state\": \"West Bengal\",\n      \"zipCode\": \"700001\",\n      \"country\": \"India\",\n      \"isDefault\": true\n    }\n  ]\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/companies",
-              "host": ["{{baseUrl}}"],
-              "path": ["companies"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies"
+              ]
             },
             "description": "Superadmin only. Creates a company with at least one location. Saves `_id` to `companyId`."
           },
@@ -903,8 +1409,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/companies/{{companyId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["companies", "{{companyId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{companyId}}"
+              ]
             },
             "description": "Protected. Returns a single company with its locations."
           },
@@ -917,8 +1428,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/companies/{{companyId}}/stamp",
-              "host": ["{{baseUrl}}"],
-              "path": ["companies", "{{companyId}}", "stamp"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{companyId}}",
+                "stamp"
+              ]
             },
             "description": "Protected. Returns whether a stamp exists and a data-URI preview."
           },
@@ -928,16 +1445,30 @@
           "name": "✏️ Update Company",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Acme Corporation\",\n  \"phone\": \"9000000000\",\n  \"isActive\": true\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/companies/{{companyId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["companies", "{{companyId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{companyId}}"
+              ]
             },
             "description": "Superadmin only. Updates company fields; pass `locations` to sync branches."
           },
@@ -950,8 +1481,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/companies/{{companyId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["companies", "{{companyId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "companies",
+                "{{companyId}}"
+              ]
             },
             "description": "Superadmin only. Deletes the company and all its locations."
           },
@@ -970,8 +1506,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/lookups",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "lookups"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "lookups"
+              ]
             },
             "description": "Protected. Dropdown data: companies, locations, payment methods, roles, months, quarters."
           },
@@ -984,8 +1525,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/companies",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "companies"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "companies"
+              ]
             },
             "description": "Protected. Simple company list (active by default; `?activeOnly=false` for all)."
           },
@@ -995,16 +1541,30 @@
           "name": "➕ Create Company (master)",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Master Co\",\n  \"code\": \"MSTCO\",\n  \"email\": \"master@co.com\",\n  \"isActive\": true\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/masters/companies",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "companies"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "companies"
+              ]
             },
             "description": "Superadmin only. Generic company create."
           },
@@ -1014,16 +1574,31 @@
           "name": "✏️ Update Company (master)",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Master Co Updated\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/masters/companies/{{companyId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "companies", "{{companyId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "companies",
+                "{{companyId}}"
+              ]
             },
             "description": "Superadmin only. Generic company update."
           },
@@ -1036,8 +1611,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/companies/{{companyId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "companies", "{{companyId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "companies",
+                "{{companyId}}"
+              ]
             },
             "description": "Superadmin only. Generic company delete."
           },
@@ -1050,8 +1631,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/locations",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "locations"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "locations"
+              ]
             },
             "description": "Protected. Simple location list."
           },
@@ -1073,16 +1659,30 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"company\": \"{{companyId}}\",\n  \"label\": \"BR1\",\n  \"name\": \"Branch 1\",\n  \"code\": \"BR1\",\n  \"city\": \"Jaipur\",\n  \"state\": \"Rajasthan\",\n  \"country\": \"India\",\n  \"isDefault\": false\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/masters/locations",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "locations"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "locations"
+              ]
             },
             "description": "Superadmin only. Creates a location for `companyId`. Saves `_id` to `locationId`."
           },
@@ -1092,16 +1692,31 @@
           "name": "✏️ Update Location (master)",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"city\": \"Bengaluru\",\n  \"state\": \"Karnataka\"\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/masters/locations/{{locationId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "locations", "{{locationId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "locations",
+                "{{locationId}}"
+              ]
             },
             "description": "Superadmin only. Generic location update."
           },
@@ -1114,8 +1729,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/locations/{{locationId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "locations", "{{locationId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "locations",
+                "{{locationId}}"
+              ]
             },
             "description": "Superadmin only. Generic location delete."
           },
@@ -1128,8 +1749,13 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "users"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "users"
+              ]
             },
             "description": "Superadmin only. Lists all users (passwords excluded)."
           },
@@ -1139,16 +1765,31 @@
           "name": "✏️ Update User",
           "request": {
             "method": "PUT",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Renamed Accountant\",\n  \"isActive\": true\n}",
-              "options": { "raw": { "language": "json" } }
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
             "url": {
               "raw": "{{baseUrl}}/masters/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "users",
+                "{{userId}}"
+              ]
             },
             "description": "Superadmin only. Updates an accountant's name/email/isActive."
           },
@@ -1161,8 +1802,14 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/masters/users/{{userId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["masters", "users", "{{userId}}"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "masters",
+                "users",
+                "{{userId}}"
+              ]
             },
             "description": "Superadmin only. Deletes an accountant (cannot delete self or superadmin)."
           },
@@ -1177,10 +1824,20 @@
         {
           "name": "🩺 Health Check",
           "request": {
-            "auth": { "type": "noauth" },
+            "auth": {
+              "type": "noauth"
+            },
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] },
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
             "description": "Public. Returns API status and timestamp."
           },
           "response": []

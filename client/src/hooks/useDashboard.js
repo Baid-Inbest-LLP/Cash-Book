@@ -2,6 +2,12 @@ import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '../api/dashboard.api';
 import { queryKeys } from '../lib/queryKeys';
 
+export const useDashboardStats = (params) =>
+  useQuery({
+    queryKey: queryKeys.dashboardStats(params),
+    queryFn: async () => (await dashboardApi.stats(params)).data.data,
+  });
+
 export const useExpenseByCompany = (params) =>
   useQuery({
     queryKey: queryKeys.expenseByCompany(params),

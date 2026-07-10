@@ -33,6 +33,18 @@ export const getExpenseByMonth = async ({ financialYear }) => {
   }));
 };
 
+// FY-level opening/closing balance and receipt/payment totals, for the dashboard's top stat cards.
+export const getDashboardStats = async ({ financialYear }) => {
+  const { summary } = await getMonthwiseReport({ financialYear });
+  return {
+    openingBalance: summary.openingBalance,
+    totalReceipts: summary.totalReceipts,
+    totalPayments: summary.totalPayments,
+    netMovement: summary.netMovement,
+    closingBalance: summary.closingBalance,
+  };
+};
+
 // Top expense heads by payment amount for a financial year (+ optional month), paginated.
 export const getTopExpenseHeads = async ({ financialYear, month, page = 1, limit = 5 }) => {
   const { expenseHeads } = await getExpenseHeadReport({ financialYear, month });

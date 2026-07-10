@@ -36,6 +36,7 @@ export default function DataTable({
   emptyAction,
   pagination,
   selection,
+  header,
   className = '',
 }) {
   const getId = selection?.getId ?? rowKey;
@@ -62,6 +63,7 @@ export default function DataTable({
 
   return (
     <div className={`card overflow-hidden ${className}`.trim()}>
+      {header && <div className="p-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">{header}</div>}
       {loading ? (
         <div className="p-6">
           <div className="space-y-4">

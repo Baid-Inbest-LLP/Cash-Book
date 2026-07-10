@@ -31,26 +31,29 @@ export default function TopExpenseHeadsTable() {
     },
   ];
 
+  const header = (
+    <>
+      <h3 className="flex items-center gap-2.5 text-lg font-semibold text-gray-700 dashboard-heading">
+        <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
+          {topRankIcon}
+        </span>
+        Top 5 Expense Heads
+      </h3>
+      <div className="flex flex-wrap gap-2">
+        <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
+        <MonthSelect value={month} onChange={setMonth} />
+      </div>
+    </>
+  );
+
   return (
     <div className="flex flex-col h-full">
-      <div className="card p-4 mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="flex items-center gap-2.5 text-lg font-semibold text-gray-700 dashboard-heading">
-          <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-            {topRankIcon}
-          </span>
-          Top 5 Expense Heads
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
-          <MonthSelect value={month} onChange={setMonth} />
-        </div>
-      </div>
-
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
 
       <div className="flex-1">
         <DataTable
           className="h-full"
+          header={header}
           columns={columns}
           data={rows}
           loading={isLoading}

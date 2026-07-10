@@ -19,6 +19,7 @@ router.get(
   controller.expenseByExpenseHead,
 );
 router.get('/expense-by-month', validate(expenseByMonthQuerySchema, 'query'), controller.expenseByMonth);
+router.get('/stats', validate(expenseByMonthQuerySchema, 'query'), controller.stats);
 router.get(
   '/top-expense-heads',
   validate(topExpenseHeadsQuerySchema, 'query'),
