@@ -14,12 +14,13 @@ export function ChartCardHeader({ icon, badgeClassName, title, children }) {
   );
 }
 
-export function ChartCardState({ isLoading, error, isEmpty, emptyMessage }) {
-  if (isLoading) return <Skeleton className="h-64 w-full" />;
+
+export function ChartCardState({ isLoading, error, isEmpty, emptyMessage, className = 'h-64' }) {
+  if (isLoading) return <Skeleton className={`${className} w-full`} />;
 
   if (error) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className={`${className} flex items-center justify-center`}>
         <p className="rounded-lg border px-4 py-3 company-error-alert">{error}</p>
       </div>
     );
@@ -27,7 +28,7 @@ export function ChartCardState({ isLoading, error, isEmpty, emptyMessage }) {
 
   if (isEmpty) {
     return (
-      <div className="h-64 flex items-center justify-center">
+      <div className={`${className} flex items-center justify-center`}>
         <p className="company-empty-desc">{emptyMessage}</p>
       </div>
     );

@@ -81,7 +81,7 @@ export default function ExpenseByExpenseHeadChart() {
   const { slices, total } = buildSlices(rows);
 
   return (
-    <div className="card p-4">
+    <div className="card p-4 flex flex-col min-h-[420px]">
       <ChartCardHeader icon={pieChartIcon} badgeClassName="bg-violet-50 text-violet-600" title="Split of Expenses">
         <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
         <MonthSelect value={month} onChange={setMonth} />
@@ -93,9 +93,10 @@ export default function ExpenseByExpenseHeadChart() {
           error={error}
           isEmpty={slices.length === 0}
           emptyMessage="No payment data for the selected filters."
+          className="flex-1"
         />
       ) : (
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
           <div className="relative w-56 flex-shrink-0">
             <ResponsiveContainer width="100%" height={224}>
               <PieChart>

@@ -56,7 +56,7 @@ export default function ExpenseByCompanyChart() {
   const data = withColors(response?.data ?? []);
 
   return (
-    <div className="card p-4 flex flex-col">
+    <div className="card p-4 flex flex-col min-h-[420px]">
       <ChartCardHeader icon={companyIcon} badgeClassName="bg-primary-50 text-primary-600" title="Expense by Company">
         <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
         <MonthSelect value={month} onChange={setMonth} />
@@ -68,6 +68,7 @@ export default function ExpenseByCompanyChart() {
           error={error}
           isEmpty={data.length === 0}
           emptyMessage="No payment data for the selected filters."
+          className="flex-1"
         />
       ) : (
         // Fills whatever height the grid stretches this card to (matching its
