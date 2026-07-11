@@ -82,12 +82,20 @@ export default function ExpenseHeadReportPage() {
 				className="mb-4"
 				title="Expense Head Report"
 				subtitle={`FY ${financialYear} · Payment totals grouped by expense head`}
-				action={{
-					onClick: () => exportReport.mutate(params),
-					label: exportReport.isPending ? "Exporting..." : "Export",
-					icon: "export",
-					disabled: exportReport.isPending,
-				}}
+				action={[
+					{
+						onClick: () => exportReport.mutate(params),
+						label: exportReport.isPending ? "Exporting..." : "Export to Excel",
+						icon: "excel",
+						iconOnly: true,
+						disabled: exportReport.isPending,
+					},
+					{
+						label: "Export to PDF",
+						icon: "pdf",
+						iconOnly: true,
+					},
+				]}
 			/>
 
 			<div className="card p-4 mb-4 flex flex-wrap items-center gap-3">

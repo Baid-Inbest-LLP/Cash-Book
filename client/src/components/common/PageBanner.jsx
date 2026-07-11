@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import excelIconSrc from '../../assets/excel.svg';
+import pdfIconSrc from '../../assets/pdf.svg';
 
 const plusIcon = (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
@@ -34,17 +36,23 @@ const exportIcon = (
   </svg>
 );
 
+const excelIcon = <img src={excelIconSrc} alt="" className="w-9 h-9" aria-hidden />;
+const pdfIcon = <img src={pdfIconSrc} alt="" className="w-9 h-9" aria-hidden />;
+
 const resolveActionIcon = (icon) => {
   if (icon === false || icon === 'none') return null;
   if (icon === 'arrow') return arrowRightIcon;
   if (icon === 'key') return keyIcon;
   if (icon === 'export') return exportIcon;
+  if (icon === 'excel') return excelIcon;
+  if (icon === 'pdf') return pdfIcon;
   return plusIcon;
 };
 
 const renderActionContent = (act) => {
   const icon = resolveActionIcon(act.icon);
   if (!icon) return act.label;
+  if (act.iconOnly) return icon;
   if (act.icon === 'arrow') {
     return (
       <>
@@ -64,6 +72,10 @@ const renderActionContent = (act) => {
 const actionBaseClassName =
   'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-all duration-150 shadow-lg flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
 
+// No background/shadow — the icon itself (already colored) is the whole affordance.
+const actionIconOnlyClassName =
+  'inline-flex items-center justify-center w-12 h-12 flex-shrink-0 active:scale-90 hover:scale-110 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:scale-100';
+
 // Color variants for banner actions — 'default' keeps the original white/primary look;
 // 'receipt'/'payment' match the emerald/red convention used for money in/out elsewhere in the app.
 const actionVariantClassName = {
@@ -72,8 +84,10 @@ const actionVariantClassName = {
   payment: 'bg-red-50 text-red-700 hover:bg-red-100 shadow-red-900/20',
 };
 
-const resolveActionClassName = (variant) =>
-  `${actionBaseClassName} ${actionVariantClassName[variant] || actionVariantClassName.default}`;
+const resolveActionClassName = (act) => {
+  if (act.iconOnly) return actionIconOnlyClassName;
+  return `${actionBaseClassName} ${actionVariantClassName[act.variant] || actionVariantClassName.default}`;
+};
 
 export default function PageBanner({ title, subtitle, action = null, className = '' }) {
   const actionsList = Array.isArray(action) ? action : action ? [action] : [];
@@ -90,10 +104,16 @@ export default function PageBanner({ title, subtitle, action = null, className =
           <p className="text-primary-200 text-md">{subtitle}</p>
         </div>
         {actionsList.length > 0 && (
-          <div className="flex flex-wrap gap-2 justify-end flex-shrink-0">
+          <div className="flex flex-wrap items-center gap-2 justify-end flex-shrink-0">
             {actionsList.map((act) =>
               act.to ? (
-                <Link key={`${act.to}-${act.label}`} to={act.to} className={resolveActionClassName(act.variant)}>
+                <Link
+                  key={`${act.to}-${act.label}`}
+                  to={act.to}
+                  title={act.iconOnly ? act.label : undefined}
+                  aria-label={act.iconOnly ? act.label : undefined}
+                  className={resolveActionClassName(act)}
+                >
                   {renderActionContent(act)}
                 </Link>
               ) : (
@@ -102,7 +122,9 @@ export default function PageBanner({ title, subtitle, action = null, className =
                   type="button"
                   onClick={act.onClick}
                   disabled={act.disabled}
-                  className={resolveActionClassName(act.variant)}
+                  title={act.iconOnly ? act.label : undefined}
+                  aria-label={act.iconOnly ? act.label : undefined}
+                  className={resolveActionClassName(act)}
                 >
                   {renderActionContent(act)}
                 </button>

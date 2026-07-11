@@ -247,9 +247,15 @@ export default function EntryListView({ isExcluded }) {
               ]),
           {
             onClick: handleExport,
-            label: exportEntries.isPending ? 'Exporting...' : 'Export',
-            icon: 'export',
+            label: exportEntries.isPending ? 'Exporting...' : 'Export to Excel',
+            icon: 'excel',
+            iconOnly: true,
             disabled: exportEntries.isPending,
+          },
+          {
+            label: 'Export to PDF',
+            icon: 'pdf',
+            iconOnly: true,
           },
         ]}
       />
