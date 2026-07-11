@@ -202,11 +202,20 @@ export default function SettingsPage() {
       {canManageUsers && (
         <>
           {showCreate && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-              <div className="company-form-panel max-w-lg">
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+              onClick={createSubmitting ? undefined : closeCreateModal}
+            >
+              <div
+                className="company-form-panel max-w-lg"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="create-user-title"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className="company-form-header">
                   <div>
-                    <h2 className="company-form-title">Create User</h2>
+                    <h2 id="create-user-title" className="company-form-title">Create User</h2>
                     <p className="company-form-subtitle">Create an accountant account</p>
                   </div>
                   <button
@@ -389,12 +398,16 @@ export default function SettingsPage() {
           />
 
           {editingUser && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+              onClick={editSubmitting ? undefined : closeEditUser}
+            >
               <div
                 className="company-form-panel max-w-lg border border-gray-100"
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="edit-user-title"
+                onClick={(e) => e.stopPropagation()}
               >
                 <div className="company-form-header">
                   <div>
@@ -483,12 +496,16 @@ export default function SettingsPage() {
       )}
 
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={pwdSubmitting ? undefined : closePasswordModal}
+        >
           <div
             className="company-form-panel max-w-lg border border-gray-100"
             role="dialog"
             aria-modal="true"
             aria-labelledby="change-password-title"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="company-form-header">
               <div>
