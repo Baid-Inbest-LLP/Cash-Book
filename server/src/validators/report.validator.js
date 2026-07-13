@@ -26,7 +26,18 @@ export const expenseHeadReportQuerySchema = reportQuerySchema.extend({
   company: objectIdSchema.optional(),
 });
 
+// Export endpoints render a single company's code/GST in the report header, so a company
+// must be selected — unlike the on-screen report, where "All Companies" is a valid view.
+export const exportExpenseHeadReportQuerySchema = reportQuerySchema.extend({
+  company: objectIdSchema,
+});
+
 export const monthwiseQuerySchema = z.object({
   financialYear: financialYearSchema.optional(),
   company: objectIdSchema.optional(),
+});
+
+export const exportMonthwiseQuerySchema = z.object({
+  financialYear: financialYearSchema.optional(),
+  company: objectIdSchema,
 });

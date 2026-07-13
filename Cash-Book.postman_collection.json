@@ -750,6 +750,73 @@
           "response": []
         },
         {
+          "name": "⬇️ Export Entries (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/entries/export/pdf?type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entries",
+                "export",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "`receipt` or `payment`."
+                },
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId."
+                },
+                {
+                  "key": "expenseHead",
+                  "value": "",
+                  "description": "Expense head ObjectId."
+                },
+                {
+                  "key": "isExcluded",
+                  "value": "false",
+                  "description": "`true` exports the excluded/recycle-bin list."
+                },
+                {
+                  "key": "fromDate",
+                  "value": "",
+                  "description": "ISO date lower bound."
+                },
+                {
+                  "key": "toDate",
+                  "value": "",
+                  "description": "ISO date upper bound."
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Description text search."
+                }
+              ]
+            },
+            "description": "Protected. Downloads all filtered entries (same filters as List Entries, no pagination) as a branded .pdf. Use **Send → Send and Download** in Postman to save the file."
+          },
+          "response": []
+        },
+        {
           "name": "➕ Create Receipt",
           "request": {
             "method": "POST",
@@ -1085,6 +1152,39 @@
           "response": []
         },
         {
+          "name": "⬇️ Export Monthwise (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/monthwise/export/pdf?financialYear=&company=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "monthwise",
+                "export",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId (optional). Narrows each month's `payments` only — `receipts` are unaffected."
+                }
+              ]
+            },
+            "description": "Protected. Downloads the monthwise report as a branded .pdf. Use **Send → Send and Download**."
+          },
+          "response": []
+        },
+        {
           "name": "⬇️ Export Expense-Head (XLSX)",
           "request": {
             "method": "GET",
@@ -1123,6 +1223,44 @@
           "response": []
         },
         {
+          "name": "⬇️ Export Expense-Head (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/expense-heads/export/pdf?financialYear=&month=&company=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "expense-heads",
+                "export",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                },
+                {
+                  "key": "company",
+                  "value": "",
+                  "description": "Company ObjectId (optional) — narrow to one company."
+                }
+              ]
+            },
+            "description": "Protected. Downloads the expense-head report as a branded .pdf. Use **Send → Send and Download**."
+          },
+          "response": []
+        },
+        {
           "name": "⬇️ Export Company (XLSX)",
           "request": {
             "method": "GET",
@@ -1152,6 +1290,39 @@
               ]
             },
             "description": "Protected. Downloads the company report as a branded .xlsx. Use **Send → Send and Download**."
+          },
+          "response": []
+        },
+        {
+          "name": "⬇️ Export Company (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/companies/export/pdf?financialYear=&month=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "companies",
+                "export",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "financialYear",
+                  "value": "",
+                  "description": "YYYY-YY (e.g. 2025-26). Defaults to current FY."
+                },
+                {
+                  "key": "month",
+                  "value": "",
+                  "description": "1–12 (optional)."
+                }
+              ]
+            },
+            "description": "Protected. Downloads the company report as a branded .pdf. Use **Send → Send and Download**."
           },
           "response": []
         }

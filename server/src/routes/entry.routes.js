@@ -7,6 +7,7 @@ import {
   createReceiptSchema,
   entryIdParamSchema,
   entryIdsBodySchema,
+  exportEntriesQuerySchema,
   listEntriesQuerySchema,
   updateEntrySchema,
 } from '../validators/entry.validator.js';
@@ -18,8 +19,13 @@ router.use(authenticate);
 router.get('/', validate(listEntriesQuerySchema, 'query'), controller.listEntries);
 router.get(
   '/export/excel',
-  validate(listEntriesQuerySchema, 'query'),
+  validate(exportEntriesQuerySchema, 'query'),
   controller.exportEntriesExcel,
+);
+router.get(
+  '/export/pdf',
+  validate(exportEntriesQuerySchema, 'query'),
+  controller.exportEntriesPdf,
 );
 router.post('/receipt', validate(createReceiptSchema), controller.createReceipt);
 router.post('/payment', validate(createPaymentSchema), controller.createPayment);

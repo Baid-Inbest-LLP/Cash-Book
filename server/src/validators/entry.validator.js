@@ -79,24 +79,32 @@ export const entryIdsBodySchema = z.object({
     .max(200, 'At most 200 entries can be selected at once'),
 });
 
-export const listEntriesQuerySchema = z
-  .object({
-    page: numberQuerySchema(z.number().int().min(1)).default(1),
-    limit: numberQuerySchema(z.number().int().min(1).max(100)).default(50),
-    type: entryTypeSchema.optional(),
-    financialYear: financialYearSchema.optional(),
-    month: numberQuerySchema(z.number().int().min(1).max(12)),
-    company: objectIdSchema.optional(),
-    expenseHead: objectIdSchema.optional(),
-    isExcluded: booleanQuerySchema,
-    fromDate: optionalDateQuerySchema,
-    toDate: optionalDateQuerySchema,
-    search: z.string().trim().max(100, 'Search must be at most 100 characters').optional(),
-  })
-  .refine(
-    (data) => !data.fromDate || !data.toDate || data.fromDate <= data.toDate,
-    'fromDate cannot be after toDate',
-  );
+const baseListEntriesQuerySchema = z.object({
+  page: numberQuerySchema(z.number().int().min(1)).default(1),
+  limit: numberQuerySchema(z.number().int().min(1).max(100)).default(50),
+  type: entryTypeSchema.optional(),
+  financialYear: financialYearSchema.optional(),
+  month: numberQuerySchema(z.number().int().min(1).max(12)),
+  company: objectIdSchema.optional(),
+  expenseHead: objectIdSchema.optional(),
+  isExcluded: booleanQuerySchema,
+  fromDate: optionalDateQuerySchema,
+  toDate: optionalDateQuerySchema,
+  search: z.string().trim().max(100, 'Search must be at most 100 characters').optional(),
+});
+
+const dateRangeRefinement = [
+  (data) => !data.fromDate || !data.toDate || data.fromDate <= data.toDate,
+  'fromDate cannot be after toDate',
+];
+
+export const listEntriesQuerySchema = baseListEntriesQuerySchema.refine(...dateRangeRefinement);
+
+// Export endpoints render a single company's code/GST in the report header, so a company
+// must be selected — unlike the list endpoint, where "All Companies" is a valid view.
+export const exportEntriesQuerySchema = baseListEntriesQuerySchema
+  .extend({ company: objectIdSchema })
+  .refine(...dateRangeRefinement);
 
 export const createReceiptSchema = baseCreateEntryBodySchema.extend({
   company: objectIdSchema.nullish(),

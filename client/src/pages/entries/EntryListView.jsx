@@ -9,11 +9,13 @@ import {
   useEntries,
   useExcludeEntries,
   useExportEntriesExcel,
+  useExportEntriesPdf,
   useRestoreEntries,
 } from '../../hooks/useEntries';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { DEFAULT_PAGE_SIZE } from '../../constants';
 import { isSuperAdmin } from '../../constants/roles';
+import { requireCompanySelected } from '../../utils/download';
 import { getCurrentFinancialYear } from '../../utils/financialYear';
 import { formatCurrency, formatDate } from '../../utils/format';
 import ConfirmModal from '../../components/common/ConfirmModal';
@@ -91,6 +93,7 @@ export default function EntryListView({ isExcluded }) {
   const restoreEntries = useRestoreEntries();
   const deletePermanent = useDeleteEntriesPermanent();
   const exportExcel = useExportEntriesExcel();
+  const exportPdf = useExportEntriesPdf();
 
   const selectedIds = Array.from(selected);
   const selectedCount = selected.size;
@@ -144,7 +147,12 @@ export default function EntryListView({ isExcluded }) {
     setConfirmDeletePermanent(true);
   };
 
-  const handleExportExcel = () => exportExcel.mutate(queryParams);
+  const handleExportExcel = () => {
+    if (requireCompanySelected(filters.company)) exportExcel.mutate(queryParams);
+  };
+  const handleExportPdf = () => {
+    if (requireCompanySelected(filters.company)) exportPdf.mutate(queryParams);
+  };
 
   const openCreate = (type) => {
     setFormType(type);
@@ -191,8 +199,7 @@ export default function EntryListView({ isExcluded }) {
       key: 'description',
       header: 'Description',
       align: 'center',
-      width: '220px',
-      className: 'break-words',
+      className: 'whitespace-nowrap',
       render: (e) => e.description || '-',
     },
     {
@@ -253,9 +260,11 @@ export default function EntryListView({ isExcluded }) {
             disabled: exportExcel.isPending,
           },
           {
-            label: 'Export to PDF',
+            onClick: handleExportPdf,
+            label: exportPdf.isPending ? 'Exporting...' : 'Export to PDF',
             icon: 'pdf',
             iconOnly: true,
+            disabled: exportPdf.isPending,
           },
         ]}
       />
@@ -310,6 +319,7 @@ export default function EntryListView({ isExcluded }) {
         }
         selection={{ selectedIds: selected, onChange: setSelected }}
         pagination={{ ...pagination, onPageChange: setPage }}
+        autoLayout
       />
 
       {showForm && (

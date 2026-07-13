@@ -76,3 +76,12 @@ export const useExportEntriesExcel = () =>
     },
     onError: notifyExportError,
   });
+
+export const useExportEntriesPdf = () =>
+  useMutation({
+    mutationFn: async (params) => {
+      const response = await entriesApi.exportPdf(params);
+      downloadBlobResponse(response, 'entries-export.pdf');
+    },
+    onError: notifyExportError,
+  });

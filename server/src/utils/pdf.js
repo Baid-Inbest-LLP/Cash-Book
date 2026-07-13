@@ -1,0 +1,265 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import puppeteer from 'puppeteer';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ASSETS_DIR = path.resolve(__dirname, '../../assets');
+
+// Brand palette (hex) — mirrors the ARGB palette in utils/excel.js.
+const COLORS = {
+  brand: '#0B2F81',
+  headerFill: '#005887',
+  headerText: '#FFFFFF',
+  muted: '#6B7280',
+  border: '#D1D5DB',
+  black: '#000000',
+  companyCode: '#13AFCD',
+};
+
+const PDF_MIME = 'application/pdf';
+
+// Read the branded logos once (as data URIs, so the headless page needs no filesystem access).
+let logoCache = null;
+const getLogos = () => {
+  if (!logoCache) {
+    const toDataUri = (file) =>
+      `data:image/png;base64,${fs.readFileSync(path.join(ASSETS_DIR, file)).toString('base64')}`;
+    logoCache = {
+      inbest: toDataUri('Inbest_Logo(Blue).png'),
+      shree: toDataUri('shree_red.png'),
+    };
+  }
+  return logoCache;
+};
+
+const escapeHtml = (value) =>
+  String(value ?? '').replace(
+    /[&<>"']/g,
+    (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char],
+  );
+
+// Mirrors excel.js's applyColumnFormat, producing a display string instead of a cell format.
+const formatCellValue = (value, column) => {
+  if (value === null || value === undefined || value === '') return '';
+  switch (column.type) {
+    case 'currency':
+      return `₹${Number(value).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+    case 'number':
+      return Number(value).toLocaleString('en-IN');
+    case 'percent':
+      return `${Number(value).toFixed(2)}%`;
+    case 'date':
+      return new Date(value)
+        .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace(/ /g, '-');
+    default:
+      return escapeHtml(value);
+  }
+};
+
+const cellAlign = (column) => {
+  if (column.type === 'currency' || column.type === 'number' || column.type === 'percent') {
+    return 'right';
+  }
+  if (column.type === 'date') return 'center';
+  return column.align || 'left';
+};
+
+const renderTableHead = (columns) =>
+  `<thead><tr>${columns
+    .map((column) => `<th style="text-align:center">${escapeHtml(column.header)}</th>`)
+    .join('')}</tr></thead>`;
+
+const renderTableBody = (columns, rows) =>
+  `<tbody>${rows
+    .map(
+      (row, rowIndex) =>
+        `<tr>${columns
+          .map((column) => {
+            const value = column.key === '__sno' ? rowIndex + 1 : row[column.key];
+            return `<td style="text-align:${cellAlign(column)}">${formatCellValue(value, column)}</td>`;
+          })
+          .join('')}</tr>`,
+    )
+    .join('')}</tbody>`;
+
+// "Total" lands under the first real column (index 1, since 0 is the S.No. column).
+const renderTotalsRow = (columns, totals) =>
+  `<tfoot><tr>${columns
+    .map((column, index) => {
+      const value =
+        column.key === '__sno'
+          ? ''
+          : index === 1
+            ? 'Total'
+            : formatCellValue(totals[column.key], column);
+      return `<td style="text-align:${cellAlign(column)}">${escapeHtml(value)}</td>`;
+    })
+    .join('')}</tr></tfoot>`;
+
+// Auto-prepended to every export so row numbering is consistent without each report
+// having to declare it — mirrors excel.js's SNO_COLUMN.
+const SNO_COLUMN = { header: 'S.No.', key: '__sno', align: 'center' };
+
+/**
+ * Global report builder — the HTML counterpart to buildBrandedWorkbook. Same
+ * column/row/totals shape, rendered as a print-ready HTML page for Puppeteer.
+ * A leading S.No. column is added automatically.
+ */
+const buildBrandedHtml = ({
+  title,
+  subtitle,
+  meta = [],
+  columns: reportColumns,
+  rows,
+  totals,
+  companyInfo,
+}) => {
+  const columns = [SNO_COLUMN, ...reportColumns];
+  const { inbest, shree } = getLogos();
+
+  return `<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; padding: 24px; }
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .header .company-info { justify-self: start; line-height: 1.3; }
+  .header .company-info .code { font-size: 30px; font-weight: 700; color: ${COLORS.companyCode}; }
+  .header .company-info .gst { font-size: 12px; font-weight: 700; color: ${COLORS.black}; }
+  .header .shree { justify-self: center; }
+  .header .shree img { height: 48px; }
+  .header .inbest { justify-self: end; }
+  .header .inbest img { height: 42px; }
+  .title { text-align: center; color: ${COLORS.brand}; font-size: 20px; font-weight: 700; margin: 4px 0; }
+  /* Report name — a second title line, not a muted annotation, so it keeps the brand color. */
+  .subtitle { text-align: center; color: ${COLORS.brand}; font-size: 15px; font-weight: 700; margin: 2px 0; }
+  .meta { text-align: center; color: ${COLORS.muted}; font-size: 10.5px; margin: 1px 0; }
+  table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 10.5px; }
+  thead { display: table-header-group; }
+  tr { page-break-inside: avoid; }
+  th {
+    background: ${COLORS.headerFill};
+    color: ${COLORS.headerText};
+    font-weight: 700;
+    padding: 7px 8px;
+    border: 1px solid ${COLORS.border};
+  }
+  td {
+    padding: 6px 8px;
+    border: 1px solid ${COLORS.border};
+  }
+  tbody tr:nth-child(even) { background: #F9FAFB; }
+  tfoot td { background: ${COLORS.headerFill}; color: ${COLORS.headerText}; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="company-info">
+      ${
+        companyInfo
+          ? `<div class="code">${escapeHtml(companyInfo.code || '-')}</div>
+             <div class="gst">GST No.: ${escapeHtml(companyInfo.taxId || '-')}</div>`
+          : ''
+      }
+    </div>
+    <div class="shree"><img src="${shree}" alt="" /></div>
+    <div class="inbest"><img src="${inbest}" alt="" /></div>
+  </div>
+  <div class="title">${escapeHtml(title)}</div>
+  ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ''}
+  ${meta.map((line) => `<div class="meta">${escapeHtml(line)}</div>`).join('')}
+  <table>
+    ${renderTableHead(columns)}
+    ${totals ? renderTotalsRow(columns, totals) : ''}
+    ${renderTableBody(columns, rows)}
+  </table>
+</body>
+</html>`;
+};
+
+// A single Chromium instance is launched lazily and reused across requests — spinning up a
+// fresh browser per export would add multi-second latency to every download.
+let browserPromise = null;
+const getBrowser = () => {
+  if (!browserPromise) {
+    browserPromise = puppeteer
+      .launch({
+        headless: true,
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      })
+      .then((browser) => {
+        // A crashed/killed browser must not stay cached — the next request should relaunch.
+        browser.once('disconnected', () => {
+          browserPromise = null;
+        });
+        return browser;
+      });
+    // A failed launch must not permanently wedge every future export — let the next call retry.
+    browserPromise.catch(() => {
+      browserPromise = null;
+    });
+  }
+  return browserPromise;
+};
+
+const renderPdfBuffer = async (html) => {
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+  try {
+    await page.setContent(html, { waitUntil: 'networkidle0' });
+    return await page.pdf({
+      format: 'A4',
+      landscape: true,
+      printBackground: true,
+      margin: { top: '12mm', bottom: '16mm', left: '10mm', right: '10mm' },
+      displayHeaderFooter: true,
+      // Header/footer templates render in an isolated context (no access to the page's own
+      // <style>), so everything needed has to be inlined here.
+      headerTemplate: '<span></span>',
+      footerTemplate: `
+        <div style="width:100%; font-size:8px; text-align:center; color:${COLORS.muted}; font-family:'Segoe UI', Arial, sans-serif;">
+          Page <span class="pageNumber"></span> of <span class="totalPages"></span>
+        </div>
+      `,
+    });
+  } finally {
+    await page.close();
+  }
+};
+
+/**
+ * Same config shape as buildBrandedWorkbook — renders it as a branded PDF buffer instead.
+ *
+ * @param {object}   config
+ * @param {string}   config.title
+ * @param {string}  [config.subtitle]
+ * @param {string[]}[config.meta]
+ * @param {Array}    config.columns
+ * @param {Array}    config.rows
+ * @param {object}  [config.totals]
+ * @param {object}  [config.companyInfo] - { code, taxId }; shown top-left when a single
+ *   company is in scope for the report
+ * @returns {Promise<Buffer>}
+ */
+export const buildBrandedPdf = ({ title, subtitle, meta, columns, rows, totals, companyInfo }) =>
+  renderPdfBuffer(buildBrandedHtml({ title, subtitle, meta, columns, rows, totals, companyInfo }));
+
+// Send a rendered PDF buffer back to the client as a download.
+export const sendPdf = (res, buffer, filename) => {
+  res.setHeader('Content-Type', PDF_MIME);
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.end(buffer);
+};

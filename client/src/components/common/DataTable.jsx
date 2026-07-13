@@ -38,6 +38,7 @@ export default function DataTable({
   selection,
   header,
   className = '',
+  autoLayout = false,
 }) {
   const getId = selection?.getId ?? rowKey;
   const pageIds = selection ? data.map((row, i) => getId(row, i)) : [];
@@ -91,7 +92,10 @@ export default function DataTable({
         </div>
       ) : (
         <div className="table-wrapper">
-          <table className="!text-base">
+          <table
+            className="!text-base"
+            style={autoLayout ? { tableLayout: 'auto' } : undefined}
+          >
             <thead>
               <tr>
                 {selection && (

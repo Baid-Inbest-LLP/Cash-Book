@@ -2,7 +2,9 @@ import { useState } from "react";
 import {
 	useExpenseHeadReport,
 	useExportExpenseHeadsExcel,
+	useExportExpenseHeadsPdf,
 } from "../../hooks/useReports";
+import { requireCompanySelected } from "../../utils/download";
 import { getApiErrorMessage } from "../../lib/queryClient";
 import {
 	getCurrentFinancialYear,
@@ -44,6 +46,14 @@ export default function ExpenseHeadReportPage() {
 		: null;
 
 	const exportExcel = useExportExpenseHeadsExcel();
+	const exportPdf = useExportExpenseHeadsPdf();
+
+	const handleExportExcel = () => {
+		if (requireCompanySelected(company)) exportExcel.mutate(params);
+	};
+	const handleExportPdf = () => {
+		if (requireCompanySelected(company)) exportPdf.mutate(params);
+	};
 
 	const columns = [
 		{
@@ -84,16 +94,18 @@ export default function ExpenseHeadReportPage() {
 				subtitle={`FY ${financialYear} · Payment totals grouped by expense head`}
 				action={[
 					{
-						onClick: () => exportExcel.mutate(params),
+						onClick: handleExportExcel,
 						label: exportExcel.isPending ? "Exporting..." : "Export to Excel",
 						icon: "excel",
 						iconOnly: true,
 						disabled: exportExcel.isPending,
 					},
 					{
-						label: "Export to PDF",
+						onClick: handleExportPdf,
+						label: exportPdf.isPending ? "Exporting..." : "Export to PDF",
 						icon: "pdf",
 						iconOnly: true,
+						disabled: exportPdf.isPending,
 					},
 				]}
 			/>
