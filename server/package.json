@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "build": "echo \"Server runs directly with Node\""
+    "build": "echo \"Server runs directly with Node\"",
+    "postinstall": "node scripts/ensure-chrome.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
