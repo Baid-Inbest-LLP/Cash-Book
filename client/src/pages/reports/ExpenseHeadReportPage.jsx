@@ -141,6 +141,7 @@ export default function ExpenseHeadReportPage() {
 				rowKey={(row, i) => row.expenseHead?.name ?? i}
 				emptyTitle="No payments yet"
 				emptyDescription="No payments recorded for the selected filters."
+				serialNumber
 			/>
 		</div>
 	);

@@ -121,6 +121,7 @@ export default function ExpenseHeadManagementPage() {
           !debouncedSearch ? { label: 'Add Expense Head', onClick: () => setShowForm(true) } : undefined
         }
         pagination={{ ...pagination, onPageChange: setPage }}
+        serialNumber
       />
 
       {showForm && <ExpenseHeadForm expenseHead={editHead} onClose={handleClose} />}

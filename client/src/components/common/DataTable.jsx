@@ -39,6 +39,8 @@ export default function DataTable({
   header,
   className = '',
   autoLayout = false,
+  serialNumber = false,
+  serialNumberLabel = 'S.No.',
 }) {
   const getId = selection?.getId ?? rowKey;
   const pageIds = selection ? data.map((row, i) => getId(row, i)) : [];
@@ -60,7 +62,11 @@ export default function DataTable({
     selection.onChange(next);
   };
 
-  const columnCount = columns.length + (selection ? 1 : 0);
+  const columnCount = columns.length + (selection ? 1 : 0) + (serialNumber ? 1 : 0);
+  // Continues numbering across pages when pagination info is available, rather than
+  // restarting at 1 on every page.
+  const serialOffset =
+    serialNumber && pagination?.page && pagination?.limit ? (pagination.page - 1) * pagination.limit : 0;
 
   return (
     <div className={`card overflow-hidden ${className}`.trim()}>
@@ -108,6 +114,7 @@ export default function DataTable({
                     />
                   </th>
                 )}
+                {serialNumber && <th className="w-12 text-center">{serialNumberLabel}</th>}
                 {columns.map((col, i) => (
                   <th
                     key={col.key ?? i}
@@ -133,6 +140,9 @@ export default function DataTable({
                           ariaLabel={`Select row ${rowIndex + 1}`}
                         />
                       </td>
+                    )}
+                    {serialNumber && (
+                      <td className="text-center">{serialOffset + rowIndex + 1}</td>
                     )}
                     {columns.map((col, i) => (
                       <td

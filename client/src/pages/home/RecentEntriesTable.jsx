@@ -70,6 +70,8 @@ export default function RecentEntriesTable() {
           rowKey={(row, i) => row._id ?? i}
           emptyTitle="No entries yet"
           emptyDescription="Add a receipt or payment to get started"
+          serialNumber
+          serialNumberLabel="#"
         />
       </div>
     </div>

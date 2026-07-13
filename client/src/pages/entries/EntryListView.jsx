@@ -323,6 +323,7 @@ export default function EntryListView({ isExcluded }) {
         selection={{ selectedIds: selected, onChange: setSelected }}
         pagination={{ ...pagination, onPageChange: setPage }}
         autoLayout
+        serialNumber
       />
 
       {showForm && (

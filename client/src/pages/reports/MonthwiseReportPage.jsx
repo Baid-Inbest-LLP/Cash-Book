@@ -119,6 +119,7 @@ export default function MonthwiseReportPage() {
         rowKey={(row) => row.month}
         emptyTitle="No data yet"
         emptyDescription="This financial year has no recorded entries yet."
+        serialNumber
       />
     </div>
   );

@@ -90,6 +90,7 @@ export default function CompanyReportPage() {
         rowKey={(row, i) => row.company?.code ?? i}
         emptyTitle="No payments yet"
         emptyDescription="No payments recorded for the selected filters."
+        serialNumber
       />
     </div>
   );

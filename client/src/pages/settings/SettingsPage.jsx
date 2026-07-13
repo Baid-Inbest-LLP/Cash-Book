@@ -309,8 +309,9 @@ export default function SettingsPage() {
                   {[0, 1, 2].map((row) => (
                     <div
                       key={row}
-                      className="grid grid-cols-[2fr,2fr,1.5fr,1.2fr,1.2fr] gap-3 items-center py-2 border-b border-gray-100 last:border-0"
+                      className="grid grid-cols-[0.4fr,2fr,2fr,1.5fr,1.2fr,1.2fr] gap-3 items-center py-2 border-b border-gray-100 last:border-0"
                     >
+                      <Skeleton className="h-3 w-6 mx-auto" />
                       <Skeleton className="h-3 w-40" />
                       <SkeletonText lines={1} />
                       <Skeleton className="h-6 w-20 rounded-full mx-auto" />
@@ -333,6 +334,7 @@ export default function SettingsPage() {
                 <table>
                   <thead>
                     <tr>
+                      <th className="text-center">S.No.</th>
                       <th className="text-left">Name</th>
                       <th className="text-center">Email</th>
                       <th className="text-center">Role</th>
@@ -341,12 +343,13 @@ export default function SettingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => {
+                    {users.map((u, index) => {
                       const isTargetSuperadmin = u.role === 'superadmin';
                       const canEdit = isSuperadmin && !isTargetSuperadmin;
                       const deleteDisabled = !canEdit;
                       return (
                         <tr key={u._id}>
+                          <td className="text-center">{index + 1}</td>
                           <td className="settings-user-name">{u.name}</td>
                           <td className="settings-user-email">{u.email}</td>
                           <td className="text-center">
