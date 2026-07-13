@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useExportMonthwise, useMonthwiseReport } from '../../hooks/useReports';
+import { useExportMonthwiseExcel, useMonthwiseReport } from '../../hooks/useReports';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { getCurrentFinancialYear, getFinancialYearOptions } from '../../utils/financialYear';
 import { formatCurrency } from '../../utils/format';
@@ -22,7 +22,7 @@ export default function MonthwiseReportPage() {
   const summary = data?.summary;
   const error = isError ? getApiErrorMessage(queryError, 'Failed to fetch monthwise report') : null;
 
-  const exportReport = useExportMonthwise();
+  const exportExcel = useExportMonthwiseExcel();
 
   const columns = [
     { key: 'month', header: 'Month', render: (row) => MONTHS[row.month - 1] },
@@ -70,11 +70,11 @@ export default function MonthwiseReportPage() {
         subtitle={`FY ${financialYear} · Opening to closing balance by month`}
         action={[
           {
-            onClick: () => exportReport.mutate(params),
-            label: exportReport.isPending ? 'Exporting...' : 'Export to Excel',
+            onClick: () => exportExcel.mutate(params),
+            label: exportExcel.isPending ? 'Exporting...' : 'Export to Excel',
             icon: 'excel',
             iconOnly: true,
-            disabled: exportReport.isPending,
+            disabled: exportExcel.isPending,
           },
           {
             label: 'Export to PDF',

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useCompanyReport, useExportCompanies } from '../../hooks/useReports';
+import { useCompanyReport, useExportCompaniesExcel } from '../../hooks/useReports';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { getCurrentFinancialYear, getFinancialYearOptions } from '../../utils/financialYear';
 import { formatCurrency } from '../../utils/format';
@@ -21,7 +21,7 @@ export default function CompanyReportPage() {
   const rows = data?.companies ?? [];
   const error = isError ? getApiErrorMessage(queryError, 'Failed to fetch company report') : null;
 
-  const exportReport = useExportCompanies();
+  const exportExcel = useExportCompaniesExcel();
 
   const columns = [
     { key: 'company', header: 'Company', render: (row) => row.company?.name || '-' },
@@ -49,11 +49,11 @@ export default function CompanyReportPage() {
         subtitle={`FY ${financialYear} · Payment totals grouped by company`}
         action={[
           {
-            onClick: () => exportReport.mutate(params),
-            label: exportReport.isPending ? 'Exporting...' : 'Export to Excel',
+            onClick: () => exportExcel.mutate(params),
+            label: exportExcel.isPending ? 'Exporting...' : 'Export to Excel',
             icon: 'excel',
             iconOnly: true,
-            disabled: exportReport.isPending,
+            disabled: exportExcel.isPending,
           },
           {
             label: 'Export to PDF',

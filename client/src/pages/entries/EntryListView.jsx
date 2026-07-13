@@ -8,7 +8,7 @@ import {
   useDeleteEntriesPermanent,
   useEntries,
   useExcludeEntries,
-  useExportEntries,
+  useExportEntriesExcel,
   useRestoreEntries,
 } from '../../hooks/useEntries';
 import { getApiErrorMessage } from '../../lib/queryClient';
@@ -90,7 +90,7 @@ export default function EntryListView({ isExcluded }) {
   const excludeEntries = useExcludeEntries();
   const restoreEntries = useRestoreEntries();
   const deletePermanent = useDeleteEntriesPermanent();
-  const exportEntries = useExportEntries();
+  const exportExcel = useExportEntriesExcel();
 
   const selectedIds = Array.from(selected);
   const selectedCount = selected.size;
@@ -144,7 +144,7 @@ export default function EntryListView({ isExcluded }) {
     setConfirmDeletePermanent(true);
   };
 
-  const handleExport = () => exportEntries.mutate(queryParams);
+  const handleExportExcel = () => exportExcel.mutate(queryParams);
 
   const openCreate = (type) => {
     setFormType(type);
@@ -246,11 +246,11 @@ export default function EntryListView({ isExcluded }) {
                 { onClick: () => openCreate('payment'), label: 'Add Payment', variant: 'payment' },
               ]),
           {
-            onClick: handleExport,
-            label: exportEntries.isPending ? 'Exporting...' : 'Export to Excel',
+            onClick: handleExportExcel,
+            label: exportExcel.isPending ? 'Exporting...' : 'Export to Excel',
             icon: 'excel',
             iconOnly: true,
-            disabled: exportEntries.isPending,
+            disabled: exportExcel.isPending,
           },
           {
             label: 'Export to PDF',

@@ -688,13 +688,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/entries/export?type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
+              "raw": "{{baseUrl}}/entries/export/excel?type=&financialYear=&month=&company=&expenseHead=&isExcluded=false&fromDate=&toDate=&search=",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "entries",
-                "export"
+                "export",
+                "excel"
               ],
               "query": [
                 {
@@ -1056,14 +1057,15 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reports/monthwise/export?financialYear=&company=",
+              "raw": "{{baseUrl}}/reports/monthwise/export/excel?financialYear=&company=",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
                 "monthwise",
-                "export"
+                "export",
+                "excel"
               ],
               "query": [
                 {
@@ -1088,14 +1090,15 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reports/expense-heads/export?financialYear=&month=&company=",
+              "raw": "{{baseUrl}}/reports/expense-heads/export/excel?financialYear=&month=&company=",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
                 "expense-heads",
-                "export"
+                "export",
+                "excel"
               ],
               "query": [
                 {
@@ -1125,14 +1128,15 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/reports/companies/export?financialYear=&month=",
+              "raw": "{{baseUrl}}/reports/companies/export/excel?financialYear=&month=",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
                 "companies",
-                "export"
+                "export",
+                "excel"
               ],
               "query": [
                 {

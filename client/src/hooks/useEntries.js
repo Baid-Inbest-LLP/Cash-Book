@@ -68,10 +68,10 @@ export const useDeleteEntriesPermanent = () => {
   });
 };
 
-export const useExportEntries = () =>
+export const useExportEntriesExcel = () =>
   useMutation({
     mutationFn: async (params) => {
-      const response = await entriesApi.export(params);
+      const response = await entriesApi.exportExcel(params);
       downloadBlobResponse(response, 'entries-export.xlsx');
     },
     onError: notifyExportError,

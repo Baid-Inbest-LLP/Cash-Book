@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
 	useExpenseHeadReport,
-	useExportExpenseHeads,
+	useExportExpenseHeadsExcel,
 } from "../../hooks/useReports";
 import { getApiErrorMessage } from "../../lib/queryClient";
 import {
@@ -43,7 +43,7 @@ export default function ExpenseHeadReportPage() {
 		? getApiErrorMessage(queryError, "Failed to fetch expense-head report")
 		: null;
 
-	const exportReport = useExportExpenseHeads();
+	const exportExcel = useExportExpenseHeadsExcel();
 
 	const columns = [
 		{
@@ -84,11 +84,11 @@ export default function ExpenseHeadReportPage() {
 				subtitle={`FY ${financialYear} · Payment totals grouped by expense head`}
 				action={[
 					{
-						onClick: () => exportReport.mutate(params),
-						label: exportReport.isPending ? "Exporting..." : "Export to Excel",
+						onClick: () => exportExcel.mutate(params),
+						label: exportExcel.isPending ? "Exporting..." : "Export to Excel",
 						icon: "excel",
 						iconOnly: true,
-						disabled: exportReport.isPending,
+						disabled: exportExcel.isPending,
 					},
 					{
 						label: "Export to PDF",

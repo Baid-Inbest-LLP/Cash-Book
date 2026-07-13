@@ -40,8 +40,8 @@ export const listEntries = asyncHandler(async (req, res) => {
   ApiResponse.success(res, result);
 });
 
-// GET /entries/export - download the filtered entries as a branded Excel file.
-export const exportEntries = asyncHandler(async (req, res) => {
+// GET /entries/export/excel - download the filtered entries as a branded Excel file.
+export const exportEntriesExcel = asyncHandler(async (req, res) => {
   const query = req.validated?.query || {};
   const financialYear = query.financialYear || getFinancialYear();
   const { workbook, filename } = await buildEntriesWorkbook({

@@ -2,7 +2,7 @@ import api from './axios';
 
 export const entriesApi = {
   getAll: (params) => api.get('/entries', { params }),
-  export: (params) => api.get('/entries/export', { params, responseType: 'blob' }),
+  exportExcel: (params) => api.get('/entries/export/excel', { params, responseType: 'blob' }),
   createReceipt: (data) => api.post('/entries/receipt', data),
   createPayment: (data) => api.post('/entries/payment', data),
   update: (id, data) => api.put(`/entries/${id}`, data),

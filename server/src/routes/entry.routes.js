@@ -16,7 +16,11 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', validate(listEntriesQuerySchema, 'query'), controller.listEntries);
-router.get('/export', validate(listEntriesQuerySchema, 'query'), controller.exportEntries);
+router.get(
+  '/export/excel',
+  validate(listEntriesQuerySchema, 'query'),
+  controller.exportEntriesExcel,
+);
 router.post('/receipt', validate(createReceiptSchema), controller.createReceipt);
 router.post('/payment', validate(createPaymentSchema), controller.createPayment);
 router.patch('/exclude', validate(entryIdsBodySchema), controller.excludeEntries);

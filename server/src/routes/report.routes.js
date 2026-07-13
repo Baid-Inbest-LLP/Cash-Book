@@ -14,9 +14,9 @@ router.use(authenticate);
 
 router.get('/monthwise', validate(monthwiseQuerySchema, 'query'), controller.monthwise);
 router.get(
-  '/monthwise/export',
+  '/monthwise/export/excel',
   validate(monthwiseQuerySchema, 'query'),
-  controller.exportMonthwise,
+  controller.exportMonthwiseExcel,
 );
 router.get(
   '/expense-heads',
@@ -24,11 +24,15 @@ router.get(
   controller.expenseHeads,
 );
 router.get(
-  '/expense-heads/export',
+  '/expense-heads/export/excel',
   validate(expenseHeadReportQuerySchema, 'query'),
-  controller.exportExpenseHeads,
+  controller.exportExpenseHeadsExcel,
 );
 router.get('/companies', validate(reportQuerySchema, 'query'), controller.companies);
-router.get('/companies/export', validate(reportQuerySchema, 'query'), controller.exportCompanies);
+router.get(
+  '/companies/export/excel',
+  validate(reportQuerySchema, 'query'),
+  controller.exportCompaniesExcel,
+);
 
 export default router;

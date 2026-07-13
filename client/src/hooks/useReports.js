@@ -21,28 +21,28 @@ export const useCompanyReport = (params) =>
     queryFn: async () => (await reportsApi.companies(params)).data.data,
   });
 
-export const useExportMonthwise = () =>
+export const useExportMonthwiseExcel = () =>
   useMutation({
     mutationFn: async (params) => {
-      const response = await reportsApi.monthwiseExport(params);
+      const response = await reportsApi.monthwiseExportExcel(params);
       downloadBlobResponse(response, 'monthwise-report.xlsx');
     },
     onError: notifyExportError,
   });
 
-export const useExportExpenseHeads = () =>
+export const useExportExpenseHeadsExcel = () =>
   useMutation({
     mutationFn: async (params) => {
-      const response = await reportsApi.expenseHeadsExport(params);
+      const response = await reportsApi.expenseHeadsExportExcel(params);
       downloadBlobResponse(response, 'expense-head-report.xlsx');
     },
     onError: notifyExportError,
   });
 
-export const useExportCompanies = () =>
+export const useExportCompaniesExcel = () =>
   useMutation({
     mutationFn: async (params) => {
-      const response = await reportsApi.companiesExport(params);
+      const response = await reportsApi.companiesExportExcel(params);
       downloadBlobResponse(response, 'company-report.xlsx');
     },
     onError: notifyExportError,

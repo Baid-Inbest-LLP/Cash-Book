@@ -17,8 +17,8 @@ export const monthwise = asyncHandler(async (req, res) => {
   ApiResponse.success(res, data);
 });
 
-// GET /reports/monthwise/export - download the monthwise report as an Excel file.
-export const exportMonthwise = asyncHandler(async (req, res) => {
+// GET /reports/monthwise/export/excel - download the monthwise report as an Excel file.
+export const exportMonthwiseExcel = asyncHandler(async (req, res) => {
   const { financialYear: requestedFinancialYear, company } = req.validated?.query || {};
   const financialYear = requestedFinancialYear || getFinancialYear();
   const { workbook, filename } = await buildMonthwiseWorkbook({ financialYear, company });
@@ -33,8 +33,8 @@ export const expenseHeads = asyncHandler(async (req, res) => {
   ApiResponse.success(res, data);
 });
 
-// GET /reports/expense-heads/export - download the expense-head report as an Excel file.
-export const exportExpenseHeads = asyncHandler(async (req, res) => {
+// GET /reports/expense-heads/export/excel - download the expense-head report as an Excel file.
+export const exportExpenseHeadsExcel = asyncHandler(async (req, res) => {
   const { financialYear: requestedFinancialYear, month, company } = req.validated?.query || {};
   const financialYear = requestedFinancialYear || getFinancialYear();
   const { workbook, filename } = await buildExpenseHeadWorkbook({ financialYear, month, company });
@@ -49,8 +49,8 @@ export const companies = asyncHandler(async (req, res) => {
   ApiResponse.success(res, data);
 });
 
-// GET /reports/companies/export - download the company report as an Excel file.
-export const exportCompanies = asyncHandler(async (req, res) => {
+// GET /reports/companies/export/excel - download the company report as an Excel file.
+export const exportCompaniesExcel = asyncHandler(async (req, res) => {
   const { financialYear: requestedFinancialYear, month } = req.validated?.query || {};
   const financialYear = requestedFinancialYear || getFinancialYear();
   const { workbook, filename } = await buildCompanyWorkbook({ financialYear, month });
