@@ -30,7 +30,7 @@ const companyLabel = (company) => {
 
 // "2026-27" -> "26-27", used in the title so the full year isn't repeated separately.
 const shortFinancialYear = (financialYear) => financialYear.slice(2);
-const buildTitle = (financialYear) => `Cash Book — FY ${shortFinancialYear(financialYear)}`;
+const buildTitle = (financialYear) => `Cash Book - FY ${shortFinancialYear(financialYear)}`;
 
 // Active-filter context lines printed under the title/report-name (FY is already in the
 // title, so it isn't repeated here).
