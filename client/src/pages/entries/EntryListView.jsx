@@ -147,11 +147,14 @@ export default function EntryListView({ isExcluded }) {
     setConfirmDeletePermanent(true);
   };
 
+  // Exports always fetch every matching entry (no pagination), so page/limit are left out.
+  const { page: _page, limit: _limit, ...exportParams } = queryParams;
+
   const handleExportExcel = () => {
-    if (requireCompanySelected(filters.company)) exportExcel.mutate(queryParams);
+    if (requireCompanySelected(filters.company)) exportExcel.mutate(exportParams);
   };
   const handleExportPdf = () => {
-    if (requireCompanySelected(filters.company)) exportPdf.mutate(queryParams);
+    if (requireCompanySelected(filters.company)) exportPdf.mutate(exportParams);
   };
 
   const openCreate = (type) => {
