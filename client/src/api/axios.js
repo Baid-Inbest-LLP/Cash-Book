@@ -27,9 +27,25 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
+const parseBlobError = async (error) => {
+  const response = error.response;
+  if (response?.data instanceof Blob && response.data.type.includes('json')) {
+    try {
+      response.data = JSON.parse(await response.data.text());
+    } catch {
+      // leave response.data as-is if it isn't valid JSON
+    }
+  }
+  return error;
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    if (error.response) {
+      await parseBlobError(error);
+    }
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
