@@ -33,7 +33,11 @@ export default function RecentEntriesTable() {
       key: 'expenseHead',
       header: 'Expense Head',
       align: 'center',
-      render: (e) => (e.expenseHead?.name ? <span className="badge-payment-pending">{e.expenseHead.name}</span> : '-'),
+      render: (e) => (
+        <div className="flex justify-center">
+          {e.expenseHead?.name ? <span className="badge-payment-pending">{e.expenseHead.name}</span> : '-'}
+        </div>
+      ),
     },
     {
       key: 'amount',
