@@ -32,6 +32,10 @@ const companyLabel = (company) => {
 const shortFinancialYear = (financialYear) => financialYear.slice(2);
 const buildTitle = (financialYear) => `Cash Book - FY ${shortFinancialYear(financialYear)}`;
 
+// Appends the company code to a report subtitle, e.g. "Monthwise Report - BILLP".
+const buildSubtitle = (subtitle, companyInfo) =>
+  companyInfo?.code ? `${subtitle} - ${companyInfo.code}` : subtitle;
+
 // Active-filter context lines printed under the title/report-name (FY is already in the
 // title, so it isn't repeated here).
 const buildMeta = ({ month, extra = [] }) => {
@@ -83,7 +87,7 @@ const buildEntriesReportConfig = async ({ filters }) => {
     config: {
       sheetName: 'Entries',
       title: buildTitle(financialYear),
-      subtitle: filters.isExcluded ? 'Excluded Entries' : 'Entries',
+      subtitle: buildSubtitle(filters.isExcluded ? 'Excluded Entries' : 'Entries', companyInfo),
       meta: buildMeta({ month: filters.month, extra }),
       columns: [
         { header: 'Date', key: 'date', width: 14, type: 'date' },
@@ -131,7 +135,7 @@ const buildMonthwiseReportConfig = async ({ financialYear, company }) => {
     config: {
       sheetName: 'Monthwise',
       title: buildTitle(financialYear),
-      subtitle: 'Monthwise Report',
+      subtitle: buildSubtitle('Monthwise Report', companyInfo),
       columns: [
         { header: 'Month', key: 'month', width: 14 },
         { header: 'Opening (₹)', key: 'openingBalance', width: 16, type: 'currency' },
@@ -192,7 +196,7 @@ const buildBreakdownReportConfig = ({
     config: {
       sheetName,
       title: buildTitle(financialYear),
-      subtitle: reportName,
+      subtitle: buildSubtitle(reportName, companyInfo),
       meta: buildMeta({ month }),
       columns: [
         { header: firstColumn.header, key: 'label', width: firstColumn.width },
