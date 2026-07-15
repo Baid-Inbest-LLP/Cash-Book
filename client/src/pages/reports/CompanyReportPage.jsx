@@ -55,16 +55,16 @@ export default function CompanyReportPage() {
         action={[
           {
             onClick: () => exportExcel.mutate(params),
-            label: exportExcel.isPending ? 'Exporting...' : 'Export to Excel',
+            label: exportExcel.isPending ? 'Exporting...' : 'Excel',
             icon: 'excel',
-            iconOnly: true,
+            variant: 'excel',
             disabled: exportExcel.isPending,
           },
           {
             onClick: () => exportPdf.mutate(params),
-            label: exportPdf.isPending ? 'Exporting...' : 'Export to PDF',
+            label: exportPdf.isPending ? 'Exporting...' : 'PDF',
             icon: 'pdf',
-            iconOnly: true,
+            variant: 'pdf',
             disabled: exportPdf.isPending,
           },
         ]}

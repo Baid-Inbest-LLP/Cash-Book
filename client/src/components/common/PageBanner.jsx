@@ -2,6 +2,17 @@ import { Link } from 'react-router-dom';
 import excelIconSrc from '../../assets/excel.svg';
 import pdfIconSrc from '../../assets/pdf.svg';
 
+const spinnerIcon = (
+  <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden>
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={4} />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+    />
+  </svg>
+);
+
 const plusIcon = (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -36,21 +47,24 @@ const exportIcon = (
   </svg>
 );
 
-const excelIcon = <img src={excelIconSrc} alt="" className="w-9 h-9" aria-hidden />;
-const pdfIcon = <img src={pdfIconSrc} alt="" className="w-9 h-9" aria-hidden />;
+const excelIcon = <img src={excelIconSrc} alt="" className="w-5 h-5" aria-hidden />;
+const pdfIcon = <img src={pdfIconSrc} alt="" className="w-5 h-5" aria-hidden />;
+const excelIconOnly = <img src={excelIconSrc} alt="" className="w-6 h-6" aria-hidden />;
+const pdfIconOnly = <img src={pdfIconSrc} alt="" className="w-6 h-6" aria-hidden />;
 
-const resolveActionIcon = (icon) => {
+const resolveActionIcon = (icon, iconOnly) => {
   if (icon === false || icon === 'none') return null;
   if (icon === 'arrow') return arrowRightIcon;
   if (icon === 'key') return keyIcon;
   if (icon === 'export') return exportIcon;
-  if (icon === 'excel') return excelIcon;
-  if (icon === 'pdf') return pdfIcon;
+  if (icon === 'excel') return iconOnly ? excelIconOnly : excelIcon;
+  if (icon === 'pdf') return iconOnly ? pdfIconOnly : pdfIcon;
   return plusIcon;
 };
 
 const renderActionContent = (act) => {
-  const icon = resolveActionIcon(act.icon);
+  if (act.iconOnly && act.disabled) return spinnerIcon;
+  const icon = resolveActionIcon(act.icon, act.iconOnly);
   if (!icon) return act.label;
   if (act.iconOnly) return icon;
   if (act.icon === 'arrow') {
@@ -72,9 +86,8 @@ const renderActionContent = (act) => {
 const actionBaseClassName =
   'inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold active:scale-95 transition-all duration-150 shadow-lg flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100';
 
-// No background/shadow — the icon itself (already colored) is the whole affordance.
 const actionIconOnlyClassName =
-  'inline-flex items-center justify-center w-12 h-12 flex-shrink-0 active:scale-90 hover:scale-110 transition-transform duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:scale-100';
+  'inline-flex items-center justify-center w-10 h-10 rounded-xl shadow-lg active:scale-90 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 flex-shrink-0';
 
 // Color variants for banner actions — 'default' keeps the original white/primary look;
 // 'receipt'/'payment' match the emerald/red convention used for money in/out elsewhere in the app.
@@ -82,11 +95,14 @@ const actionVariantClassName = {
   default: 'bg-white text-primary-800 hover:bg-primary-50 shadow-primary-900/30',
   receipt: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shadow-emerald-900/20',
   payment: 'bg-red-50 text-red-700 hover:bg-red-100 shadow-red-900/20',
+  excel: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 shadow-emerald-900/20',
+  pdf: 'bg-red-50 text-red-700 hover:bg-red-100 shadow-red-900/20',
 };
 
 const resolveActionClassName = (act) => {
-  if (act.iconOnly) return actionIconOnlyClassName;
-  return `${actionBaseClassName} ${actionVariantClassName[act.variant] || actionVariantClassName.default}`;
+  const variantClassName = actionVariantClassName[act.variant] || actionVariantClassName.default;
+  if (act.iconOnly) return `${actionIconOnlyClassName} ${variantClassName}`;
+  return `${actionBaseClassName} ${variantClassName}`;
 };
 
 export default function PageBanner({ title, subtitle, action = null, className = '' }) {
@@ -105,10 +121,10 @@ export default function PageBanner({ title, subtitle, action = null, className =
         </div>
         {actionsList.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 justify-end flex-shrink-0">
-            {actionsList.map((act) =>
+            {actionsList.map((act, index) =>
               act.to ? (
                 <Link
-                  key={`${act.to}-${act.label}`}
+                  key={act.key || act.to}
                   to={act.to}
                   title={act.iconOnly ? act.label : undefined}
                   aria-label={act.iconOnly ? act.label : undefined}
@@ -118,7 +134,7 @@ export default function PageBanner({ title, subtitle, action = null, className =
                 </Link>
               ) : (
                 <button
-                  key={act.label}
+                  key={act.key || act.icon || index}
                   type="button"
                   onClick={act.onClick}
                   disabled={act.disabled}
