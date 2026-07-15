@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
+import puppeteerCore from 'puppeteer-core';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ASSETS_DIR = path.resolve(__dirname, '../../assets');
@@ -189,24 +190,74 @@ const buildBrandedHtml = ({
 </html>`;
 };
 
-// A single Chromium instance is launched lazily and reused across requests — spinning up a
-// fresh browser per export would add multi-second latency to every download.
+// On Render/Vercel we run the serverless-friendly @sparticuz/chromium build via puppeteer-core;
+// locally we point puppeteer-core at an installed Chrome/Chromium. This mirrors the working
+// PO-Software / Mer-App setup so PDF export behaves identically once deployed.
+const usePackagedChromium = Boolean(process.env.VERCEL || process.env.RENDER);
+
+// Resolve an installed Chrome/Chromium executable for local development.
+const getLocalChromePath = () => {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) return process.env.PUPPETEER_EXECUTABLE_PATH;
+  const candidates = [
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  ];
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) return candidate;
+    } catch {
+      /* try the next candidate */
+    }
+  }
+  return undefined;
+};
+
+const launchPackagedBrowser = async () => {
+  // Disable WebGL/swiftshader extraction — saves memory on Render.
+  chromium.setGraphicsMode = false;
+
+  const executablePath = await chromium.executablePath();
+  if (!executablePath) {
+    throw new Error('Packaged Chromium executable path could not be resolved');
+  }
+
+  return puppeteerCore.launch({
+    args: [...chromium.args, '--disable-dev-shm-usage'],
+    defaultViewport: chromium.defaultViewport,
+    executablePath,
+    headless: chromium.headless,
+    ignoreHTTPSErrors: true,
+  });
+};
+
+// A single local Chromium instance is launched lazily and reused across requests — spinning up
+// a fresh browser per export would add multi-second latency to every download. On Render we
+// instead launch a fresh browser per request (avoids a stale/OOM singleton).
 let browserPromise = null;
-const getBrowser = () => {
+const getLocalBrowser = () => {
   if (!browserPromise) {
-    browserPromise = puppeteer
-      .launch({
+    browserPromise = (async () => {
+      const executablePath = getLocalChromePath();
+      if (!executablePath) {
+        throw new Error(
+          'Chrome/Chromium not found locally. Set PUPPETEER_EXECUTABLE_PATH in server/.env',
+        );
+      }
+      const browser = await puppeteerCore.launch({
         headless: true,
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        executablePath,
         args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-      })
-      .then((browser) => {
-        // A crashed/killed browser must not stay cached — the next request should relaunch.
-        browser.once('disconnected', () => {
-          browserPromise = null;
-        });
-        return browser;
       });
+      // A crashed/killed browser must not stay cached — the next request should relaunch.
+      browser.once('disconnected', () => {
+        browserPromise = null;
+      });
+      return browser;
+    })();
     // A failed launch must not permanently wedge every future export — let the next call retry.
     browserPromise.catch(() => {
       browserPromise = null;
@@ -216,7 +267,7 @@ const getBrowser = () => {
 };
 
 const renderPdfBuffer = async (html) => {
-  const browser = await getBrowser();
+  const browser = usePackagedChromium ? await launchPackagedBrowser() : await getLocalBrowser();
   const page = await browser.newPage();
   try {
     await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -236,7 +287,9 @@ const renderPdfBuffer = async (html) => {
       `,
     });
   } finally {
-    await page.close();
+    await page.close().catch(() => {});
+    // On Render each request owns its browser — close it so we don't leak processes/memory.
+    if (usePackagedChromium) await browser.close().catch(() => {});
   }
 };
 

@@ -1,9 +1,3 @@
 packages:
   - 'server'
   - 'client'
-
-# Lets puppeteer's postinstall (Chromium download) run without an interactive
-# `pnpm approve-builds` prompt — needed for local PDF export; Docker skips it via
-# PUPPETEER_SKIP_DOWNLOAD and uses the system chromium package instead.
-onlyBuiltDependencies:
-  - puppeteer
