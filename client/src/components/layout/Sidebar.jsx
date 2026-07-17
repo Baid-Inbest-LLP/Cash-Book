@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useMe } from '../../hooks/useAuth';
+import { useAvatar, useMe } from '../../hooks/useAuth';
 import { isAccountant, isSuperAdmin } from '../../constants/roles';
 import inbestTextLogo from '../../assets/inbest_text_logo.png';
 import inbestWhiteLogo from '../../assets/white_inbest_logo.png';
@@ -20,7 +20,6 @@ const navItems = [
   { to: '/', label: 'Dashboard', end: true, Icon: DashboardIcon },
   { to: '/entries', label: 'Cashbook Entries', Icon: CashbookEntriesIcon },
   { to: '/excluded-entries', label: 'Excluded Entries', Icon: ExcludedEntriesIcon },
-  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   {
     label: 'Reports & Insights',
     basePath: '/reports',
@@ -31,6 +30,7 @@ const navItems = [
       { to: '/reports/companies', label: 'Company Report' },
     ],
   },
+  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
   { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ];
 
@@ -57,7 +57,8 @@ const avatarForRole = (role) => {
 
 const Sidebar = ({ isOpen = true }) => {
   const { data: user } = useMe();
-  const avatarSrc = avatarForRole(user?.role);
+  const { data: avatarPreview } = useAvatar();
+  const avatarSrc = avatarPreview || avatarForRole(user?.role);
   const location = useLocation();
   const navigate = useNavigate();
   const [reportsOpen, setReportsOpen] = useState(() => location.pathname.startsWith('/reports'));
@@ -78,7 +79,7 @@ const Sidebar = ({ isOpen = true }) => {
           <img
             src={isOpen ? inbestTextLogo : inbestWhiteLogo}
             alt="inbest"
-            className={`object-contain object-center transition-[height,width] duration-200 ${
+            className={`sidebar-brand-logo object-contain object-center transition-[height,width] duration-200 ${
               isOpen ? 'h-9 w-auto max-w-[9.5rem]' : 'h-9 w-auto max-w-[3.25rem]'
             }`}
             decoding="async"
@@ -170,9 +171,9 @@ const Sidebar = ({ isOpen = true }) => {
           className={`flex items-center gap-3 ${isOpen ? '' : 'justify-center'}`}
           title={!isOpen ? user?.name : undefined}
         >
-          <div className="w-10 h-10 flex-shrink-0 bg-white rounded-full flex items-center justify-center text-lg font-semibold overflow-hidden">
+          <div className="sidebar-user-avatar text-lg font-semibold">
             {avatarSrc ? (
-              <img src={avatarSrc} alt={roleLabel(user?.role)} className="w-full h-full object-cover" />
+              <img src={avatarSrc} alt={user?.name || 'Profile'} />
             ) : (
               user?.name?.charAt(0).toUpperCase()
             )}
@@ -183,7 +184,7 @@ const Sidebar = ({ isOpen = true }) => {
             }`}
           >
             <p className="text-md font-medium text-white truncate whitespace-nowrap">{user?.name}</p>
-            <p className="text-sm text-gray-400 truncate whitespace-nowrap">{roleLabel(user?.role)}</p>
+            <p className="sidebar-user-role text-sm truncate whitespace-nowrap">{roleLabel(user?.role)}</p>
           </div>
         </div>
       </div>

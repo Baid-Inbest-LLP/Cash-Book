@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../../lib/queryClient';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import PageBanner from '../../components/common/PageBanner';
 import PasswordInput from '../../components/common/PasswordInput';
+import ProfilePhotoModal from '../../components/common/ProfilePhotoModal';
 import RowActions from '../../components/common/RowActions';
 import Skeleton, { SkeletonText } from '../../components/common/Skeleton';
 import { isSuperAdmin } from '../../constants/roles';
@@ -29,6 +30,7 @@ export default function SettingsPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
@@ -195,9 +197,12 @@ export default function SettingsPage() {
         subtitle={isSuperadmin ? 'User management and account security' : 'Account security'}
         action={[
           { onClick: () => setShowPasswordModal(true), label: 'Change password', icon: 'key' },
+          { onClick: () => setShowPhotoModal(true), label: 'Upload DP', icon: 'none' },
           ...(canManageUsers ? [{ onClick: () => setShowCreate(true), label: 'Create User' }] : []),
         ]}
       />
+
+      <ProfilePhotoModal open={showPhotoModal} onClose={() => setShowPhotoModal(false)} />
 
       {canManageUsers && (
         <>

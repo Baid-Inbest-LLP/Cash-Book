@@ -26,6 +26,8 @@ router.post(
 );
 router.post('/logout', authenticate, authController.logout);
 router.get('/me', authenticate, authController.getMe);
+router.get('/me/avatar', authenticate, authController.getMyAvatar);
+router.put('/profile', authenticate, authController.updateProfile);
 router.put(
   '/change-password',
   authenticate,

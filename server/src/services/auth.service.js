@@ -6,16 +6,20 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from '../utils/tokenUtils.js';
+import { processAvatarUpload, avatarBase64ToDataUri } from '../utils/processAvatarImage.js';
 
 const toAuthUser = (user) => ({
   _id: user._id,
   name: user.name,
   role: user.role,
+  hasAvatar: Boolean(user.avatarImage),
 });
 
 export const login = async (email, password) => {
   const normalizedEmail = String(email).trim().toLowerCase();
-  const user = await User.findOne({ email: normalizedEmail }).select('+password +refreshToken');
+  const user = await User.findOne({ email: normalizedEmail }).select(
+    '+password +refreshToken +avatarImage',
+  );
   if (!user || !(await user.comparePassword(password))) {
     throw ApiError.unauthorized('Invalid email or password');
   }
@@ -111,6 +115,43 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   }
   user.password = newPassword;
   await user.save();
+};
+
+export const getProfile = async (userId) => {
+  const user = await User.findById(userId).select('+avatarImage');
+  if (!user) throw ApiError.notFound('User not found');
+  return toAuthUser(user);
+};
+
+export const getMyAvatar = async (userId) => {
+  const user = await User.findById(userId).select('+avatarImage');
+  if (!user) throw ApiError.notFound('User not found');
+  return {
+    hasAvatar: Boolean(user.avatarImage),
+    avatarPreview: user.avatarImage ? avatarBase64ToDataUri(user.avatarImage) : '',
+  };
+};
+
+export const updateProfile = async (userId, { avatarImage, clearAvatar } = {}) => {
+  const user = await User.findById(userId).select('+avatarImage');
+  if (!user) throw ApiError.notFound('User not found');
+
+  if (clearAvatar) {
+    user.avatarImage = '';
+  } else if (avatarImage !== undefined) {
+    try {
+      user.avatarImage = processAvatarUpload(avatarImage);
+    } catch (err) {
+      throw ApiError.badRequest(err.message || 'Invalid photo');
+    }
+  }
+
+  await user.save({ validateBeforeSave: false });
+
+  return {
+    user: toAuthUser(user),
+    avatarPreview: user.avatarImage ? avatarBase64ToDataUri(user.avatarImage) : '',
+  };
 };
 
 export const toAuthUserPayload = toAuthUser;
