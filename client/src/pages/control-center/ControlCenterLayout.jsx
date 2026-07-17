@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import PageBanner from '../../components/common/PageBanner';
 import { ROUTES } from '../../constants';
 
 const tabs = [
@@ -7,9 +8,16 @@ const tabs = [
 ];
 
 export default function ControlCenterLayout() {
+  const location = useLocation();
+  const subtitle = location.pathname.includes('expense-heads')
+    ? 'Manage expense categories used to classify payments'
+    : 'Legal entities, branch locations, and expense heads';
+
   return (
-    <div className="space-y-4">
-      <div className="control-center-tabs-shell">
+    <div>
+      <PageBanner className="mb-4" title="Control Center" subtitle={subtitle} />
+
+      <div className="control-center-tabs-shell mb-4">
         <div className="control-center-tabs-list" role="tablist" aria-label="Control Center">
           {tabs.map((tab) => (
             <NavLink
@@ -24,6 +32,7 @@ export default function ControlCenterLayout() {
           ))}
         </div>
       </div>
+
       <Outlet />
     </div>
   );

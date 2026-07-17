@@ -9,7 +9,8 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ['superadmin', 'accountant'], default: 'accountant' },
     isActive: { type: Boolean, default: true },
     avatarImage: { type: String, default: '', select: false },
-    refreshToken: { type: String, select: false },
+    // Mixed: legacy string or string[] of active refresh tokens (multi-session).
+    refreshToken: { type: mongoose.Schema.Types.Mixed, select: false },
     resetPasswordToken: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
     lastLogin: { type: Date },

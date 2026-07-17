@@ -1534,6 +1534,14 @@
   color: #fff !important;
 }
 
+[data-theme='dark'] #root .control-center-toolbar-title {
+  color: #c1c2c5 !important;
+}
+
+[data-theme='dark'] #root .control-center-toolbar-subtitle {
+  color: #909296 !important;
+}
+
 [data-theme='dark'] #root .company-empty-icon {
   color: #495057 !important;
 }

@@ -5,8 +5,8 @@ import { useMe } from '../../hooks/useAuth';
 import { useCompanies, useDeleteCompany } from '../../hooks/useCompanies';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import CompanyForm from './CompanyForm';
+import ControlCenterToolbar from './ControlCenterToolbar';
 import ConfirmModal from '../../components/common/ConfirmModal';
-import PageBanner from '../../components/common/PageBanner';
 import Skeleton, { SkeletonText } from '../../components/common/Skeleton';
 import { isSuperAdmin } from '../../constants/roles';
 
@@ -55,21 +55,16 @@ export default function CompanyListPage() {
 
   return (
     <div>
-      <PageBanner
-        className="mb-4"
+      <ControlCenterToolbar
         title="Companies"
         subtitle={`Legal entities and branch locations · ${total} compan${total !== 1 ? 'ies' : 'y'}`}
-        action={canManage ? { onClick: () => setShowForm(true), label: 'Add Company' } : undefined}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search companies..."
+        showAction={canManage}
+        actionLabel="Add Company"
+        onAction={() => setShowForm(true)}
       />
-
-      <div className="card p-4 mb-4 flex justify-end">
-        <input
-          className="input-field max-w-sm"
-          placeholder="Search companies..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
 
