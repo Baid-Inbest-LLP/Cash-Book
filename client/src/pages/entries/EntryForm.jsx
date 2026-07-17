@@ -1,11 +1,14 @@
 import { Controller, useForm } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
+import { DatePickerInput } from '@mantine/dates';
 import { useCreatePayment, useCreateReceipt, useUpdateEntry } from '../../hooks/useEntries';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import CurrencyInput from '../../components/common/CurrencyInput';
 
 const toDateInputValue = (date) => new Date(date).toISOString().slice(0, 10);
 const todayInputValue = () => toDateInputValue(new Date());
+
+const MAX_DATE = new Date();
 
 export default function EntryForm({ entry, initialType, companies, expenseHeads, onClose }) {
   const isEdit = Boolean(entry);
@@ -131,11 +134,21 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
               <label className="company-form-field-label">
                 Date <span className="text-red-500">*</span>
               </label>
-              <input
-                type="date"
-                max={todayInputValue()}
-                className={inputCls(errors.date)}
-                {...register('date', { required: 'Date is required' })}
+              <Controller
+                name="date"
+                control={control}
+                rules={{ required: 'Date is required' }}
+                render={({ field }) => (
+                  <DatePickerInput
+                    placeholder="Select date"
+                    valueFormat="DD MMM YYYY"
+                    maxDate={MAX_DATE}
+                    value={field.value || null}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    classNames={{ input: inputCls(errors.date) }}
+                  />
+                )}
               />
               {errors.date && <p className="text-red-500 text-xs mt-1">{errors.date.message}</p>}
             </div>

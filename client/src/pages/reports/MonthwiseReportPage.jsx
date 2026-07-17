@@ -77,6 +77,12 @@ export default function MonthwiseReportPage() {
 
   return (
     <div>
+      {isLoading ? (
+        <StatTiles loading />
+      ) : (
+        summary && <StatTiles items={buildSummaryStatItems(summary)} />
+      )}
+
       <PageBanner
         className="mb-4"
         title="Monthwise Ledger"
@@ -105,12 +111,6 @@ export default function MonthwiseReportPage() {
       </div>
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
-
-      {isLoading ? (
-        <StatTiles loading />
-      ) : (
-        summary && <StatTiles items={buildSummaryStatItems(summary)} />
-      )}
 
       <DataTable
         columns={columns}

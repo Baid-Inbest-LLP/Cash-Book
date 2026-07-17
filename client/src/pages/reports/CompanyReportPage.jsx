@@ -48,6 +48,12 @@ export default function CompanyReportPage() {
 
   return (
     <div>
+      {isLoading ? (
+        <StatTiles loading />
+      ) : (
+        data && <StatTiles items={buildSummaryStatItems(data.summary, { month })} />
+      )}
+
       <PageBanner
         className="mb-4"
         title="Company Report"
@@ -76,12 +82,6 @@ export default function CompanyReportPage() {
       </div>
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
-
-      {isLoading ? (
-        <StatTiles loading />
-      ) : (
-        data && <StatTiles items={buildSummaryStatItems(data.summary, { month })} />
-      )}
 
       <DataTable
         columns={columns}
