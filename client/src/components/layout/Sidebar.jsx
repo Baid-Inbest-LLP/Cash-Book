@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAvatar, useMe } from '../../hooks/useAuth';
 import { isAccountant, isSuperAdmin } from '../../constants/roles';
-import inbestTextLogo from '../../assets/inbest_text_logo.png';
-import inbestWhiteLogo from '../../assets/white_inbest_logo.png';
 import superAdminAvatar from '../../assets/superAdmin.webp';
 import accountantAvatar from '../../assets/shree_blue.webp';
 import {
@@ -75,15 +73,13 @@ const Sidebar = ({ isOpen = true }) => {
           isOpen ? 'px-3 py-2' : 'px-2 py-2'
         }`}
       >
-        <div className="flex w-full min-w-0 items-center justify-center gap-4">
-          <img
-            src={isOpen ? inbestTextLogo : inbestWhiteLogo}
-            alt="inbest"
-            className={`sidebar-brand-logo object-contain object-center transition-[height,width] duration-200 ${
-              isOpen ? 'h-9 w-auto max-w-[9.5rem]' : 'h-9 w-auto max-w-[3.25rem]'
-            }`}
-            decoding="async"
-          />
+        <div className="flex w-full min-w-0 items-center justify-center gap-2">
+          <img src="/wallet.svg" alt="Cash Book" className="h-7 w-7 flex-shrink-0 object-contain" />
+          {isOpen && (
+            <span className="truncate text-lg font-semibold tracking-wide text-white">
+              Cash Book
+            </span>
+          )}
         </div>
       </div>
 

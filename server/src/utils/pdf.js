@@ -1,11 +1,6 @@
 import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import chromium from '@sparticuz/chromium';
 import puppeteerCore from 'puppeteer-core';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ASSETS_DIR = path.resolve(__dirname, '../../assets');
 
 // Brand palette (hex) — mirrors the ARGB palette in utils/excel.js.
 const COLORS = {
@@ -20,25 +15,20 @@ const COLORS = {
 
 const PDF_MIME = 'application/pdf';
 
-// Read the branded logos once (as data URIs, so the headless page needs no filesystem access).
-let logoCache = null;
-const getLogos = () => {
-  if (!logoCache) {
-    const toDataUri = (file) =>
-      `data:image/png;base64,${fs.readFileSync(path.join(ASSETS_DIR, file)).toString('base64')}`;
-    logoCache = {
-      inbest: toDataUri('Inbest_Logo(Blue).png'),
-      shree: toDataUri('shree_red.png'),
-    };
-  }
-  return logoCache;
-};
-
 const escapeHtml = (value) =>
   String(value ?? '').replace(
     /[&<>"']/g,
     (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char],
   );
+
+// Renders the title's two lines ("Cash Book" / "FY 26-27") with the second line smaller —
+// mirrors the rich-text split in utils/excel.js's title cell.
+const renderTitle = (title) => {
+  const [line1, line2] = title.split('\n');
+  return line2
+    ? `${escapeHtml(line1)}<br /><span class="fy">${escapeHtml(line2)}</span>`
+    : escapeHtml(title);
+};
 
 // Mirrors excel.js's applyColumnFormat, producing a display string instead of a cell format.
 const formatCellValue = (value, column) => {
@@ -121,7 +111,6 @@ const buildBrandedHtml = ({
   companyInfo,
 }) => {
   const columns = [SNO_COLUMN, ...reportColumns];
-  const { inbest, shree } = getLogos();
 
   return `<!doctype html>
 <html>
@@ -137,15 +126,12 @@ const buildBrandedHtml = ({
     margin-bottom: 12px;
   }
   .header .company-info { justify-self: start; line-height: 1.3; }
-  .header .company-info .code { font-size: 30px; font-weight: 700; color: ${COLORS.companyCode}; }
-  .header .company-info .gst { font-size: 12px; font-weight: 700; color: ${COLORS.black}; }
-  .header .shree { justify-self: center; }
-  .header .shree img { height: 48px; }
-  .header .inbest { justify-self: end; }
-  .header .inbest img { height: 42px; }
-  .title { text-align: center; color: ${COLORS.brand}; font-size: 20px; font-weight: 700; margin: 4px 0; }
+  .header .company-info .code { font-size: 18px; font-weight: 700; color: ${COLORS.companyCode}; }
+  .header .company-info .gst { font-size: 10px; font-weight: 700; color: ${COLORS.black}; }
+  .header .title { justify-self: center; color: ${COLORS.brand}; font-size: 18px; font-weight: 700; text-align: center; line-height: 1.3; }
+  .header .title .fy { font-size: 12px; }
   /* Report name — a second title line, not a muted annotation, so it keeps the brand color. */
-  .subtitle { text-align: center; color: ${COLORS.brand}; font-size: 15px; font-weight: 700; margin: 2px 0; }
+  .header .subtitle { justify-self: end; color: ${COLORS.brand}; font-size: 14px; font-weight: 700; text-align: right; }
   .meta { text-align: center; color: ${COLORS.muted}; font-size: 10.5px; margin: 1px 0; }
   table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 10.5px; }
   thead { display: table-header-group; }
@@ -175,11 +161,9 @@ const buildBrandedHtml = ({
           : ''
       }
     </div>
-    <div class="shree"><img src="${shree}" alt="" /></div>
-    <div class="inbest"><img src="${inbest}" alt="" /></div>
+    <div class="title">${renderTitle(title)}</div>
+    <div class="subtitle">${subtitle ? escapeHtml(subtitle) : ''}</div>
   </div>
-  <div class="title">${escapeHtml(title)}</div>
-  ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ''}
   ${meta.map((line) => `<div class="meta">${escapeHtml(line)}</div>`).join('')}
   <table>
     ${renderTableHead(columns)}

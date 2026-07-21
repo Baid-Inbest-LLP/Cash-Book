@@ -6,7 +6,6 @@ import { notifications } from '@mantine/notifications';
 import { useLogin } from '../../hooks/useAuth';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { isAuthenticated } from '../../lib/session';
-import inbestLogo from '../../assets/white_inbest_logo.png';
 import PasswordInput from '../../components/common/PasswordInput';
 
 export default function LoginPage() {
@@ -46,9 +45,11 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-4">
           <div className="inline-flex items-center justify-center mb-4">
-            <img src={inbestLogo} alt="Inbest Logo" className="w-25 h-25 object-contain" />
+            <img src="/wallet.svg" alt="Cash Book" className="w-16 h-16 object-contain" />
           </div>
-          <p className={`text-lg mt-1 ${isDark ? 'text-gray-400' : 'text-gray-400'}`}>Cash Book</p>
+          <p className={`text-lg mt-1 font-semibold ${isDark ? 'text-gray-200' : 'text-white'}`}>
+            Cash Book
+          </p>
         </div>
 
         <div

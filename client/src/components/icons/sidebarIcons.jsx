@@ -49,3 +49,4 @@ export const ChevronRightIcon = ({ className }) => (
     <Path d="M9 5l7 7-7 7" />
   </Svg>
 );
+

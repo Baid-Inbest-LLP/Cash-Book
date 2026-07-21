@@ -1,10 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import ExcelJS from 'exceljs';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ASSETS_DIR = path.resolve(__dirname, '../../assets');
 
 // Brand palette (ARGB) reused across every generated sheet.
 const COLORS = {
@@ -24,18 +18,6 @@ const THIN_BORDER = {
   left: { style: 'thin', color: { argb: COLORS.border } },
   bottom: { style: 'thin', color: { argb: COLORS.border } },
   right: { style: 'thin', color: { argb: COLORS.border } },
-};
-
-// Read the branded logos once and reuse the buffers for every export.
-let logoCache = null;
-const getLogos = () => {
-  if (!logoCache) {
-    logoCache = {
-      inbest: fs.readFileSync(path.join(ASSETS_DIR, 'Inbest_Logo(Blue).png')),
-      shree: fs.readFileSync(path.join(ASSETS_DIR, 'shree_red.png')),
-    };
-  }
-  return logoCache;
 };
 
 // Apply per-column number format + alignment to a data/total cell.
@@ -62,80 +44,70 @@ const applyColumnFormat = (cell, column) => {
   }
 };
 
-// Draw the branded header band: company code/GST (left), Shree mark (centre),
-// Inbest logo (right), title + meta lines.
-const addBrandedHeader = ({ workbook, worksheet, title, subtitle, meta, columns, companyInfo }) => {
+// Draw the header band: title on its own full-width row (truly centred on the table, not just
+// within a column band), then company code/GST (left) + subtitle (right) sharing a row below,
+// then meta lines.
+const addBrandedHeader = ({ worksheet, title, subtitle, meta, columns, companyInfo }) => {
   const columnCount = columns.length;
-  const { inbest, shree } = getLogos();
-  const inbestId = workbook.addImage({ buffer: inbest, extension: 'png' });
-  const shreeId = workbook.addImage({ buffer: shree, extension: 'png' });
 
-  for (let row = 1; row <= 3; row += 1) worksheet.getRow(row).height = 22;
-  // Row 1 also carries the 30pt company code, which needs more vertical room than the logos do.
-  // (Compensated below in the Inbest logo anchor so the taller row doesn't stretch the logo.)
-  const HEADER_ROW1_HEIGHT = companyInfo ? 40 : 22;
-  worksheet.getRow(1).height = HEADER_ROW1_HEIGHT;
+  // Row 1: two-line title ("Cash Book" / "FY 26-27"), merged across every column so it centres
+  // on the table itself. The two lines use different sizes, so this needs rich text — a plain
+  // `.value` string can only carry one font for the whole cell.
+  worksheet.getRow(1).height = 34;
+  worksheet.mergeCells(1, 1, 1, columnCount);
+  const [titleLine1, titleLine2] = title.split('\n');
+  const titleCell = worksheet.getCell(1, 1);
+  titleCell.value = {
+    richText: [
+      { font: { size: 16, bold: true, color: { argb: COLORS.brand } }, text: titleLine1 },
+      ...(titleLine2
+        ? [
+            { font: { size: 16, bold: true, color: { argb: COLORS.brand } }, text: '\n' },
+            { font: { size: 11, bold: true, color: { argb: COLORS.brand } }, text: titleLine2 },
+          ]
+        : []),
+    ],
+  };
+  titleCell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
 
+  // Row 2: company code (left) + subtitle (right). The company code's own column (S.No., only
+  // 7 units wide) is far too narrow for an 18pt code like "BSIB" — and because its neighbour is
+  // about to become part of the subtitle's merged range, there's no empty cell left for the
+  // overflow to spill into, so the text gets clipped. Give it a merged range of its own, wide
+  // enough to hold a few characters at that size.
+  worksheet.getRow(2).height = 26;
+  const companyCodeCols = Math.min(columnCount, 3);
   if (companyInfo) {
-    const codeCell = worksheet.getCell(1, 1);
+    if (companyCodeCols > 1) worksheet.mergeCells(2, 1, 2, companyCodeCols);
+    const codeCell = worksheet.getCell(2, 1);
     codeCell.value = companyInfo.code || '-';
-    codeCell.font = { size: 30, bold: true, color: { argb: COLORS.companyCode } };
+    codeCell.font = { size: 18, bold: true, color: { argb: COLORS.companyCode } };
     codeCell.alignment = { horizontal: 'left', vertical: 'middle' };
-
-    const gstCell = worksheet.getCell(2, 1);
-    gstCell.value = `GST No.: ${companyInfo.taxId || '-'}`;
-    gstCell.font = { size: 11, bold: true, color: { argb: COLORS.black } };
-    gstCell.alignment = { horizontal: 'left', vertical: 'middle' };
   }
-
-  // Shree mark (fixed 56px) centred on the table's mid-point. exceljs's decimal `col` setter
-  // converts the fraction with a default column width (not the real one), so it mis-places
-  // fractional anchors. We compute the pixel offset ourselves (exceljs uses 7px per width
-  // unit, 9525 EMU per px) and pass an explicit nativeCol/nativeColOff to place it exactly.
-  const SHREE_SIZE = 56;
-  const EMU_PER_PX = 9525;
-  const columnPixels = columns.map((column) => Math.round((column.width || 18) * 7));
-  const tableWidth = columnPixels.reduce((sum, px) => sum + px, 0);
-  const targetLeftPx = Math.max(0, tableWidth / 2 - SHREE_SIZE / 2);
-  let accumulated = 0;
-  let shreeCol = 0;
-  for (let i = 0; i < columnPixels.length; i += 1) {
-    if (accumulated + columnPixels[i] > targetLeftPx) {
-      shreeCol = i;
-      break;
+  if (subtitle) {
+    const subtitleStartCol = companyInfo ? companyCodeCols + 1 : 1;
+    if (columnCount > subtitleStartCol) {
+      worksheet.mergeCells(2, subtitleStartCol, 2, columnCount);
     }
-    accumulated += columnPixels[i];
+    const subtitleCell = worksheet.getCell(2, subtitleStartCol);
+    subtitleCell.value = subtitle;
+    // Report name — a second title line, not a muted annotation, so it keeps the brand color.
+    subtitleCell.font = { size: 13, bold: true, color: { argb: COLORS.brand } };
+    subtitleCell.alignment = { horizontal: 'right', vertical: 'middle' };
   }
-  worksheet.addImage(shreeId, {
-    tl: {
-      nativeCol: shreeCol,
-      nativeColOff: Math.round((targetLeftPx - accumulated) * EMU_PER_PX),
-      nativeRow: 0,
-      nativeRowOff: 90000,
-    },
-    ext: { width: SHREE_SIZE, height: SHREE_SIZE },
-  });
 
-  // Inbest logo pinned to the far right. A two-cell anchor whose bottom-right corner sits on
-  // the table's right border (col === columnCount) guarantees the logo never spills past the
-  // table, whatever the real column widths turn out to be.
-  // The logo's absolute height is kept constant (58.3pt, the value the original uniform
-  // 22/22/22 header rows produced) by solving for br.row against the real row-1 height, so a
-  // taller row 1 (to fit the company code) doesn't stretch the logo.
-  const LOGO_TOP_PT = 0.2 * HEADER_ROW1_HEIGHT;
-  const LOGO_HEIGHT_PT = 58.3;
-  const logoBottomPt = LOGO_TOP_PT + LOGO_HEIGHT_PT;
-  const inbestBrRow =
-    logoBottomPt <= HEADER_ROW1_HEIGHT
-      ? logoBottomPt / HEADER_ROW1_HEIGHT
-      : 1 + (logoBottomPt - HEADER_ROW1_HEIGHT) / 22;
-  worksheet.addImage(inbestId, {
-    tl: { col: columnCount - 1, row: 0.2 },
-    br: { col: columnCount, row: inbestBrRow },
-    editAs: 'oneCell',
-  });
+  // Row 3: GST, left-aligned under the company code.
+  let row = 3;
+  if (companyInfo) {
+    worksheet.getRow(3).height = 18;
+    if (companyCodeCols > 1) worksheet.mergeCells(3, 1, 3, companyCodeCols);
+    const gstCell = worksheet.getCell(3, 1);
+    gstCell.value = `GST No.: ${companyInfo.taxId || '-'}`;
+    gstCell.font = { size: 10, bold: true, color: { argb: COLORS.black } };
+    gstCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    row += 1;
+  }
 
-  let row = 4;
   const addCentredLine = (value, font) => {
     worksheet.mergeCells(row, 1, row, columnCount);
     const cell = worksheet.getCell(row, 1);
@@ -145,10 +117,6 @@ const addBrandedHeader = ({ workbook, worksheet, title, subtitle, meta, columns,
     row += 1;
   };
 
-  addCentredLine(title, { size: 16, bold: true, color: { argb: COLORS.brand } });
-  worksheet.getRow(4).height = 24;
-  // Report name — a second title line, not a muted annotation, so it keeps the brand color.
-  if (subtitle) addCentredLine(subtitle, { size: 13, bold: true, color: { argb: COLORS.brand } });
   for (const line of meta) addCentredLine(line, { size: 9, color: { argb: COLORS.muted } });
 
   return row + 1; // leave one blank spacer row before the table
@@ -194,7 +162,6 @@ export const buildBrandedWorkbook = ({
   worksheet.columns = columns.map((column) => ({ key: column.key, width: column.width || 18 }));
 
   const headerRowNumber = addBrandedHeader({
-    workbook,
     worksheet,
     title,
     subtitle,

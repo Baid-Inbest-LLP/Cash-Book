@@ -865,12 +865,6 @@
   flex-shrink: 0;
 }
 
-#root .app-layout > aside .sidebar-brand-logo {
-  height: 2.25rem;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-}
 
 #root .app-layout > aside .sidebar-user-avatar {
   width: 2.5rem;
