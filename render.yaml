@@ -39,7 +39,7 @@ services:
       - key: MONGODB_URI
         sync: false
       - key: FRONTEND_URL
-        value: https://cash-book-client.onrender.com
+        value: https://cashbook-client-fcqj.onrender.com
 
   - type: web
     name: cash-book-client
@@ -54,4 +54,4 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        value: https://cash-book-server.onrender.com/api/v1
+        value: https://cashbook-server-pu71.onrender.com/api/v1

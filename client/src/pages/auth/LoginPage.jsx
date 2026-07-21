@@ -1,23 +1,76 @@
-import { useEffect } from 'react';
+import { Component, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
 import { notifications } from '@mantine/notifications';
 import { useLogin } from '../../hooks/useAuth';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { isAuthenticated } from '../../lib/session';
 import PasswordInput from '../../components/common/PasswordInput';
+import Hyperspeed from '../../components/effects/Hyperspeed';
+
+class HyperspeedBoundary extends Component {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error) {
+    console.warn('[Hyperspeed] render error:', error);
+  }
+
+  render() {
+    if (this.state.failed) return null;
+    return this.props.children;
+  }
+}
+
+const HYPERSPEED_OPTIONS = {
+  onSpeedUp: () => {},
+  onSlowDown: () => {},
+  distortion: 'turbulentDistortion',
+  length: 400,
+  roadWidth: 10,
+  islandWidth: 2,
+  lanesPerRoad: 3,
+  fov: 90,
+  fovSpeedUp: 150,
+  speedUp: 2,
+  carLightsFade: 0.4,
+  totalSideLightSticks: 20,
+  lightPairsPerRoadWay: 40,
+  shoulderLinesWidthPercentage: 0.05,
+  brokenLinesWidthPercentage: 0.1,
+  brokenLinesLengthPercentage: 0.5,
+  lightStickWidth: [0.12, 0.5],
+  lightStickHeight: [1.3, 1.7],
+  movingAwaySpeed: [60, 80],
+  movingCloserSpeed: [-120, -160],
+  carLightsLength: [400 * 0.03, 400 * 0.2],
+  carLightsRadius: [0.05, 0.14],
+  carWidthPercentage: [0.3, 0.5],
+  carShiftX: [-0.8, 0.8],
+  carFloorSeparation: [0, 5],
+  colors: {
+    roadColor: 0x080808,
+    islandColor: 0x0a0a0a,
+    background: 0x000000,
+    shoulderLines: 0xffffff,
+    brokenLines: 0xffffff,
+    leftCars: [0x8eb8ff, 0x1446a0, 0x1d5fb3],
+    rightCars: [0x03b3c3, 0x0e5ea5, 0x324555],
+    sticks: 0x8eb8ff,
+  },
+};
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const loginMutation = useLogin();
-  const { theme } = useSelector((state) => state.common);
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const isDark = theme === 'dark';
   const loading = loginMutation.isPending;
   const error = loginMutation.isError
     ? getApiErrorMessage(loginMutation.error, 'Login failed')
@@ -37,42 +90,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center p-4 ${
-        isDark ? 'bg-[#1a1b1e]' : 'bg-gradient-to-br from-[#0b2f81] via-[#1446a0] to-[#1d5fb3]'
-      }`}
-    >
-      <div className="w-full max-w-md">
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center justify-center mb-4">
-            <img src="/wallet.svg" alt="Cash Book" className="w-16 h-16 object-contain" />
-          </div>
-          <p className={`text-lg mt-1 font-semibold ${isDark ? 'text-gray-200' : 'text-white'}`}>
-            Cash Book
-          </p>
-        </div>
+    <div className="login-page min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="login-page__bg" aria-hidden="true">
+        <HyperspeedBoundary>
+          <Hyperspeed effectOptions={HYPERSPEED_OPTIONS} />
+        </HyperspeedBoundary>
+      </div>
 
-        <div
-          className={`rounded-2xl shadow-2xl p-8 ${
-            isDark ? 'bg-[#25262b] border border-[#373a40]' : 'bg-white'
-          }`}
-        >
-          <h2
-            className={`text-xl font-bold mb-6 text-center ${isDark ? 'text-white' : 'text-gray-900'}`}
-          >
-            Sign In
-          </h2>
+      <div className="login-page__overlay" aria-hidden="true" />
+
+      <div className="login-page__content w-full max-w-md">
+        <div className="bg-transparent border-2 border-white/20 backdrop-blur-[13px] px-6 py-8 rounded-xl shadow-[0_0_10px_rgba(0,0,0,0.1)]">
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center justify-center mb-4">
+              <img src="/wallet.svg" alt="Cash Book" className="w-16 h-16 object-contain" />
+            </div>
+            <p className="text-white/90 text-lg mt-1">Cash Book</p>
+          </div>
+
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">Sign In</h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-              >
-                Email
-              </label>
+              <label className="block text-sm font-medium text-white/90 mb-1">Email</label>
               <input
                 type="email"
-                className="input-field"
+                className="login-input"
                 placeholder="accountant@cashbook.com"
                 {...register('email', { required: 'Email is required' })}
               />
@@ -80,12 +123,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}
-              >
-                Password
-              </label>
+              <label className="block text-sm font-medium text-white/90 mb-1">Password</label>
               <PasswordInput
+                className="login-input login-input--with-toggle"
+                toggleClassName="text-white hover:text-white focus:ring-white/40"
                 placeholder="••••••••"
                 autoComplete="current-password"
                 {...register('password', { required: 'Password is required' })}
@@ -107,7 +148,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full justify-center py-2.5 mt-2 inline-flex items-center rounded-lg px-4 text-sm font-semibold text-white bg-[#0b2f81] hover:bg-[#1446a0] active:bg-[#08306b] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+              className="login-submit-btn"
             >
               {loading ? (
                 <span className="flex items-center gap-2">

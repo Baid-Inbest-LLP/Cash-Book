@@ -4,9 +4,9 @@ import { notifications } from '@mantine/notifications';
 import { useDeleteExpenseHead, useExpenseHeads } from '../../hooks/useExpenseHeads';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import ExpenseHeadForm from './ExpenseHeadForm';
+import ControlCenterToolbar from './ControlCenterToolbar';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import DataTable from '../../components/common/DataTable';
-import PageBanner from '../../components/common/PageBanner';
 import RowActions from '../../components/common/RowActions';
 import { DEFAULT_PAGE_SIZE } from '../../constants';
 
@@ -89,23 +89,18 @@ export default function ExpenseHeadManagementPage() {
 
   return (
     <div>
-      <PageBanner
-        className="mb-4"
+      <ControlCenterToolbar
         title="Expense Heads"
         subtitle={`Categories used to classify payments · ${pagination.total} head${
           pagination.total !== 1 ? 's' : ''
         }`}
-        action={{ onClick: () => setShowForm(true), label: 'Add Expense Head' }}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search expense heads..."
+        showAction
+        actionLabel="Add Expense Head"
+        onAction={() => setShowForm(true)}
       />
-
-      <div className="card p-4 mb-4 flex justify-end">
-        <input
-          className="input-field max-w-sm"
-          placeholder="Search expense heads..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}
 

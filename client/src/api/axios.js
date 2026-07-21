@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { STORAGE_KEYS } from '../constants';
+import { clearSession } from '../lib/session';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api/v1';
 
@@ -39,6 +40,13 @@ const parseBlobError = async (error) => {
   return error;
 };
 
+const redirectToLogin = () => {
+  clearSession();
+  if (!window.location.pathname.startsWith('/login')) {
+    window.location.href = '/login';
+  }
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -47,21 +55,18 @@ api.interceptors.response.use(
     }
 
     const originalRequest = error.config;
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       const authUrl = originalRequest.url || '';
-      if (
-        authUrl.includes('/auth/login') ||
-        authUrl.includes('/auth/register')
-      ) {
+      if (authUrl.includes('/auth/login') || authUrl.includes('/auth/register')) {
         return Promise.reject(error);
       }
 
       if (authUrl.includes('/auth/refresh')) {
-        localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.USER);
-        window.location.href = '/login';
+        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -79,7 +84,8 @@ api.interceptors.response.use(
 
       const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
       if (!refreshToken) {
-        window.location.href = '/login';
+        isRefreshing = false;
+        redirectToLogin();
         return Promise.reject(error);
       }
 
@@ -94,9 +100,15 @@ api.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
+        // A newer login may have replaced localStorage while this refresh was in-flight.
+        // Do not wipe the newer session.
+        const currentRefresh = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+        if (currentRefresh && currentRefresh !== refreshToken) {
+          processQueue(refreshError, null);
+          return Promise.reject(refreshError);
+        }
         processQueue(refreshError, null);
-        localStorage.clear();
-        window.location.href = '/login';
+        redirectToLogin();
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
