@@ -25,16 +25,6 @@ export const getMe = asyncHandler(async (req, res) => {
   ApiResponse.success(res, user, 'User profile');
 });
 
-export const getMyAvatar = asyncHandler(async (req, res) => {
-  const result = await authService.getMyAvatar(req.user._id);
-  ApiResponse.success(res, result, 'Avatar');
-});
-
-export const updateProfile = asyncHandler(async (req, res) => {
-  const result = await authService.updateProfile(req.user._id, req.body);
-  ApiResponse.success(res, result, 'Profile updated');
-});
-
 export const forgotPassword = asyncHandler(async (req, res) => {
   const result = await authService.forgotPassword(req.body.email);
   const resetUrl = result.resetToken

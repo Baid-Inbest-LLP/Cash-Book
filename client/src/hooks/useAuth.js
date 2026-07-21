@@ -13,29 +13,6 @@ export const useMe = () =>
     staleTime: 5 * 60 * 1000,
   });
 
-// The current user's uploaded profile photo (data URI). Only fetched when the user has one.
-export const useAvatar = () => {
-  const { data: user } = useMe();
-  return useQuery({
-    queryKey: queryKeys.avatar,
-    queryFn: async () => (await authApi.getAvatar()).data.data?.avatarPreview || '',
-    enabled: isAuthenticated() && Boolean(user?.hasAvatar),
-    staleTime: 5 * 60 * 1000,
-  });
-};
-
-export const useUpdateProfile = () => {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (payload) => (await authApi.updateProfile(payload)).data.data,
-    onSuccess: ({ user, avatarPreview }) => {
-      saveSession({ user });
-      queryClient.setQueryData(queryKeys.me, user);
-      queryClient.setQueryData(queryKeys.avatar, avatarPreview || '');
-    },
-  });
-};
-
 export const useLogin = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -43,7 +20,6 @@ export const useLogin = () => {
     onSuccess: (data) => {
       saveSession(data);
       queryClient.setQueryData(queryKeys.me, data.user);
-      queryClient.setQueryData(queryKeys.avatar, '');
     },
   });
 };

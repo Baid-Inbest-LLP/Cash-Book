@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useAvatar, useMe } from '../../hooks/useAuth';
-import { isAccountant, isSuperAdmin } from '../../constants/roles';
-import superAdminAvatar from '../../assets/superAdmin.webp';
-import accountantAvatar from '../../assets/shree_blue.webp';
+import { useMe } from '../../hooks/useAuth';
 import {
   CashbookEntriesIcon,
   ChevronRightIcon,
@@ -47,16 +44,8 @@ const linkClass = (isOpen, isActive) =>
       : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
   }`;
 
-const avatarForRole = (role) => {
-  if (isSuperAdmin(role)) return superAdminAvatar;
-  if (isAccountant(role)) return accountantAvatar;
-  return null;
-};
-
 const Sidebar = ({ isOpen = true }) => {
   const { data: user } = useMe();
-  const { data: avatarPreview } = useAvatar();
-  const avatarSrc = avatarPreview || avatarForRole(user?.role);
   const location = useLocation();
   const navigate = useNavigate();
   const [reportsOpen, setReportsOpen] = useState(() => location.pathname.startsWith('/reports'));
@@ -168,11 +157,7 @@ const Sidebar = ({ isOpen = true }) => {
           title={!isOpen ? user?.name : undefined}
         >
           <div className="sidebar-user-avatar text-lg font-semibold">
-            {avatarSrc ? (
-              <img src={avatarSrc} alt={user?.name || 'Profile'} />
-            ) : (
-              user?.name?.charAt(0).toUpperCase()
-            )}
+            {roleLabel(user?.role).charAt(0).toUpperCase()}
           </div>
           <div
             className={`min-w-0 overflow-hidden transition-all duration-300 ease-in-out ${
