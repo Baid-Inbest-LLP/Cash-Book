@@ -17,13 +17,13 @@ const toLocationDto = (loc) => ({
   isDefault: Boolean(loc.isDefault),
 });
 
-const toPublicCompany = (company, locations = []) => {
+const toPublicCompany = (company, locations = [], hasStampOverride) => {
   const doc = company?.toObject ? company.toObject() : { ...company };
   const { stampImage, code, ...rest } = doc;
   return {
     ...rest,
     companyCode: code,
-    hasStamp: Boolean(stampImage),
+    hasStamp: hasStampOverride !== undefined ? hasStampOverride : Boolean(stampImage),
     locations: locations.map(toLocationDto),
   };
 };
@@ -55,7 +55,7 @@ const syncLocations = async (companyId, locations = []) => {
     throw ApiError.badRequest('At least one location is required');
   }
 
-  const existing = await Location.find({ company: companyId });
+  const existing = await Location.find({ company: companyId }).select('_id').lean();
   const incomingIds = new Set(locations.filter((l) => l._id).map((l) => String(l._id)));
   const remainingCount =
     existing.filter((l) => incomingIds.has(String(l._id))).length +
@@ -65,18 +65,22 @@ const syncLocations = async (companyId, locations = []) => {
     throw ApiError.badRequest('Company must have at least one location');
   }
 
-  for (const loc of existing) {
-    if (!incomingIds.has(String(loc._id))) {
-      await Location.findByIdAndDelete(loc._id);
-    }
+  const idsToDelete = existing
+    .filter((l) => !incomingIds.has(String(l._id)))
+    .map((l) => l._id);
+  if (idsToDelete.length) {
+    await Location.deleteMany({ _id: { $in: idsToDelete } });
   }
 
-  let hasDefault = locations.some((l) => l.isDefault);
+  const firstDefaultIndex = locations.findIndex((l) => l.isDefault);
+  const defaultIndex = firstDefaultIndex === -1 ? 0 : firstDefaultIndex;
   const normalizedLocations = locations.map((loc, index) => ({
     ...loc,
-    isDefault: hasDefault ? Boolean(loc.isDefault) : index === 0,
+    isDefault: index === defaultIndex,
   }));
 
+  const updates = [];
+  const creates = [];
   for (const loc of normalizedLocations) {
     const payload = {
       company: companyId,
@@ -93,21 +97,18 @@ const syncLocations = async (companyId, locations = []) => {
     };
 
     if (loc._id) {
-      await Location.findByIdAndUpdate(loc._id, payload, { runValidators: true });
+      updates.push(
+        Location.findByIdAndUpdate(loc._id, payload, { runValidators: true }),
+      );
     } else {
-      await Location.create(payload);
+      creates.push(payload);
     }
   }
 
-  const all = await Location.find({ company: companyId, isActive: true });
-  const defaults = all.filter((l) => l.isDefault);
-  if (!defaults.length && all.length) {
-    await Location.updateMany({ company: companyId }, { isDefault: false });
-    await Location.findByIdAndUpdate(all[0]._id, { isDefault: true });
-  } else if (defaults.length > 1) {
-    await Location.updateMany({ company: companyId }, { isDefault: false });
-    await Location.findByIdAndUpdate(defaults[0]._id, { isDefault: true });
-  }
+  await Promise.all([
+    ...updates,
+    ...(creates.length ? [Location.insertMany(creates)] : []),
+  ]);
 };
 
 export const getCompanies = asyncHandler(async (req, res) => {
@@ -128,11 +129,18 @@ export const getCompanies = asyncHandler(async (req, res) => {
 
   const total = await Company.countDocuments(filter);
   const companies = await Company.find(filter)
-    .select('+stampImage')
     .sort({ name: 1 })
     .skip((parsedPage - 1) * parsedLimit)
     .limit(parsedLimit)
     .lean();
+
+  const companiesWithStampIds = new Set(
+    (
+      await Company.find({ _id: { $in: companies.map((c) => c._id) }, stampImage: { $nin: [null, ''] } })
+        .select('_id')
+        .lean()
+    ).map((c) => String(c._id)),
+  );
 
   const companyIds = companies.map((c) => c._id);
   const locationDocs = await Location.find({
@@ -150,7 +158,11 @@ export const getCompanies = asyncHandler(async (req, res) => {
   }, {});
 
   const payload = companies.map((company) =>
-    toPublicCompany(company, locationsByCompany[String(company._id)] || []),
+    toPublicCompany(
+      company,
+      locationsByCompany[String(company._id)] || [],
+      companiesWithStampIds.has(String(company._id)),
+    ),
   );
 
   ApiResponse.paginated(res, payload, {
@@ -162,10 +174,13 @@ export const getCompanies = asyncHandler(async (req, res) => {
 });
 
 export const getCompany = asyncHandler(async (req, res) => {
-  const company = await Company.findById(req.params.id).select('+stampImage');
+  const [company, stampDoc] = await Promise.all([
+    Company.findById(req.params.id),
+    Company.findById(req.params.id).select('stampImage').lean(),
+  ]);
   if (!company) throw ApiError.notFound('Company not found');
   const locations = await loadCompanyLocations(company._id);
-  ApiResponse.success(res, toPublicCompany(company, locations));
+  ApiResponse.success(res, toPublicCompany(company, locations, Boolean(stampDoc?.stampImage)));
 });
 
 export const getCompanyStamp = asyncHandler(async (req, res) => {
@@ -192,9 +207,8 @@ export const createCompany = asyncHandler(async (req, res) => {
     throw ApiError.badRequest(err.message || 'Failed to create company');
   }
 
-  const saved = await Company.findById(company._id).select('+stampImage');
   const locs = await loadCompanyLocations(company._id);
-  ApiResponse.created(res, toPublicCompany(saved, locs), 'Company created');
+  ApiResponse.created(res, toPublicCompany(company, locs, Boolean(company.stampImage)), 'Company created');
 });
 
 export const updateCompany = asyncHandler(async (req, res) => {
@@ -216,9 +230,8 @@ export const updateCompany = asyncHandler(async (req, res) => {
     await syncLocations(company._id, locations);
   }
 
-  const saved = await Company.findById(company._id).select('+stampImage');
   const locs = await loadCompanyLocations(company._id);
-  ApiResponse.success(res, toPublicCompany(saved, locs), 'Company updated');
+  ApiResponse.success(res, toPublicCompany(company, locs, Boolean(company.stampImage)), 'Company updated');
 });
 
 export const deleteCompany = asyncHandler(async (req, res) => {

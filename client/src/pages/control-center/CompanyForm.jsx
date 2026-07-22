@@ -1,20 +1,7 @@
-import { useState, useEffect } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
-import { useCompanyStamp, useCreateCompany, useUpdateCompany } from '../../hooks/useCompanies';
+import { useCreateCompany, useUpdateCompany } from '../../hooks/useCompanies';
 import { getApiErrorMessage } from '../../lib/queryClient';
-
-const readImageFileAsDataUrl = (file) =>
-  new Promise((resolve, reject) => {
-    if (!file) {
-      resolve('');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Could not read image file'));
-    reader.readAsDataURL(file);
-  });
 
 const PHONE_REGEX = /^(\+91|91)?[6-9]\d{9}$/;
 const GST_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
@@ -71,44 +58,6 @@ export default function CompanyForm({ company, onClose }) {
   // fields[] only holds each row's initial values; watch for the live values (badges, headers).
   const locations = useWatch({ control, name: 'locations' }) || [];
 
-  // Parent always toggles `company` and `showForm` together, so this remounts fresh per
-  // add/edit — no effect needed to reset state when `company` changes.
-  const [stampFile, setStampFile] = useState(null);
-  const [localStampPreview, setLocalStampPreview] = useState('');
-  const [clearStamp, setClearStamp] = useState(false);
-
-  const {
-    data: fetchedStamp,
-    isFetching: stampLoading,
-    isError: stampError,
-  } = useCompanyStamp(company?._id, Boolean(company?.hasStamp));
-
-  const stampPreview = clearStamp ? '' : localStampPreview || fetchedStamp || '';
-
-  useEffect(() => {
-    if (stampError) notifications.show({ message: 'Could not load company stamp', color: 'red' });
-  }, [stampError]);
-
-  const onStampFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!/^image\/(png|jpeg|jpg|webp)$/i.test(file.type)) {
-      notifications.show({ message: 'Stamp must be a PNG or JPEG image', color: 'red' });
-      return;
-    }
-    if (file.size > 1024 * 1024) {
-      notifications.show({ message: 'Stamp image must be 1 MB or smaller', color: 'red' });
-      return;
-    }
-    setStampFile(file);
-    setClearStamp(false);
-    try {
-      setLocalStampPreview(await readImageFileAsDataUrl(file));
-    } catch {
-      notifications.show({ message: 'Could not preview stamp', color: 'red' });
-    }
-  };
-
   const registerUpper = (name, rules) => {
     const field = register(name, rules);
     return {
@@ -144,16 +93,6 @@ export default function CompanyForm({ company, onClose }) {
       companyCode: data.companyCode.toUpperCase(),
       taxId: data.taxId.toUpperCase(),
     };
-    if (clearStamp) {
-      payload.clearStamp = true;
-    } else if (stampFile) {
-      try {
-        payload.stampImage = await readImageFileAsDataUrl(stampFile);
-      } catch {
-        notifications.show({ message: 'Could not read stamp image', color: 'red' });
-        return;
-      }
-    }
 
     try {
       if (isEdit) {
@@ -240,7 +179,7 @@ export default function CompanyForm({ company, onClose }) {
               <Field label="Phone" required error={errors.phone?.message}>
                 <input
                   className={inputCls(errors.phone)}
-                  placeholder="9876543210 or +919876543210"
+                  placeholder="e.g. 9876543210"
                   maxLength={13}
                   {...register('phone', {
                     required: 'Phone number is required',
@@ -278,47 +217,6 @@ export default function CompanyForm({ company, onClose }) {
               </label>
             </div>
 
-            <div className="mt-4 pt-4 company-form-divider">
-              <label className="company-form-field-label">
-                Company stamp <span className="company-form-stamp-hint">(optional)</span>
-              </label>
-              {stampLoading ? (
-                <p className="company-form-stamp-loading">Loading stamp…</p>
-              ) : (
-                <>
-                  {stampPreview && !clearStamp ? (
-                    <div className="company-form-stamp-preview">
-                      <img
-                        src={stampPreview}
-                        alt="Stamp preview"
-                        className="max-h-24 max-w-full object-contain mx-auto"
-                      />
-                    </div>
-                  ) : (
-                    <p className="company-form-stamp-empty">No stamp on file</p>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/jpg,image/webp"
-                    className="input-field text-sm py-2"
-                    onChange={onStampFileChange}
-                  />
-                  {stampPreview && !clearStamp ? (
-                    <button
-                      type="button"
-                      className="company-form-stamp-remove"
-                      onClick={() => {
-                        setClearStamp(true);
-                        setStampFile(null);
-                        setLocalStampPreview('');
-                      }}
-                    >
-                      Remove stamp
-                    </button>
-                  ) : null}
-                </>
-              )}
-            </div>
           </div>
 
           <div>

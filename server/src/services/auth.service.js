@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { User } from '../models/User.js';
 import { ApiError } from '../utils/ApiError.js';
 import {
@@ -12,6 +11,7 @@ const MAX_REFRESH_SESSIONS = 5;
 const toAuthUser = (user) => ({
   _id: user._id,
   name: user.name,
+  userName: user.userName,
   role: user.role,
 });
 
@@ -28,11 +28,13 @@ const rememberRefreshToken = (user, token) => {
   user.refreshToken = next.slice(-MAX_REFRESH_SESSIONS);
 };
 
-export const login = async (email, password) => {
-  const normalizedEmail = String(email).trim().toLowerCase();
-  const user = await User.findOne({ email: normalizedEmail }).select('+password +refreshToken');
+export const login = async (userName, password) => {
+  const normalizedUserName = String(userName).trim().toLowerCase();
+  const user = await User.findOne({ userName: normalizedUserName }).select(
+    'name userName role isActive password refreshToken',
+  );
   if (!user || !(await user.comparePassword(password))) {
-    throw ApiError.unauthorized('Invalid email or password');
+    throw ApiError.unauthorized('Invalid user name or password');
   }
   if (!user.isActive) {
     throw ApiError.unauthorized('Account is deactivated');
@@ -53,7 +55,7 @@ export const login = async (email, password) => {
 
 export const refreshAccessToken = async (token) => {
   const decoded = verifyRefreshToken(token);
-  const user = await User.findById(decoded.id).select('+refreshToken');
+  const user = await User.findById(decoded.id).select('isActive refreshToken');
   const sessions = listRefreshTokens(user?.refreshToken);
   if (!user || !user.isActive || !sessions.includes(token)) {
     throw ApiError.unauthorized('Invalid refresh token');
@@ -68,61 +70,23 @@ export const logout = async (userId) => {
   await User.findByIdAndUpdate(userId, { refreshToken: [] });
 };
 
-export const forgotPassword = async (email) => {
-  const user = await User.findOne({ email });
-  if (!user) {
-    return { message: 'If email exists, reset link has been sent' };
-  }
-
-  const resetToken = crypto.randomBytes(32).toString('hex');
-  user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-  user.resetPasswordExpires = Date.now() + 3600000;
-  await user.save({ validateBeforeSave: false });
-
-  return { resetToken, email: user.email, message: 'If email exists, reset link has been sent' };
-};
-
-export const resetPassword = async (token, password) => {
-  const hashed = crypto.createHash('sha256').update(token).digest('hex');
-  const user = await User.findOne({
-    resetPasswordToken: hashed,
-    resetPasswordExpires: { $gt: Date.now() },
-  }).select('+password +resetPasswordToken +resetPasswordExpires');
-
-  if (!user) {
-    throw ApiError.badRequest('Invalid or expired reset token');
-  }
-
-  user.password = password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpires = undefined;
-  user.refreshToken = [];
-  await user.save();
-
-  return user;
-};
-
 export const registerUser = async (data, requestedBy) => {
-  const exists = await User.findOne({ email: data.email });
-  if (exists) throw ApiError.conflict('Email already registered');
+  const exists = await User.findOne({ userName: data.userName });
+  if (exists) throw ApiError.conflict('User name already registered');
 
   if (requestedBy.role !== 'superadmin') {
     throw ApiError.forbidden('Only superadmin can create users');
   }
 
-  const role = data.role || 'accountant';
-  if (role === 'superadmin') {
-    throw ApiError.forbidden('Superadmin accounts cannot be created here');
-  }
-  if (role !== 'accountant') {
-    throw ApiError.forbidden('Invalid role');
+  if (data.role === 'superadmin') {
+    throw ApiError.forbidden('Only one superadmin account can exist');
   }
 
-  return User.create({ ...data, role });
+  return User.create({ ...data, role: 'accountant' });
 };
 
 export const changePassword = async (userId, currentPassword, newPassword) => {
-  const user = await User.findById(userId).select('+password +refreshToken');
+  const user = await User.findById(userId).select('password refreshToken');
   if (!user) throw ApiError.notFound('User not found');
   if (!(await user.comparePassword(currentPassword))) {
     throw ApiError.badRequest('Current password is incorrect');
@@ -133,7 +97,7 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
 };
 
 export const getProfile = async (userId) => {
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).select('name userName role');
   if (!user) throw ApiError.notFound('User not found');
   return toAuthUser(user);
 };

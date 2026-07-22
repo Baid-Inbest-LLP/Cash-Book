@@ -15,14 +15,6 @@ export const useCompanies = (params) =>
     placeholderData: keepPreviousData,
   });
 
-export const useCompanyStamp = (id, enabled = true) =>
-  useQuery({
-    queryKey: queryKeys.companyStamp(id),
-    queryFn: async () => (await companiesApi.getStamp(id)).data?.data?.stampPreview || '',
-    enabled: Boolean(id) && enabled,
-    staleTime: 5 * 60 * 1000,
-  });
-
 const invalidateCompanyData = (queryClient) => {
   queryClient.invalidateQueries({ queryKey: ['companies'] });
 };

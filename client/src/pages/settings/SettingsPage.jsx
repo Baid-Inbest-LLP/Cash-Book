@@ -11,7 +11,7 @@ import RowActions from '../../components/common/RowActions';
 import Skeleton, { SkeletonText } from '../../components/common/Skeleton';
 import { isSuperAdmin } from '../../constants/roles';
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USER_NAME_PATTERN = /^[a-zA-Z0-9._-]+$/;
 const PASSWORD_POLICY_LABEL = 'Min 8 chars, with uppercase, lowercase, number, special character';
 const STRONG_PASSWORD_PATTERN =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[ !"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]).{8,}$/;
@@ -46,7 +46,7 @@ export default function SettingsPage() {
   } = useForm({
     defaultValues: {
       name: '',
-      email: '',
+      userName: '',
       password: '',
     },
   });
@@ -72,14 +72,14 @@ export default function SettingsPage() {
     control: controlEdit,
     formState: { errors: editErrors, isSubmitting: editSubmitting },
   } = useForm({
-    defaultValues: { name: '', email: '', isActive: true },
+    defaultValues: { name: '', userName: '', isActive: true },
   });
 
   const onCreateUser = async (data) => {
     try {
       await registerUser.mutateAsync({
         name: data.name,
-        email: data.email,
+        userName: data.userName,
         password: data.password,
         role: 'accountant',
       });
@@ -121,7 +121,7 @@ export default function SettingsPage() {
 
   const closeCreateModal = () => {
     setShowCreate(false);
-    resetCreate({ name: '', email: '', password: '' });
+    resetCreate({ name: '', userName: '', password: '' });
   };
 
   const closePasswordModal = () => {
@@ -133,14 +133,14 @@ export default function SettingsPage() {
     setEditingUser(u);
     resetEdit({
       name: u.name || '',
-      email: u.email || '',
+      userName: u.userName || '',
       isActive: u.isActive !== false,
     });
   };
 
   const closeEditUser = () => {
     setEditingUser(null);
-    resetEdit({ name: '', email: '', isActive: true });
+    resetEdit({ name: '', userName: '', isActive: true });
   };
 
   const onUpdateUser = async (data) => {
@@ -150,7 +150,7 @@ export default function SettingsPage() {
         id: editingUser._id,
         data: {
           name: data.name,
-          email: data.email,
+          userName: data.userName,
           isActive: Boolean(data.isActive),
         },
       });
@@ -249,18 +249,18 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="company-form-field-label">Email</label>
+                    <label className="company-form-field-label">User Name</label>
                     <input
                       className="input-field"
-                      placeholder="user@company.com"
-                      type="email"
-                      {...registerCreate('email', {
-                        required: 'Email is required',
-                        pattern: { value: EMAIL_PATTERN, message: 'Enter a valid email address' },
+                      placeholder="e.g. jdoe"
+                      autoComplete="username"
+                      {...registerCreate('userName', {
+                        required: 'User name is required',
+                        pattern: { value: USER_NAME_PATTERN, message: 'Letters, numbers, ., _ or - only' },
                       })}
                     />
-                    {createErrors.email && (
-                      <p className="text-red-500 text-xs mt-1">{createErrors.email.message}</p>
+                    {createErrors.userName && (
+                      <p className="text-red-500 text-xs mt-1">{createErrors.userName.message}</p>
                     )}
                   </div>
 
@@ -336,7 +336,7 @@ export default function SettingsPage() {
                     <tr>
                       <th className="text-center">S.No.</th>
                       <th className="text-left">Name</th>
-                      <th className="text-center">Email</th>
+                      <th className="text-center">User Name</th>
                       <th className="text-center">Role</th>
                       <th className="text-center">Status</th>
                       <th className="text-center">Actions</th>
@@ -345,13 +345,14 @@ export default function SettingsPage() {
                   <tbody>
                     {users.map((u, index) => {
                       const isTargetSuperadmin = u.role === 'superadmin';
-                      const canEdit = isSuperadmin && !isTargetSuperadmin;
-                      const deleteDisabled = !canEdit;
+                      const isSelf = u._id === user?._id;
+                      const canEdit = isSuperadmin && (isSelf || !isTargetSuperadmin);
+                      const deleteDisabled = !isSuperadmin || isTargetSuperadmin || isSelf;
                       return (
                         <tr key={u._id}>
                           <td className="text-center">{index + 1}</td>
                           <td className="settings-user-name">{u.name}</td>
-                          <td className="settings-user-email">{u.email}</td>
+                          <td className="settings-user-email">{u.userName}</td>
                           <td className="text-center">
                             <span className="settings-role-badge">{roleLabel(u.role)}</span>
                           </td>
@@ -417,7 +418,7 @@ export default function SettingsPage() {
                     <h2 id="edit-user-title" className="company-form-title">
                       Edit user
                     </h2>
-                    <p className="company-form-subtitle">Update name, email, or account status</p>
+                    <p className="company-form-subtitle">Update name, user name, or account status</p>
                   </div>
                   <button
                     type="button"
@@ -448,15 +449,18 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div>
-                    <label className="company-form-field-label">Email</label>
+                    <label className="company-form-field-label">User Name</label>
                     <input
-                      type="email"
+                      type="text"
                       className="input-field"
                       autoComplete="off"
-                      {...registerEdit('email', { required: 'Email is required' })}
+                      {...registerEdit('userName', {
+                        required: 'User name is required',
+                        pattern: { value: USER_NAME_PATTERN, message: 'Letters, numbers, ., _ or - only' },
+                      })}
                     />
-                    {editErrors.email && (
-                      <p className="text-red-500 text-xs mt-1">{editErrors.email.message}</p>
+                    {editErrors.userName && (
+                      <p className="text-red-500 text-xs mt-1">{editErrors.userName.message}</p>
                     )}
                   </div>
                   <div>
@@ -469,14 +473,18 @@ export default function SettingsPage() {
                           className="input-field"
                           value={field.value ? 'true' : 'false'}
                           onChange={(e) => field.onChange(e.target.value === 'true')}
-                          disabled={editSubmitting}
+                          disabled={editSubmitting || editingUser?._id === user?._id}
                         >
                           <option value="true">Active</option>
                           <option value="false">Inactive</option>
                         </select>
                       )}
                     />
-                    <p className="company-form-section-hint mt-1">Inactive users cannot sign in.</p>
+                    <p className="company-form-section-hint mt-1">
+                      {editingUser?._id === user?._id
+                        ? 'You cannot deactivate your own account.'
+                        : 'Inactive users cannot sign in.'}
+                    </p>
                   </div>
                   <div className="company-form-footer">
                     <button

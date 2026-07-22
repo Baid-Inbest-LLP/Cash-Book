@@ -11,7 +11,7 @@ export const authenticate = asyncHandler(async (req, _res, next) => {
 
   const token = authHeader.split(' ')[1];
   const decoded = verifyAccessToken(token);
-  const user = await User.findById(decoded.id);
+  const user = await User.findById(decoded.id).select('role isActive');
 
   if (!user || !user.isActive) {
     throw ApiError.unauthorized('User not found or inactive');

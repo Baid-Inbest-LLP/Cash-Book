@@ -4,14 +4,12 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    userName: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, minlength: 6, select: false },
     role: { type: String, enum: ['superadmin', 'accountant'], default: 'accountant' },
     isActive: { type: Boolean, default: true },
     // Mixed: legacy string or string[] of active refresh tokens (multi-session).
     refreshToken: { type: mongoose.Schema.Types.Mixed, select: false },
-    resetPasswordToken: { type: String, select: false },
-    resetPasswordExpires: { type: Date, select: false },
     lastLogin: { type: Date },
   },
   { timestamps: true },
@@ -33,8 +31,6 @@ userSchema.methods.toJSON = function toJSON() {
   const obj = this.toObject();
   delete obj.password;
   delete obj.refreshToken;
-  delete obj.resetPasswordToken;
-  delete obj.resetPasswordExpires;
   return obj;
 };
 

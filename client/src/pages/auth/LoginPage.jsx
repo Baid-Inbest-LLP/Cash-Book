@@ -73,14 +73,17 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white/90 mb-1">Email</label>
+              <label className="block text-sm font-medium text-white/90 mb-1">User Name</label>
               <input
-                type="email"
+                type="text"
                 className="login-input"
-                placeholder="accountant@cashbook.com"
-                {...register('email', { required: 'Email is required' })}
+                placeholder="accountant"
+                autoComplete="username"
+                {...register('userName', { required: 'User name is required' })}
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              {errors.userName && (
+                <p className="text-red-500 text-xs mt-1">{errors.userName.message}</p>
+              )}
             </div>
 
             <div>

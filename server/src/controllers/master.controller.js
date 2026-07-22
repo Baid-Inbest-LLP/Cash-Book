@@ -87,7 +87,9 @@ const canManageUser = (actorRole, targetRole) =>
   actorRole === 'superadmin' && targetRole === 'accountant';
 
 export const listUsers = asyncHandler(async (req, res) => {
-  const users = await User.find().select('-password').sort({ name: 1 });
+  const users = await User.find()
+    .select('name userName role isActive lastLogin createdAt updatedAt')
+    .sort({ name: 1 });
   ApiResponse.success(res, users);
 });
 
@@ -96,22 +98,25 @@ export const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) throw ApiError.notFound('User not found');
 
-  if (user._id.equals(actor._id)) {
-    throw ApiError.forbidden('You cannot edit your own account here');
-  }
-  if (!canManageUser(actor.role, user.role)) {
+  const isSelf = user._id.equals(actor._id);
+  if (!isSelf && !canManageUser(actor.role, user.role)) {
     throw ApiError.forbidden('You do not have permission to manage this user');
   }
 
-  const { name, email, isActive } = req.body;
+  const { name, userName, isActive } = req.body;
   if (name !== undefined) user.name = name;
-  if (email !== undefined) {
-    const normalized = String(email).trim().toLowerCase();
-    const existing = await User.findOne({ email: normalized, _id: { $ne: user._id } });
-    if (existing) throw ApiError.conflict('Email already in use');
-    user.email = normalized;
+  if (userName !== undefined) {
+    const normalized = String(userName).trim().toLowerCase();
+    const existing = await User.findOne({ userName: normalized, _id: { $ne: user._id } });
+    if (existing) throw ApiError.conflict('User name already in use');
+    user.userName = normalized;
   }
-  if (isActive !== undefined) user.isActive = Boolean(isActive);
+  if (isActive !== undefined) {
+    if (isSelf && !isActive) {
+      throw ApiError.forbidden('You cannot deactivate your own account');
+    }
+    user.isActive = Boolean(isActive);
+  }
 
   await user.save();
   ApiResponse.success(res, user, 'User updated');
@@ -132,6 +137,6 @@ export const deleteUser = asyncHandler(async (req, res) => {
     throw ApiError.forbidden('You do not have permission to delete this user');
   }
 
-  await User.findByIdAndDelete(req.params.id);
+  await user.deleteOne();
   ApiResponse.success(res, null, 'User deleted');
 });

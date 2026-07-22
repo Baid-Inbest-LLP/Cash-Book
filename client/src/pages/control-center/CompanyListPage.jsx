@@ -151,13 +151,6 @@ export default function CompanyListPage() {
                       {company.companyCode && (
                         <span className="company-code-badge">{company.companyCode}</span>
                       )}
-                      <span
-                        className={
-                          company.hasStamp ? 'company-stamp-badge--yes' : 'company-stamp-badge--no'
-                        }
-                      >
-                        {company.hasStamp ? 'Stamp on file' : 'No stamp'}
-                      </span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                       {company.email && <span className="company-meta-chip">{company.email}</span>}
