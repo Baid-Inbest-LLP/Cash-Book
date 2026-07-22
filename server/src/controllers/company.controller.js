@@ -1,7 +1,7 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { ApiError } from '../utils/ApiError.js';
-import { Company, Location } from '../models/index.js';
+import { Company, Location, Entry } from '../models/index.js';
 import { buildLocationName } from '../utils/locationFormat.js';
 import { processStampUpload, stampBase64ToDataUri } from '../utils/processStampImage.js';
 import { escapeRegex } from '../utils/searchUtils.js';
@@ -237,6 +237,11 @@ export const updateCompany = asyncHandler(async (req, res) => {
 export const deleteCompany = asyncHandler(async (req, res) => {
   const company = await Company.findById(req.params.id);
   if (!company) throw ApiError.notFound('Company not found');
+
+  const hasEntries = await Entry.exists({ company: company._id });
+  if (hasEntries) {
+    throw ApiError.conflict('Cannot delete company: entries exist for this company');
+  }
 
   await Location.deleteMany({ company: company._id });
   await Company.findByIdAndDelete(company._id);
