@@ -164,40 +164,39 @@ export default function CompanyForm({ company, onClose }) {
                 />
               </Field>
 
-              <Field label="Email" required error={errors.email?.message}>
+              <Field label="Email" error={errors.email?.message}>
                 <input
                   type="email"
                   className={inputCls(errors.email)}
                   placeholder="info@company.com"
                   {...register('email', {
-                    required: 'Email is required',
                     pattern: { value: EMAIL_REGEX, message: 'Enter a valid email address' },
                   })}
                 />
               </Field>
 
-              <Field label="Phone" required error={errors.phone?.message}>
+              <Field label="Phone" error={errors.phone?.message}>
                 <input
                   className={inputCls(errors.phone)}
                   placeholder="e.g. 9876543210"
                   maxLength={13}
                   {...register('phone', {
-                    required: 'Phone number is required',
                     validate: (value) =>
+                      !value ||
                       PHONE_REGEX.test(value.replace(/\s/g, '')) ||
                       'Enter a valid Indian phone number (e.g. 9876543210 or +919876543210)',
                   })}
                 />
               </Field>
 
-              <Field label="GST No" required error={errors.taxId?.message}>
+              <Field label="GST No" error={errors.taxId?.message}>
                 <input
                   className={`${inputCls(errors.taxId)} uppercase`}
                   placeholder="e.g. 27AAPFU0939F1ZV"
                   maxLength={15}
                   {...registerUpper('taxId', {
-                    required: 'GST No is required',
                     validate: (value) =>
+                      !value ||
                       GST_REGEX.test(value.toUpperCase()) ||
                       'Enter a valid GST number (e.g. 27AAPFU0939F1ZV)',
                   })}
