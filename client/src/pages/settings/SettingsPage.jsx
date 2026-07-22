@@ -2,7 +2,12 @@ import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
 import { useChangePassword, useMe, useRegister } from '../../hooks/useAuth';
-import { useDeleteUser, useUpdateUser, useUsers } from '../../hooks/useMasters';
+import {
+  useDeleteUser,
+  useResetUserPassword,
+  useUpdateUser,
+  useUsers,
+} from '../../hooks/useMasters';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import ConfirmModal from '../../components/common/ConfirmModal';
 import PageBanner from '../../components/common/PageBanner';
@@ -31,12 +36,15 @@ export default function SettingsPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmResetPassword, setConfirmResetPassword] = useState(null);
+  const [generatedPassword, setGeneratedPassword] = useState(null);
 
   const { data: users = [], isLoading: loading, refetch: refetchUsers } = useUsers(canManageUsers);
   const registerUser = useRegister();
   const changePassword = useChangePassword();
   const updateUserMutation = useUpdateUser();
   const deleteUserMutation = useDeleteUser();
+  const resetUserPasswordMutation = useResetUserPassword();
 
   const {
     register: registerCreate,
@@ -180,6 +188,21 @@ export default function SettingsPage() {
     } catch (err) {
       notifications.show({
         message: getApiErrorMessage(err, 'Failed to delete user'),
+        color: 'red',
+      });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!confirmResetPassword) return;
+    try {
+      const password = await resetUserPasswordMutation.mutateAsync(confirmResetPassword._id);
+      setConfirmResetPassword(null);
+      closeEditUser();
+      setGeneratedPassword({ name: confirmResetPassword.name, password });
+    } catch (err) {
+      notifications.show({
+        message: getApiErrorMessage(err, 'Failed to reset password'),
         color: 'red',
       });
     }
@@ -401,6 +424,17 @@ export default function SettingsPage() {
             onCancel={() => setConfirmDelete(null)}
           />
 
+          <ConfirmModal
+            open={!!confirmResetPassword}
+            title="Reset Password"
+            message={`Generate a new password for "${confirmResetPassword?.name}"? Their current password will stop working and any active sessions will be signed out.`}
+            confirmLabel="Reset Password"
+            variant="warning"
+            loading={resetUserPasswordMutation.isPending}
+            onConfirm={handleResetPassword}
+            onCancel={() => setConfirmResetPassword(null)}
+          />
+
           {editingUser && (
             <div
               className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
@@ -486,6 +520,34 @@ export default function SettingsPage() {
                         : 'Inactive users cannot sign in.'}
                     </p>
                   </div>
+                  {editingUser?.role !== 'superadmin' && editingUser?._id !== user?._id && (
+                    <div className="mt-4 pt-4 company-form-divider flex items-center justify-between gap-3">
+                      <div>
+                        <label className="company-form-field-label">Password</label>
+                        <p className="company-form-section-hint">Forgot their password?</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg px-3 py-1.5 transition-colors shrink-0"
+                        onClick={() =>
+                          setConfirmResetPassword({
+                            _id: editingUser._id,
+                            name: editingUser.name,
+                          })
+                        }
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 7a2 2 0 012 2m4 0a6 6 0 11-12 0 6 6 0 0112 0zM7 15l-4 4m0 0v-3m0 3h3"
+                          />
+                        </svg>
+                        Reset password
+                      </button>
+                    </div>
+                  )}
                   <div className="company-form-footer">
                     <button
                       type="button"
@@ -596,6 +658,77 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {generatedPassword && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          onClick={() => setGeneratedPassword(null)}
+        >
+          <div
+            className="company-form-panel max-w-lg border border-gray-100"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="generated-password-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="company-form-header">
+              <div>
+                <h2 id="generated-password-title" className="company-form-title">
+                  New Password Generated
+                </h2>
+                <p className="company-form-subtitle">
+                  Share this with {generatedPassword.name} securely. It will not be shown again.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setGeneratedPassword(null)}
+                className="company-form-close-btn"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <code className="input-field font-mono text-sm flex-1 select-all">
+                  {generatedPassword.password}
+                </code>
+                <button
+                  type="button"
+                  className="btn-secondary shrink-0"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(generatedPassword.password);
+                      notifications.show({ message: 'Password copied', color: 'green' });
+                    } catch {
+                      notifications.show({ message: 'Could not copy password', color: 'red' });
+                    }
+                  }}
+                >
+                  Copy
+                </button>
+              </div>
+              <div className="company-form-footer">
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => setGeneratedPassword(null)}
+                >
+                  Done
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

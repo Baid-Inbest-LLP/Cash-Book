@@ -1,5 +1,6 @@
 import { User } from '../models/User.js';
 import { ApiError } from '../utils/ApiError.js';
+import { generatePassword } from '../utils/passwordUtils.js';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -94,6 +95,28 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
   user.password = newPassword;
   user.refreshToken = [];
   await user.save();
+};
+
+export const resetUserPassword = async (targetUserId, requestedBy) => {
+  if (requestedBy.role !== 'superadmin') {
+    throw ApiError.forbidden('Only superadmin can reset passwords');
+  }
+  if (String(targetUserId) === String(requestedBy._id)) {
+    throw ApiError.forbidden('Use change password to update your own password');
+  }
+
+  const user = await User.findById(targetUserId).select('role refreshToken');
+  if (!user) throw ApiError.notFound('User not found');
+  if (user.role !== 'accountant') {
+    throw ApiError.forbidden('You do not have permission to reset this user\'s password');
+  }
+
+  const newPassword = generatePassword();
+  user.password = newPassword;
+  user.refreshToken = [];
+  await user.save();
+
+  return newPassword;
 };
 
 export const getProfile = async (userId) => {

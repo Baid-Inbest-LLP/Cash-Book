@@ -21,5 +21,6 @@ router.delete('/locations/:id', authorize('superadmin'), master.locationControll
 router.get('/users', authorize('superadmin'), master.listUsers);
 router.put('/users/:id', authorize('superadmin'), master.updateUser);
 router.delete('/users/:id', authorize('superadmin'), master.deleteUser);
+router.post('/users/:id/reset-password', authorize('superadmin'), master.resetPassword);
 
 export default router;

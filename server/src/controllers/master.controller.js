@@ -4,6 +4,7 @@ import { Company, Location, User } from '../models/index.js';
 import { normalizeBranchLabel } from '../utils/locationFormat.js';
 import { ApiError } from '../utils/ApiError.js';
 import { USER_ROLES } from '../constants/roles.js';
+import { resetUserPassword } from '../services/auth.service.js';
 
 const crud = (Model, name) => ({
   list: asyncHandler(async (req, res) => {
@@ -139,4 +140,9 @@ export const deleteUser = asyncHandler(async (req, res) => {
 
   await user.deleteOne();
   ApiResponse.success(res, null, 'User deleted');
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const newPassword = await resetUserPassword(req.params.id, req.user);
+  ApiResponse.success(res, { password: newPassword }, 'Password reset successfully');
 });

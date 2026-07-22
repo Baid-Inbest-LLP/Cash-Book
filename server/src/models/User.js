@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema(
     // Mixed: legacy string or string[] of active refresh tokens (multi-session).
     refreshToken: { type: mongoose.Schema.Types.Mixed, select: false },
     lastLogin: { type: Date },
+    // Set whenever password changes; used to invalidate tokens issued before this point.
+    passwordChangedAt: { type: Date, select: false },
   },
   { timestamps: true },
 );
@@ -20,6 +22,8 @@ userSchema.index({ role: 1 });
 userSchema.pre('save', async function hashPassword(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12);
+  // Skip on document creation — no prior tokens exist yet to invalidate.
+  if (!this.isNew) this.passwordChangedAt = new Date();
   next();
 });
 

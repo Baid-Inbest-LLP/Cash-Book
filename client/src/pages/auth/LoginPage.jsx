@@ -77,7 +77,7 @@ export default function LoginPage() {
               <input
                 type="text"
                 className="login-input"
-                placeholder="accountant"
+                placeholder="Enter your username"
                 autoComplete="username"
                 {...register('userName', { required: 'User name is required' })}
               />
@@ -91,7 +91,7 @@ export default function LoginPage() {
               <PasswordInput
                 className="login-input login-input--with-toggle"
                 toggleClassName="text-white hover:text-white focus:ring-white/40"
-                placeholder="••••••••"
+                placeholder="Enter your password"
                 autoComplete="current-password"
                 {...register('password', { required: 'Password is required' })}
               />

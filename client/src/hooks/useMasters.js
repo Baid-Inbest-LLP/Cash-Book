@@ -27,3 +27,8 @@ export const useDeleteUser = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.users }),
   });
 };
+
+export const useResetUserPassword = () =>
+  useMutation({
+    mutationFn: async (id) => (await masterApi.resetUserPassword(id)).data.data.password,
+  });

@@ -11,10 +11,13 @@ export const authenticate = asyncHandler(async (req, _res, next) => {
 
   const token = authHeader.split(' ')[1];
   const decoded = verifyAccessToken(token);
-  const user = await User.findById(decoded.id).select('role isActive');
+  const user = await User.findById(decoded.id).select('role isActive passwordChangedAt');
 
   if (!user || !user.isActive) {
     throw ApiError.unauthorized('User not found or inactive');
+  }
+  if (user.passwordChangedAt && decoded.iat * 1000 < user.passwordChangedAt.getTime()) {
+    throw ApiError.unauthorized('Session expired due to password change');
   }
 
   req.user = user;
