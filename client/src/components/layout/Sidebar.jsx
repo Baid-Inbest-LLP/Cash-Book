@@ -25,7 +25,12 @@ const navItems = [
       { to: '/reports/companies', label: 'Company Report' },
     ],
   },
-  { to: '/control-center', label: 'Control Center', Icon: ControlCenterIcon },
+  {
+    to: '/control-center/companies',
+    basePath: '/control-center',
+    label: 'Control Center',
+    Icon: ControlCenterIcon,
+  },
   { to: '/settings', label: 'Settings', Icon: SettingsIcon },
 ];
 
@@ -136,7 +141,12 @@ const Sidebar = ({ isOpen = true }) => {
               to={item.to}
               end={item.end}
               title={!isOpen ? item.label : undefined}
-              className={({ isActive }) => linkClass(isOpen, isActive)}
+              className={({ isActive }) =>
+                linkClass(
+                  isOpen,
+                  item.basePath ? location.pathname.startsWith(item.basePath) : isActive,
+                )
+              }
             >
               <Icon className={`${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`} />
               {isOpen && (
