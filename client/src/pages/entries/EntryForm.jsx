@@ -234,17 +234,17 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
               <label className="company-form-field-label">Description</label>
               <textarea
                 rows={3}
-                maxLength={50}
+                maxLength={200}
                 className={inputCls(errors.description)}
                 placeholder="Optional note about this entry"
                 {...register('description', {
-                  maxLength: { value: 50, message: 'Description must be at most 50 characters' },
+                  maxLength: { value: 200, message: 'Description must be at most 200 characters' },
                 })}
               />
               {errors.description ? (
                 <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
               ) : (
-                <p className="company-form-section-hint mt-1">Max 50 characters</p>
+                <p className="company-form-section-hint mt-1">Max 200 characters</p>
               )}
             </div>
           </div>
