@@ -3,10 +3,6 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Company, Location, LocationCity, Entry } from "../models/index.js";
 import { buildLocationName } from "../utils/locationFormat.js";
-import {
-	processStampUpload,
-	stampBase64ToDataUri,
-} from "../utils/processStampImage.js";
 import { escapeRegex } from "../utils/searchUtils.js";
 
 const toLocationDto = (loc) => ({
@@ -21,16 +17,12 @@ const toLocationDto = (loc) => ({
 	isDefault: Boolean(loc.isDefault),
 });
 
-const toPublicCompany = (company, locations = [], hasStampOverride) => {
+const toPublicCompany = (company, locations = []) => {
 	const doc = company?.toObject ? company.toObject() : { ...company };
-	const { stampImage, code, ...rest } = doc;
+	const { code, ...rest } = doc;
 	return {
 		...rest,
 		companyCode: code,
-		hasStamp:
-			hasStampOverride !== undefined
-				? hasStampOverride
-				: Boolean(stampImage),
 		locations: locations.map(toLocationDto),
 	};
 };
@@ -41,18 +33,8 @@ const normalizeCompanyFields = (body = {}) => ({
 	email: body.email?.trim()?.toLowerCase(),
 	phone: body.phone?.trim(),
 	taxId: body.taxId?.trim()?.toUpperCase(),
-	logo: body.logo?.trim() || "",
 	isActive: body.isActive !== false,
 });
-
-const applyStamp = (company, stampImage, { clearStamp = false } = {}) => {
-	if (clearStamp) {
-		company.stampImage = "";
-		return;
-	}
-	if (stampImage === undefined) return;
-	company.stampImage = processStampUpload(stampImage);
-};
 
 const loadCompanyLocations = (companyId) =>
 	Location.find({ company: companyId, isActive: true })
@@ -153,6 +135,17 @@ export const getCompanies = asyncHandler(async (req, res) => {
 		];
 	}
 
+	// Accountants only ever see companies that have a branch in their own city.
+	const scopedCity = req.user.role === "accountant" ? req.user.locationCity : null;
+
+	if (scopedCity) {
+		const visibleCompanyIds = await Location.distinct("company", {
+			city: scopedCity,
+			isActive: true,
+		});
+		filter._id = { $in: visibleCompanyIds };
+	}
+
 	const total = await Company.countDocuments(filter);
 	const companies = await Company.find(filter)
 		.sort({ name: 1 })
@@ -160,22 +153,11 @@ export const getCompanies = asyncHandler(async (req, res) => {
 		.limit(parsedLimit)
 		.lean();
 
-	const companiesWithStampIds = new Set(
-		(
-			await Company.find({
-				_id: { $in: companies.map((c) => c._id) },
-				stampImage: { $nin: [null, ""] },
-			})
-				.select("_id")
-				.lean()
-		).map((c) => String(c._id)),
-	);
-
 	const companyIds = companies.map((c) => c._id);
-	const locationDocs = await Location.find({
-		company: { $in: companyIds },
-		isActive: true,
-	})
+	const locationFilter = { company: { $in: companyIds }, isActive: true };
+	if (scopedCity) locationFilter.city = scopedCity;
+
+	const locationDocs = await Location.find(locationFilter)
 		.sort({ isDefault: -1, label: 1 })
 		.populate("city", "name")
 		.lean();
@@ -188,11 +170,7 @@ export const getCompanies = asyncHandler(async (req, res) => {
 	}, {});
 
 	const payload = companies.map((company) =>
-		toPublicCompany(
-			company,
-			locationsByCompany[String(company._id)] || [],
-			companiesWithStampIds.has(String(company._id)),
-		),
+		toPublicCompany(company, locationsByCompany[String(company._id)] || []),
 	);
 
 	ApiResponse.paginated(res, payload, {
@@ -204,39 +182,18 @@ export const getCompanies = asyncHandler(async (req, res) => {
 });
 
 export const getCompany = asyncHandler(async (req, res) => {
-	const [company, stampDoc] = await Promise.all([
-		Company.findById(req.params.id),
-		Company.findById(req.params.id).select("stampImage").lean(),
-	]);
+	const company = await Company.findById(req.params.id);
 	if (!company) throw ApiError.notFound("Company not found");
 	const locations = await loadCompanyLocations(company._id);
-	ApiResponse.success(
-		res,
-		toPublicCompany(company, locations, Boolean(stampDoc?.stampImage)),
-	);
-});
-
-export const getCompanyStamp = asyncHandler(async (req, res) => {
-	const company = await Company.findById(req.params.id).select(
-		"+stampImage code name",
-	);
-	if (!company) throw ApiError.notFound("Company not found");
-	ApiResponse.success(res, {
-		hasStamp: Boolean(company.stampImage),
-		stampPreview: company.stampImage
-			? stampBase64ToDataUri(company.stampImage)
-			: "",
-	});
+	ApiResponse.success(res, toPublicCompany(company, locations));
 });
 
 export const createCompany = asyncHandler(async (req, res) => {
-	const { locations = [], stampImage, clearStamp, ...companyBody } = req.body;
+	const { locations = [], ...companyBody } = req.body;
 	const fields = normalizeCompanyFields(companyBody);
 
 	const company = await Company.create(fields);
 	try {
-		applyStamp(company, stampImage, { clearStamp });
-		if (stampImage !== undefined || clearStamp) await company.save();
 		await syncLocations(company._id, locations);
 	} catch (err) {
 		await Company.findByIdAndDelete(company._id);
@@ -245,28 +202,18 @@ export const createCompany = asyncHandler(async (req, res) => {
 	}
 
 	const locs = await loadCompanyLocations(company._id);
-	ApiResponse.created(
-		res,
-		toPublicCompany(company, locs, Boolean(company.stampImage)),
-		"Company created",
-	);
+	ApiResponse.created(res, toPublicCompany(company, locs), "Company created");
 });
 
 export const updateCompany = asyncHandler(async (req, res) => {
-	const company = await Company.findById(req.params.id).select("+stampImage");
+	const company = await Company.findById(req.params.id);
 	if (!company) throw ApiError.notFound("Company not found");
 
-	const { locations, stampImage, clearStamp, ...companyBody } = req.body;
+	const { locations, ...companyBody } = req.body;
 	Object.assign(
 		company,
 		normalizeCompanyFields({ ...company.toObject(), ...companyBody }),
 	);
-
-	try {
-		applyStamp(company, stampImage, { clearStamp });
-	} catch (err) {
-		throw ApiError.badRequest(err.message);
-	}
 
 	await company.save();
 
@@ -275,11 +222,7 @@ export const updateCompany = asyncHandler(async (req, res) => {
 	}
 
 	const locs = await loadCompanyLocations(company._id);
-	ApiResponse.success(
-		res,
-		toPublicCompany(company, locs, Boolean(company.stampImage)),
-		"Company updated",
-	);
+	ApiResponse.success(res, toPublicCompany(company, locs), "Company updated");
 });
 
 export const deleteCompany = asyncHandler(async (req, res) => {

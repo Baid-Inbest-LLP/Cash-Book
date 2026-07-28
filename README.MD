@@ -52,5 +52,5 @@ Created automatically on first boot when the database is empty:
 | --------- | -------------------------------------------------------------------- |
 | Auth      | Login, forgot/reset password, JWT refresh, role-based access         |
 | Layout    | Navbar header, collapsible gradient sidebar, light/dark theme toggle |
-| Companies | CRUD for companies and branch locations, optional company stamp      |
+| Companies | CRUD for companies and branch locations                             |
 | Settings  | User management (create/edit/deactivate/delete), change password     |
