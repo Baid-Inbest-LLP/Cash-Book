@@ -4,7 +4,6 @@ import {
   useExportMonthwisePdf,
   useMonthwiseReport,
 } from '../../hooks/useReports';
-import { requireCompanySelected } from '../../utils/download';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { getCurrentFinancialYear, getFinancialYearOptions } from '../../utils/financialYear';
 import { formatCurrency } from '../../utils/format';
@@ -31,10 +30,10 @@ export default function MonthwiseReportPage() {
   const exportPdf = useExportMonthwisePdf();
 
   const handleExportExcel = () => {
-    if (requireCompanySelected(company)) exportExcel.mutate(params);
+    exportExcel.mutate(params);
   };
   const handleExportPdf = () => {
-    if (requireCompanySelected(company)) exportPdf.mutate(params);
+    exportPdf.mutate(params);
   };
 
   const columns = [

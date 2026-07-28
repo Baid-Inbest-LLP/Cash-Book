@@ -41,9 +41,10 @@ const buildMeta = ({ month, extra = [] }) => {
   return lines;
 };
 
-// Company code + GST shown top-left of the branded header. These exports require a single
-// company to be selected, so the lookup always has a real id to resolve.
+// Company code + GST shown top-left of the branded header when a single company is selected.
+// With no company filter the report covers all companies, so there's no header to resolve.
 const getCompanyHeaderInfo = async (companyId) => {
+  if (!companyId) return null;
   const company = await Company.findById(companyId).select('code taxId').lean();
   if (!company) throw ApiError.notFound('Company not found');
   return { code: company.code, taxId: company.taxId };

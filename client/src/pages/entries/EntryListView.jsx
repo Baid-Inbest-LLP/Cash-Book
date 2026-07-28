@@ -15,7 +15,6 @@ import {
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { DEFAULT_PAGE_SIZE } from '../../constants';
 import { isSuperAdmin } from '../../constants/roles';
-import { requireCompanySelected } from '../../utils/download';
 import { getCurrentFinancialYear } from '../../utils/financialYear';
 import { formatCurrency, formatDate } from '../../utils/format';
 import ConfirmModal from '../../components/common/ConfirmModal';
@@ -151,10 +150,10 @@ export default function EntryListView({ isExcluded }) {
   const { page: _page, limit: _limit, ...exportParams } = queryParams;
 
   const handleExportExcel = () => {
-    if (requireCompanySelected(filters.company)) exportExcel.mutate(exportParams);
+    exportExcel.mutate(exportParams);
   };
   const handleExportPdf = () => {
-    if (requireCompanySelected(filters.company)) exportPdf.mutate(exportParams);
+    exportPdf.mutate(exportParams);
   };
 
   const openCreate = (type) => {

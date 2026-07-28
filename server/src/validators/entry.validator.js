@@ -100,11 +100,9 @@ const dateRangeRefinement = [
 
 export const listEntriesQuerySchema = baseListEntriesQuerySchema.refine(...dateRangeRefinement);
 
-// Export endpoints render a single company's code/GST in the report header, so a company
-// must be selected — unlike the list endpoint, where "All Companies" is a valid view.
-export const exportEntriesQuerySchema = baseListEntriesQuerySchema
-  .extend({ company: objectIdSchema })
-  .refine(...dateRangeRefinement);
+// Export endpoints show a single company's code/GST in the report header when a company is
+// selected; otherwise they cover all companies, same as the list endpoint.
+export const exportEntriesQuerySchema = baseListEntriesQuerySchema.refine(...dateRangeRefinement);
 
 export const createReceiptSchema = baseCreateEntryBodySchema.extend({
   company: objectIdSchema.nullish(),

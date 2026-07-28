@@ -4,7 +4,6 @@ import {
 	useExportExpenseHeadsExcel,
 	useExportExpenseHeadsPdf,
 } from "../../hooks/useReports";
-import { requireCompanySelected } from "../../utils/download";
 import { getApiErrorMessage } from "../../lib/queryClient";
 import {
 	getCurrentFinancialYear,
@@ -49,10 +48,10 @@ export default function ExpenseHeadReportPage() {
 	const exportPdf = useExportExpenseHeadsPdf();
 
 	const handleExportExcel = () => {
-		if (requireCompanySelected(company)) exportExcel.mutate(params);
+		exportExcel.mutate(params);
 	};
 	const handleExportPdf = () => {
-		if (requireCompanySelected(company)) exportPdf.mutate(params);
+		exportPdf.mutate(params);
 	};
 
 	const columns = [
