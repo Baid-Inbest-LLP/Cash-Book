@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
 import { useCreateCompany, useUpdateCompany } from '../../hooks/useCompanies';
@@ -54,17 +53,20 @@ export default function CompanyForm({ company, onClose }) {
     handleSubmit,
     getValues,
     setValue,
-    reset,
     formState: { errors },
   } = useForm({ defaultValues: buildDefaultValues(company) });
-
-  useEffect(() => {
-    if (locationCities.length) reset(buildDefaultValues(company));
-  }, [locationCities.length, company, reset]);
 
   const { fields, append, remove } = useFieldArray({ control, name: 'locations' });
   // fields[] only holds each row's initial values; watch for the live values (badges, headers).
   const locations = useWatch({ control, name: 'locations' }) || [];
+
+  const cityOptionsFor = (loc) => {
+    const options = [...locationCities];
+    if (loc.city && !options.some((c) => c._id === loc.city)) {
+      options.push({ _id: loc.city, name: loc.cityName || '' });
+    }
+    return options;
+  };
 
   const registerUpper = (name, rules) => {
     const field = register(name, rules);
@@ -335,7 +337,7 @@ export default function CompanyForm({ company, onClose }) {
                           {...register(`locations.${idx}.city`, { required: 'City is required' })}
                         >
                           <option value="">Select city</option>
-                          {locationCities.map((c) => (
+                          {cityOptionsFor(loc).map((c) => (
                             <option key={c._id} value={c._id}>
                               {c.name}
                             </option>

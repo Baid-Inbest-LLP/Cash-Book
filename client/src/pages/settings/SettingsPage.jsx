@@ -41,7 +41,9 @@ export default function SettingsPage() {
   const [generatedPassword, setGeneratedPassword] = useState(null);
 
   const { data: users = [], isLoading: loading, refetch: refetchUsers } = useUsers(canManageUsers);
-  const { data: locationCities = [] } = useLocationCities(canManageUsers);
+  const { data: locationCities = [] } = useLocationCities(
+    canManageUsers && (showCreate || Boolean(editingUser)),
+  );
   const registerUser = useRegister();
   const changePassword = useChangePassword();
   const updateUserMutation = useUpdateUser();
@@ -177,6 +179,15 @@ export default function SettingsPage() {
       });
     }
   };
+
+  const editUserLocationOptions = useMemo(() => {
+    const ownLocation = editingUser?.locationCity;
+    const options = [...locationCities];
+    if (ownLocation?._id && !options.some((c) => c._id === ownLocation._id)) {
+      options.push(ownLocation);
+    }
+    return options;
+  }, [editingUser, locationCities]);
 
   const canDelete = useMemo(() => {
     if (!confirmDelete) return false;
@@ -532,7 +543,7 @@ export default function SettingsPage() {
                         {...registerEdit('locationCity', { required: 'Location is required' })}
                       >
                         <option value="">Select location</option>
-                        {locationCities.map((c) => (
+                        {editUserLocationOptions.map((c) => (
                           <option key={c._id} value={c._id}>
                             {c.name}
                           </option>
