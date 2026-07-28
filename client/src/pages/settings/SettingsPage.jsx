@@ -4,6 +4,7 @@ import { notifications } from '@mantine/notifications';
 import { useChangePassword, useMe, useRegister } from '../../hooks/useAuth';
 import {
   useDeleteUser,
+  useLocationCities,
   useResetUserPassword,
   useUpdateUser,
   useUsers,
@@ -40,6 +41,7 @@ export default function SettingsPage() {
   const [generatedPassword, setGeneratedPassword] = useState(null);
 
   const { data: users = [], isLoading: loading, refetch: refetchUsers } = useUsers(canManageUsers);
+  const { data: locationCities = [] } = useLocationCities(canManageUsers);
   const registerUser = useRegister();
   const changePassword = useChangePassword();
   const updateUserMutation = useUpdateUser();
@@ -56,6 +58,7 @@ export default function SettingsPage() {
       name: '',
       userName: '',
       password: '',
+      locationCity: '',
     },
   });
 
@@ -80,7 +83,7 @@ export default function SettingsPage() {
     control: controlEdit,
     formState: { errors: editErrors, isSubmitting: editSubmitting },
   } = useForm({
-    defaultValues: { name: '', userName: '', isActive: true },
+    defaultValues: { name: '', userName: '', isActive: true, locationCity: '' },
   });
 
   const onCreateUser = async (data) => {
@@ -90,6 +93,7 @@ export default function SettingsPage() {
         userName: data.userName,
         password: data.password,
         role: 'accountant',
+        locationCity: data.locationCity,
       });
       notifications.show({
         message: 'Accountant account created',
@@ -129,7 +133,7 @@ export default function SettingsPage() {
 
   const closeCreateModal = () => {
     setShowCreate(false);
-    resetCreate({ name: '', userName: '', password: '' });
+    resetCreate({ name: '', userName: '', password: '', locationCity: '' });
   };
 
   const closePasswordModal = () => {
@@ -143,12 +147,13 @@ export default function SettingsPage() {
       name: u.name || '',
       userName: u.userName || '',
       isActive: u.isActive !== false,
+      locationCity: u.locationCity?._id || u.locationCity || '',
     });
   };
 
   const closeEditUser = () => {
     setEditingUser(null);
-    resetEdit({ name: '', userName: '', isActive: true });
+    resetEdit({ name: '', userName: '', isActive: true, locationCity: '' });
   };
 
   const onUpdateUser = async (data) => {
@@ -160,6 +165,7 @@ export default function SettingsPage() {
           name: data.name,
           userName: data.userName,
           isActive: Boolean(data.isActive),
+          ...(editingUser.role === 'accountant' ? { locationCity: data.locationCity } : {}),
         },
       });
       notifications.show({ message: 'User updated', color: 'green' });
@@ -272,7 +278,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <label className="company-form-field-label">User Name</label>
+                    <label className="company-form-field-label">Username</label>
                     <input
                       className="input-field"
                       placeholder="e.g. jdoe"
@@ -290,6 +296,24 @@ export default function SettingsPage() {
                   <div>
                     <label className="company-form-field-label">Role</label>
                     <input className="settings-readonly-role" value="Accountant" readOnly />
+                  </div>
+
+                  <div>
+                    <label className="company-form-field-label">Location</label>
+                    <select
+                      className="input-field"
+                      {...registerCreate('locationCity', { required: 'Location is required' })}
+                    >
+                      <option value="">Select location</option>
+                      {locationCities.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    {createErrors.locationCity && (
+                      <p className="text-red-500 text-xs mt-1">{createErrors.locationCity.message}</p>
+                    )}
                   </div>
 
                   <div>
@@ -332,12 +356,13 @@ export default function SettingsPage() {
                   {[0, 1, 2].map((row) => (
                     <div
                       key={row}
-                      className="grid grid-cols-[0.4fr,2fr,2fr,1.5fr,1.2fr,1.2fr] gap-3 items-center py-2 border-b border-gray-100 last:border-0"
+                      className="grid grid-cols-[0.4fr,2fr,2fr,1.5fr,1.2fr,1.2fr,1.2fr] gap-3 items-center py-2 border-b border-gray-100 last:border-0"
                     >
                       <Skeleton className="h-3 w-6 mx-auto" />
                       <Skeleton className="h-3 w-40" />
                       <SkeletonText lines={1} />
                       <Skeleton className="h-6 w-20 rounded-full mx-auto" />
+                      <Skeleton className="h-6 w-16 rounded-full mx-auto" />
                       <Skeleton className="h-6 w-16 rounded-full mx-auto" />
                       <div className="flex justify-center gap-2">
                         <Skeleton className="h-8 w-8 rounded-full" />
@@ -361,6 +386,7 @@ export default function SettingsPage() {
                       <th className="text-left">Name</th>
                       <th className="text-center">User Name</th>
                       <th className="text-center">Role</th>
+                      <th className="text-center">Location</th>
                       <th className="text-center">Status</th>
                       <th className="text-center">Actions</th>
                     </tr>
@@ -379,6 +405,7 @@ export default function SettingsPage() {
                           <td className="text-center">
                             <span className="settings-role-badge">{roleLabel(u.role)}</span>
                           </td>
+                          <td className="text-center">{u.locationCity?.name || '—'}</td>
                           <td className="text-center">
                             <span
                               className={
@@ -483,7 +510,7 @@ export default function SettingsPage() {
                     )}
                   </div>
                   <div>
-                    <label className="company-form-field-label">User Name</label>
+                    <label className="company-form-field-label">Username</label>
                     <input
                       type="text"
                       className="input-field"
@@ -497,6 +524,25 @@ export default function SettingsPage() {
                       <p className="text-red-500 text-xs mt-1">{editErrors.userName.message}</p>
                     )}
                   </div>
+                  {editingUser?.role === 'accountant' && (
+                    <div>
+                      <label className="company-form-field-label">Location</label>
+                      <select
+                        className="input-field"
+                        {...registerEdit('locationCity', { required: 'Location is required' })}
+                      >
+                        <option value="">Select location</option>
+                        {locationCities.map((c) => (
+                          <option key={c._id} value={c._id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+                      {editErrors.locationCity && (
+                        <p className="text-red-500 text-xs mt-1">{editErrors.locationCity.message}</p>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <label className="company-form-field-label">Status</label>
                     <Controller
