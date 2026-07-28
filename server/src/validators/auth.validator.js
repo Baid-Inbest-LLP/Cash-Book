@@ -10,6 +10,8 @@ export const registerSchema = z.object({
   userName: z.string().trim().min(1, 'User name is required').toLowerCase(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['superadmin', 'accountant']).optional(),
+  // registerUser always forces role: 'accountant', so every registered user needs one.
+  locationCity: z.string().trim().min(1, 'Location is required'),
 });
 
 export const refreshTokenSchema = z.object({

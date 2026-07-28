@@ -18,6 +18,8 @@ router.post('/locations', authorize('superadmin'), master.locationController.cre
 router.put('/locations/:id', authorize('superadmin'), master.locationController.update);
 router.delete('/locations/:id', authorize('superadmin'), master.locationController.remove);
 
+router.get('/location-cities', master.getLocationCities);
+
 router.get('/users', authorize('superadmin'), master.listUsers);
 router.put('/users/:id', authorize('superadmin'), master.updateUser);
 router.delete('/users/:id', authorize('superadmin'), master.deleteUser);

@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
 import { useCreateCompany, useUpdateCompany } from '../../hooks/useCompanies';
+import { useLocationCities } from '../../hooks/useMasters';
 import { getApiErrorMessage } from '../../lib/queryClient';
 
 const PHONE_REGEX = /^(\+91|91)?[6-9]\d{9}$/;
@@ -43,6 +45,7 @@ export default function CompanyForm({ company, onClose }) {
   const isEdit = Boolean(company);
   const createCompany = useCreateCompany();
   const updateCompany = useUpdateCompany();
+  const { data: locationCities = [] } = useLocationCities();
   const submitting = createCompany.isPending || updateCompany.isPending;
 
   const {
@@ -51,8 +54,13 @@ export default function CompanyForm({ company, onClose }) {
     handleSubmit,
     getValues,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({ defaultValues: buildDefaultValues(company) });
+
+  useEffect(() => {
+    if (locationCities.length) reset(buildDefaultValues(company));
+  }, [locationCities.length, company, reset]);
 
   const { fields, append, remove } = useFieldArray({ control, name: 'locations' });
   // fields[] only holds each row's initial values; watch for the live values (badges, headers).
@@ -322,11 +330,17 @@ export default function CompanyForm({ company, onClose }) {
                       </div>
 
                       <Field label="City" required error={locErrors.city?.message}>
-                        <input
+                        <select
                           className={inputCls(locErrors.city)}
-                          placeholder="City"
                           {...register(`locations.${idx}.city`, { required: 'City is required' })}
-                        />
+                        >
+                          <option value="">Select city</option>
+                          {locationCities.map((c) => (
+                            <option key={c._id} value={c._id}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </select>
                       </Field>
 
                       <Field label="State / Province" required error={locErrors.state?.message}>
