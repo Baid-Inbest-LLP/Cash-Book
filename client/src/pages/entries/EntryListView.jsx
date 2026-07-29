@@ -186,6 +186,7 @@ export default function EntryListView({ isExcluded }) {
       ),
     },
     { key: 'company', header: 'Company', align: 'center', render: (e) => e.company?.code || '-' },
+    { key: 'location', header: 'Location', align: 'center', render: (e) => e.location?.name || '-' },
     {
       key: 'expenseHead',
       header: 'Expense Head',
