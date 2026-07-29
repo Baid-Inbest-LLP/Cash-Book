@@ -20,6 +20,13 @@ const entrySchema = new mongoose.Schema(
       default: null,
     },
 
+    // City this entry belongs to; scopes visibility for location-bound accountants.
+    location: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'LocationCity',
+      required: true,
+    },
+
     // Expense head applies to payments (expenses); receipts (income) have none.
     expenseHead: {
       type: mongoose.Schema.Types.ObjectId,
@@ -48,9 +55,10 @@ entrySchema.index({ date: 1 });
 entrySchema.index({ financialYear: 1 });
 entrySchema.index({ isExcluded: 1 });
 entrySchema.index({ company: 1 });
+entrySchema.index({ location: 1 });
 
 // Compound index for the hot path: visible entries within a financial year
-// (Balance Engine, dashboard, and month-wise reports).
-entrySchema.index({ financialYear: 1, isExcluded: 1, date: 1 });
+// (Balance Engine, dashboard, and month-wise reports), scoped by location.
+entrySchema.index({ financialYear: 1, isExcluded: 1, location: 1, date: 1 });
 
 export const Entry = mongoose.model('Entry', entrySchema);
