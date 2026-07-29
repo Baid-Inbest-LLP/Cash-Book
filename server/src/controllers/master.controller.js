@@ -43,7 +43,7 @@ export const getLocationCities = asyncHandler(async (req, res) => {
 	}
 	const cities = await LocationCity.find(filter)
 		.select("name")
-		.sort({ name: 1 })
+		.sort({ createdAt: 1 })
 		.lean();
 	ApiResponse.success(res, cities);
 });
