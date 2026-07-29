@@ -7,6 +7,52 @@ import {
 	walletIcon,
 } from "../../components/icons/reportIcons";
 
+// One row of 5 cards (same metrics as buildSummaryStatItems), each showing a stacked
+// per-location breakdown instead of a single combined number.
+export const buildLocationBreakdownStatItems = (rows) => {
+	const metrics = [
+		{ key: "openingBalance", label: "Opening Balance", valueClassName: "text-primary-600", icon: walletIcon },
+		{
+			key: "totalReceipts",
+			label: "Total Receipts",
+			valueClassName: "text-emerald-700",
+			icon: receiptsIcon,
+			iconClassName: "bg-emerald-50 text-emerald-600",
+		},
+		{
+			key: "totalPayments",
+			label: "Total Payments",
+			valueClassName: "text-red-600",
+			icon: paymentsIcon,
+			iconClassName: "bg-red-50 text-red-600",
+		},
+		{ key: "netMovement", label: "Net Movement", icon: trendUpIcon },
+		{
+			key: "closingBalance",
+			label: "Closing Balance",
+			icon: walletIcon,
+			iconClassName: "bg-slate-100 text-slate-600",
+		},
+	];
+
+	return metrics.map((metric) => ({
+		label: metric.label,
+		valueClassName: metric.valueClassName || "text-gray-900",
+		icon: metric.icon,
+		iconClassName: metric.iconClassName,
+		breakdown: rows.map((row) => ({
+			label: row.location.name,
+			value: formatCurrency(row[metric.key]),
+			valueClassName:
+				metric.key === "netMovement"
+					? row[metric.key] >= 0
+						? "text-emerald-700"
+						: "text-red-600"
+					: undefined,
+		})),
+	}));
+};
+
 export const buildSummaryStatItems = (summary, { month } = {}) => {
 	const label = (text) => (month ? text : `FY ${text}`);
 

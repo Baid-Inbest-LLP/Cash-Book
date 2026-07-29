@@ -1,6 +1,13 @@
 import Skeleton from '../../components/common/Skeleton';
 
-function StatTile({ label, value, valueClassName = 'text-gray-900', icon, iconClassName = 'bg-primary-50 text-primary-600' }) {
+function StatTile({
+  label,
+  value,
+  valueClassName = 'text-gray-900',
+  icon,
+  iconClassName = 'bg-primary-50 text-primary-600',
+  breakdown,
+}) {
   return (
     <div className="card p-4 flex items-start gap-3">
       {icon && (
@@ -8,9 +15,24 @@ function StatTile({ label, value, valueClassName = 'text-gray-900', icon, iconCl
           {icon}
         </div>
       )}
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-gray-500 stat-tile-label">{label}</p>
-        <p className={`text-2xl font-semibold mt-1 stat-tile-value ${valueClassName}`}>{value}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-base font-medium text-gray-500 stat-tile-label">{label}</p>
+        {breakdown ? (
+          <div className="mt-2 space-y-1.5">
+            {breakdown.map((row) => (
+              <div key={row.label} className="flex items-center justify-between gap-2">
+                <span className="text-lg font-medium text-gray-500 truncate stat-tile-label">{row.label}</span>
+                <span
+                  className={`text-xl font-semibold whitespace-nowrap stat-tile-value ${row.valueClassName || valueClassName}`}
+                >
+                  {row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={`text-2xl font-semibold mt-1 stat-tile-value ${valueClassName}`}>{value}</p>
+        )}
       </div>
     </div>
   );

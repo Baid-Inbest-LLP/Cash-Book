@@ -1,5 +1,6 @@
 import { getCompanyReport, getExpenseHeadReport, getMonthwiseReport } from './report.service.js';
-import { percentage } from '../utils/reportUtils.js';
+import { LocationCity } from '../models/index.js';
+import { percentage, resolveLocationScope } from '../utils/reportUtils.js';
 
 // Company-wise payment totals for a financial year (+ optional month), chart-ready.
 export const getExpenseByCompany = async ({ financialYear, month, user, location }) => {
@@ -33,16 +34,35 @@ export const getExpenseByMonth = async ({ financialYear, user, location }) => {
   }));
 };
 
-// FY-level opening/closing balance and receipt/payment totals, for the dashboard's top stat cards.
+const toStatsSummary = (summary) => ({
+  openingBalance: summary.openingBalance,
+  totalReceipts: summary.totalReceipts,
+  totalPayments: summary.totalPayments,
+  netMovement: summary.netMovement,
+  closingBalance: summary.closingBalance,
+});
+
+// FY-level opening/closing balance and receipt/payment totals, for the dashboard's top stat
+// cards. Accountants (always scoped to their own location) and a superadmin who has picked one
+// location both get a single summary; an unscoped superadmin gets one row per active location.
 export const getDashboardStats = async ({ financialYear, user, location }) => {
-  const { summary } = await getMonthwiseReport({ financialYear, user, location });
-  return {
-    openingBalance: summary.openingBalance,
-    totalReceipts: summary.totalReceipts,
-    totalPayments: summary.totalPayments,
-    netMovement: summary.netMovement,
-    closingBalance: summary.closingBalance,
-  };
+  const scopedLocation = resolveLocationScope({ user, location });
+
+  if (scopedLocation) {
+    const { summary } = await getMonthwiseReport({ financialYear, user, location });
+    return toStatsSummary(summary);
+  }
+
+  const locations = await LocationCity.find({ isActive: true })
+    .select('name')
+    .sort({ createdAt: 1 })
+    .lean();
+  return Promise.all(
+    locations.map(async (city) => {
+      const { summary } = await getMonthwiseReport({ financialYear, user, location: city._id });
+      return { location: { _id: city._id, name: city.name }, ...toStatsSummary(summary) };
+    }),
+  );
 };
 
 // Top expense heads by payment amount for a financial year (+ optional month), paginated.
