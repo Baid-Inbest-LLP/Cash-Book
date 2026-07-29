@@ -41,12 +41,12 @@ const roleLabel = (role) => {
 };
 
 const linkClass = (isOpen, isActive) =>
-  `flex min-w-0 items-center overflow-hidden rounded-lg text-md font-medium transition-colors ${
+  `sidebar-nav-link flex min-w-0 items-center overflow-hidden rounded-lg text-md font-medium transition-colors ${
     isOpen ? 'gap-3 justify-start px-3 py-2' : 'justify-center px-2 py-2.5'
   } ${
     isActive
-      ? 'bg-white/75 text-[#0b2f81] shadow-sm'
-      : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
+      ? 'sidebar-nav-link--active bg-white/75 text-[#0b2f81] shadow-sm'
+      : 'sidebar-nav-link--inactive text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
   }`;
 
 const Sidebar = ({ isOpen = true }) => {
@@ -118,10 +118,10 @@ const Sidebar = ({ isOpen = true }) => {
                         key={child.to}
                         to={child.to}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 rounded-lg pl-4 pr-3 py-2 text-sm font-medium transition-colors ${
+                          `sidebar-nav-link flex items-center gap-3 rounded-lg pl-4 pr-3 py-2 text-sm font-medium transition-colors ${
                             isActive
-                              ? 'bg-white/75 text-[#0b2f81] shadow-sm'
-                              : 'text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
+                              ? 'sidebar-nav-link--active bg-white/75 text-[#0b2f81] shadow-sm'
+                              : 'sidebar-nav-link--inactive text-primary-100 hover:bg-white/70 hover:text-[#0b2f81]'
                           }`
                         }
                       >
@@ -141,12 +141,12 @@ const Sidebar = ({ isOpen = true }) => {
               to={item.to}
               end={item.end}
               title={!isOpen ? item.label : undefined}
-              className={({ isActive }) =>
-                linkClass(
-                  isOpen,
-                  item.basePath ? location.pathname.startsWith(item.basePath) : isActive,
-                )
-              }
+              className={({ isActive }) => {
+                const isItemActive = item.basePath
+                  ? location.pathname.startsWith(item.basePath)
+                  : isActive;
+                return linkClass(isOpen, isItemActive);
+              }}
             >
               <Icon className={`${isOpen ? 'w-5 h-5' : 'w-7 h-7'} flex-shrink-0`} />
               {isOpen && (
