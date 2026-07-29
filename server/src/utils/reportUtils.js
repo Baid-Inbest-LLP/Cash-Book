@@ -1,5 +1,6 @@
 import { ENTRY_TYPES } from '../constants/entryTypes.js';
 import { FY_MONTH_ORDER, getFinancialYear } from './financialYear.js';
+import { toObjectId } from './mongoAggregation.js';
 
 // How many months of a financial year have started as of today.
 const monthsElapsedInFy = (financialYear) => {
@@ -14,10 +15,19 @@ const monthsElapsedInFy = (financialYear) => {
 export const percentage = (amount, total) =>
   total > 0 ? Math.round((amount / total) * 10000) / 100 : 0;
 
-// Base filter for report queries: one financial year, with optional month.
-export const buildReportMatch = ({ financialYear, month }) => {
+// Accountants only ever see their own location's data; superadmin sees everything unless
+// they've explicitly narrowed to one location via `location`.
+export const resolveLocationScope = ({ user, location }) => {
+  if (user.role === 'accountant') return user.locationCity;
+  return location || null;
+};
+
+// Base filter for report queries: one financial year, with optional month, scoped by location.
+export const buildReportMatch = ({ financialYear, month, user, location }) => {
   const match = { financialYear, isExcluded: false };
   if (month) match.month = month;
+  const scopedLocation = resolveLocationScope({ user, location });
+  if (scopedLocation) match.location = toObjectId(scopedLocation);
   return match;
 };
 

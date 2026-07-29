@@ -3,10 +3,9 @@ import { Controller, useForm } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
 import { DatePickerInput } from '@mantine/dates';
 import { useCreatePayment, useCreateReceipt, useUpdateEntry } from '../../hooks/useEntries';
-import { useMe } from '../../hooks/useAuth';
+import { useIsSuperAdmin } from '../../hooks/useAuth';
 import { useLocationCities } from '../../hooks/useMasters';
 import { getApiErrorMessage } from '../../lib/queryClient';
-import { isSuperAdmin } from '../../constants/roles';
 import CurrencyInput from '../../components/common/CurrencyInput';
 
 const toDateInputValue = (date) => new Date(date).toISOString().slice(0, 10);
@@ -16,8 +15,7 @@ const MAX_DATE = new Date();
 
 export default function EntryForm({ entry, initialType, companies, expenseHeads, onClose }) {
   const isEdit = Boolean(entry);
-  const { data: user } = useMe();
-  const isSuperadmin = isSuperAdmin(user?.role);
+  const isSuperadmin = useIsSuperAdmin();
   const { data: locationCities = [] } = useLocationCities();
   const createReceipt = useCreateReceipt();
   const createPayment = useCreatePayment();

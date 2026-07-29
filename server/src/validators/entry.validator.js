@@ -87,6 +87,8 @@ const baseListEntriesQuerySchema = z.object({
   month: numberQuerySchema(z.number().int().min(1).max(12)),
   company: objectIdSchema.optional(),
   expenseHead: objectIdSchema.optional(),
+  // Superadmin-only optional narrowing; accountants are always scoped to their own location server-side regardless of this value.
+  location: objectIdSchema.optional(),
   isExcluded: booleanQuerySchema,
   fromDate: optionalDateQuerySchema,
   toDate: optionalDateQuerySchema,

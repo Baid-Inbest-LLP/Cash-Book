@@ -4,6 +4,7 @@ import {
   useExportCompaniesExcel,
   useExportCompaniesPdf,
 } from '../../hooks/useReports';
+import { useIsSuperAdmin } from '../../hooks/useAuth';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { getCurrentFinancialYear, getFinancialYearOptions } from '../../utils/financialYear';
 import { formatCurrency } from '../../utils/format';
@@ -11,15 +12,21 @@ import DataTable from '../../components/common/DataTable';
 import PageBanner from '../../components/common/PageBanner';
 import StatTiles from './StatTiles';
 import { buildSummaryStatItems } from './summaryStatItems';
-import { FinancialYearSelect, MonthSelect } from './ReportFilters';
+import { FinancialYearSelect, LocationSelect, MonthSelect } from './ReportFilters';
 import ShareBar from './ShareBar';
 
 export default function CompanyReportPage() {
+  const isSuperadmin = useIsSuperAdmin();
   const [financialYear, setFinancialYear] = useState(getCurrentFinancialYear);
   const [month, setMonth] = useState('');
+  const [location, setLocation] = useState('');
   const fyOptions = getFinancialYearOptions(1);
 
-  const params = { financialYear, ...(month && { month }) };
+  const params = {
+    financialYear,
+    ...(month && { month }),
+    ...(isSuperadmin && location && { location }),
+  };
 
   const { data, isLoading, isError, error: queryError } = useCompanyReport(params);
   const rows = data?.companies ?? [];
@@ -79,6 +86,7 @@ export default function CompanyReportPage() {
       <div className="card p-4 mb-4 flex flex-wrap items-center gap-3">
         <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
         <MonthSelect value={month} onChange={setMonth} />
+        {isSuperadmin && <LocationSelect value={location} onChange={setLocation} />}
       </div>
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}

@@ -2,7 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { sendWorkbook } from '../utils/excel.js';
 import { sendPdf } from '../utils/pdf.js';
-import { getFinancialYear } from '../utils/financialYear.js';
+import { resolveFinancialYear } from '../utils/financialYear.js';
 import * as entryService from '../services/entry.service.js';
 import { buildEntriesPdf, buildEntriesWorkbook } from '../services/export.service.js';
 
@@ -16,6 +16,7 @@ export const listEntries = asyncHandler(async (req, res) => {
     month,
     company,
     expenseHead,
+    location,
     isExcluded,
     fromDate,
     toDate,
@@ -31,11 +32,13 @@ export const listEntries = asyncHandler(async (req, res) => {
       month,
       company,
       expenseHead,
+      location,
       isExcluded,
       fromDate,
       toDate,
       search,
     },
+    user: req.user,
   });
 
   ApiResponse.success(res, result);
@@ -44,9 +47,10 @@ export const listEntries = asyncHandler(async (req, res) => {
 // GET /entries/export/excel - download the filtered entries as a branded Excel file.
 export const exportEntriesExcel = asyncHandler(async (req, res) => {
   const query = req.validated?.query || {};
-  const financialYear = query.financialYear || getFinancialYear();
+  const financialYear = resolveFinancialYear(query.financialYear);
   const { workbook, filename } = await buildEntriesWorkbook({
     filters: { ...query, financialYear },
+    user: req.user,
   });
   await sendWorkbook(res, workbook, filename);
 });
@@ -54,9 +58,10 @@ export const exportEntriesExcel = asyncHandler(async (req, res) => {
 // GET /entries/export/pdf - download the filtered entries as a branded PDF file.
 export const exportEntriesPdf = asyncHandler(async (req, res) => {
   const query = req.validated?.query || {};
-  const financialYear = query.financialYear || getFinancialYear();
+  const financialYear = resolveFinancialYear(query.financialYear);
   const { buffer, filename } = await buildEntriesPdf({
     filters: { ...query, financialYear },
+    user: req.user,
   });
   sendPdf(res, buffer, filename);
 });

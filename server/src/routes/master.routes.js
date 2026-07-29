@@ -8,11 +8,6 @@ router.use(authenticate);
 
 router.get('/lookups', master.getLookupData);
 
-router.get('/companies', master.companyController.list);
-router.post('/companies', authorize('superadmin'), master.companyController.create);
-router.put('/companies/:id', authorize('superadmin'), master.companyController.update);
-router.delete('/companies/:id', authorize('superadmin'), master.companyController.remove);
-
 router.get('/locations', master.locationController.list);
 router.post('/locations', authorize('superadmin'), master.locationController.create);
 router.put('/locations/:id', authorize('superadmin'), master.locationController.update);

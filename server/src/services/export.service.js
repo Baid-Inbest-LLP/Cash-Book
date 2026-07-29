@@ -52,10 +52,10 @@ const getCompanyHeaderInfo = async (companyId) => {
 
 // Shared report shape (columns/rows/totals/meta) consumed by both the Excel and PDF renderers,
 // so the data-fetching and shaping logic is written once per report.
-const buildEntriesReportConfig = async ({ filters }) => {
+const buildEntriesReportConfig = async ({ filters, user }) => {
   const { financialYear } = filters;
   const [entries, companyInfo] = await Promise.all([
-    getEntriesForExport({ filters }),
+    getEntriesForExport({ filters, user }),
     getCompanyHeaderInfo(filters.company),
   ]);
 
@@ -103,19 +103,19 @@ const buildEntriesReportConfig = async ({ filters }) => {
   };
 };
 
-export const buildEntriesWorkbook = async ({ filters }) => {
-  const { config, filename } = await buildEntriesReportConfig({ filters });
+export const buildEntriesWorkbook = async ({ filters, user }) => {
+  const { config, filename } = await buildEntriesReportConfig({ filters, user });
   return { workbook: buildBrandedWorkbook(config), filename: `${filename}.xlsx` };
 };
 
-export const buildEntriesPdf = async ({ filters }) => {
-  const { config, filename } = await buildEntriesReportConfig({ filters });
+export const buildEntriesPdf = async ({ filters, user }) => {
+  const { config, filename } = await buildEntriesReportConfig({ filters, user });
   return { buffer: await buildBrandedPdf(config), filename: `${filename}.pdf` };
 };
 
-const buildMonthwiseReportConfig = async ({ financialYear, company }) => {
+const buildMonthwiseReportConfig = async ({ financialYear, company, user, location }) => {
   const [{ months, summary }, companyInfo] = await Promise.all([
-    getMonthwiseReport({ financialYear, company }),
+    getMonthwiseReport({ financialYear, company, user, location }),
     getCompanyHeaderInfo(company),
   ]);
 
@@ -155,13 +155,13 @@ const buildMonthwiseReportConfig = async ({ financialYear, company }) => {
   };
 };
 
-export const buildMonthwiseWorkbook = async ({ financialYear, company }) => {
-  const { config, filename } = await buildMonthwiseReportConfig({ financialYear, company });
+export const buildMonthwiseWorkbook = async ({ financialYear, company, user, location }) => {
+  const { config, filename } = await buildMonthwiseReportConfig({ financialYear, company, user, location });
   return { workbook: buildBrandedWorkbook(config), filename: `${filename}.xlsx` };
 };
 
-export const buildMonthwisePdf = async ({ financialYear, company }) => {
-  const { config, filename } = await buildMonthwiseReportConfig({ financialYear, company });
+export const buildMonthwisePdf = async ({ financialYear, company, user, location }) => {
+  const { config, filename } = await buildMonthwiseReportConfig({ financialYear, company, user, location });
   return { buffer: await buildBrandedPdf(config), filename: `${filename}.pdf` };
 };
 
@@ -213,9 +213,9 @@ const buildBreakdownReportConfig = ({
   };
 };
 
-const buildExpenseHeadReportConfig = async ({ financialYear, month, company }) => {
+const buildExpenseHeadReportConfig = async ({ financialYear, month, company, user, location }) => {
   const [{ summary, expenseHeads }, companyInfo] = await Promise.all([
-    getExpenseHeadReport({ financialYear, month, company }),
+    getExpenseHeadReport({ financialYear, month, company, user, location }),
     getCompanyHeaderInfo(company),
   ]);
 
@@ -232,26 +232,30 @@ const buildExpenseHeadReportConfig = async ({ financialYear, month, company }) =
   });
 };
 
-export const buildExpenseHeadWorkbook = async ({ financialYear, month, company }) => {
+export const buildExpenseHeadWorkbook = async ({ financialYear, month, company, user, location }) => {
   const { config, filename } = await buildExpenseHeadReportConfig({
     financialYear,
     month,
     company,
+    user,
+    location,
   });
   return { workbook: buildBrandedWorkbook(config), filename: `${filename}.xlsx` };
 };
 
-export const buildExpenseHeadPdf = async ({ financialYear, month, company }) => {
+export const buildExpenseHeadPdf = async ({ financialYear, month, company, user, location }) => {
   const { config, filename } = await buildExpenseHeadReportConfig({
     financialYear,
     month,
     company,
+    user,
+    location,
   });
   return { buffer: await buildBrandedPdf(config), filename: `${filename}.pdf` };
 };
 
-const buildCompanyReportConfig = async ({ financialYear, month }) => {
-  const { summary, companies } = await getCompanyReport({ financialYear, month });
+const buildCompanyReportConfig = async ({ financialYear, month, user, location }) => {
+  const { summary, companies } = await getCompanyReport({ financialYear, month, user, location });
 
   return buildBreakdownReportConfig({
     financialYear,
@@ -265,12 +269,12 @@ const buildCompanyReportConfig = async ({ financialYear, month }) => {
   });
 };
 
-export const buildCompanyWorkbook = async ({ financialYear, month }) => {
-  const { config, filename } = await buildCompanyReportConfig({ financialYear, month });
+export const buildCompanyWorkbook = async ({ financialYear, month, user, location }) => {
+  const { config, filename } = await buildCompanyReportConfig({ financialYear, month, user, location });
   return { workbook: buildBrandedWorkbook(config), filename: `${filename}.xlsx` };
 };
 
-export const buildCompanyPdf = async ({ financialYear, month }) => {
-  const { config, filename } = await buildCompanyReportConfig({ financialYear, month });
+export const buildCompanyPdf = async ({ financialYear, month, user, location }) => {
+  const { config, filename } = await buildCompanyReportConfig({ financialYear, month, user, location });
   return { buffer: await buildBrandedPdf(config), filename: `${filename}.pdf` };
 };

@@ -7,6 +7,7 @@ const EMPTY_FILTERS = {
   month: '',
   company: '',
   expenseHead: '',
+  location: '',
   fromDate: '',
   toDate: '',
   search: '',
@@ -16,7 +17,14 @@ const EMPTY_FILTERS = {
 // render was resetting the calendar's in-progress range selection after one click.
 const MAX_DATE = new Date();
 
-export default function EntryFilterBar({ filters, onChange, companies, expenseHeads }) {
+export default function EntryFilterBar({
+  filters,
+  onChange,
+  companies,
+  expenseHeads,
+  locationCities = [],
+  showLocationFilter = false,
+}) {
   const fyOptions = getFinancialYearOptions(1);
 
   const set = (patch) => onChange(patch);
@@ -79,6 +87,21 @@ export default function EntryFilterBar({ filters, onChange, companies, expenseHe
             </option>
           ))}
         </select>
+
+        {showLocationFilter && (
+          <select
+            className="input-field grow basis-[150px] min-w-[150px] cursor-pointer"
+            value={filters.location}
+            onChange={(e) => set({ location: e.target.value })}
+          >
+            <option value="">All Locations</option>
+            {locationCities.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        )}
 
         <select
           className="input-field grow basis-[150px] min-w-[150px] cursor-pointer"

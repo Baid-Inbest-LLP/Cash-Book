@@ -3,6 +3,7 @@ import { Company, Entry, ExpenseHead, LocationCity } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { getFinancialYear, getFinancialYearAndMonth } from '../utils/financialYear.js';
 import { lookupOne, toObjectId } from '../utils/mongoAggregation.js';
+import { resolveLocationScope } from '../utils/reportUtils.js';
 import { escapeRegex } from '../utils/searchUtils.js';
 
 // Load an entry or fail with a consistent API error.
@@ -98,8 +99,9 @@ export const createPayment = ({ date, company, expenseHead, amount, description,
     user,
   });
 
-// Build MongoDB filters for the entries table and balance summary.
-const buildListFilter = ({ filters }) => {
+// Build MongoDB filters for the entries table and balance summary. Accountants are always
+// scoped to their own location; superadmin sees everything unless they pick one explicitly.
+const buildListFilter = ({ filters, user }) => {
   const financialYear = filters.financialYear || getFinancialYear();
   const filter = {
     financialYear,
@@ -111,6 +113,9 @@ const buildListFilter = ({ filters }) => {
   if (filters.company) filter.company = toObjectId(filters.company);
   if (filters.expenseHead) filter.expenseHead = toObjectId(filters.expenseHead);
   if (filters.search) filter.description = { $regex: escapeRegex(filters.search), $options: 'i' };
+
+  const scopedLocation = resolveLocationScope({ user, location: filters.location });
+  if (scopedLocation) filter.location = toObjectId(scopedLocation);
 
   if (filters.fromDate || filters.toDate) {
     filter.date = {};
@@ -181,8 +186,8 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
 
 // Fetch every entry matching the filters (no pagination) for an Excel export,
 // ordered chronologically so the file reads like a ledger.
-export const getEntriesForExport = ({ filters = {} }) => {
-  const filter = buildListFilter({ filters });
+export const getEntriesForExport = ({ filters = {}, user }) => {
+  const filter = buildListFilter({ filters, user });
   return Entry.aggregate([
     { $match: filter },
     { $sort: { date: 1, createdAt: 1 } },
@@ -205,10 +210,10 @@ export const getEntriesForExport = ({ filters = {} }) => {
 };
 
 // List entries with pagination.
-export const listEntries = async ({ filters = {} }) => {
+export const listEntries = async ({ filters = {}, user }) => {
   const page = filters.page || 1;
   const limit = filters.limit || 50;
-  const filter = buildListFilter({ filters });
+  const filter = buildListFilter({ filters, user });
   const skip = (page - 1) * limit;
 
   const entryResult = await aggregateEntries({ filter, skip, limit });

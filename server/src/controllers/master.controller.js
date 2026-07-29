@@ -32,7 +32,6 @@ const crud = (Model, name) => ({
 	}),
 });
 
-export const companyController = crud(Company, "Company");
 export const locationController = crud(Location, "Location");
 
 // Accountants only see their own assigned locationCity; superadmin sees every active locationCity.

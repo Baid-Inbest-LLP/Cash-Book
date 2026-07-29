@@ -4,6 +4,7 @@ import {
 	useExportExpenseHeadsExcel,
 	useExportExpenseHeadsPdf,
 } from "../../hooks/useReports";
+import { useIsSuperAdmin } from "../../hooks/useAuth";
 import { getApiErrorMessage } from "../../lib/queryClient";
 import {
 	getCurrentFinancialYear,
@@ -17,20 +18,24 @@ import { buildSummaryStatItems } from "./summaryStatItems";
 import {
 	CompanySelect,
 	FinancialYearSelect,
+	LocationSelect,
 	MonthSelect,
 } from "./ReportFilters";
 import ShareBar from "./ShareBar";
 
 export default function ExpenseHeadReportPage() {
+	const isSuperadmin = useIsSuperAdmin();
 	const [financialYear, setFinancialYear] = useState(getCurrentFinancialYear);
 	const [month, setMonth] = useState("");
 	const [company, setCompany] = useState("");
+	const [location, setLocation] = useState("");
 	const fyOptions = getFinancialYearOptions(1);
 
 	const params = {
 		financialYear,
 		...(month && { month }),
 		...(company && { company }),
+		...(isSuperadmin && location && { location }),
 	};
 
 	const {
@@ -127,6 +132,7 @@ export default function ExpenseHeadReportPage() {
 				/>
 				<MonthSelect value={month} onChange={setMonth} />
 				<CompanySelect value={company} onChange={setCompany} />
+				{isSuperadmin && <LocationSelect value={location} onChange={setLocation} />}
 			</div>
 
 			{error && (

@@ -4,6 +4,7 @@ import {
   useExportMonthwisePdf,
   useMonthwiseReport,
 } from '../../hooks/useReports';
+import { useIsSuperAdmin } from '../../hooks/useAuth';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { getCurrentFinancialYear, getFinancialYearOptions } from '../../utils/financialYear';
 import { formatCurrency } from '../../utils/format';
@@ -12,14 +13,20 @@ import DataTable from '../../components/common/DataTable';
 import PageBanner from '../../components/common/PageBanner';
 import StatTiles from './StatTiles';
 import { buildSummaryStatItems } from './summaryStatItems';
-import { CompanySelect, FinancialYearSelect } from './ReportFilters';
+import { CompanySelect, FinancialYearSelect, LocationSelect } from './ReportFilters';
 
 export default function MonthwiseReportPage() {
+  const isSuperadmin = useIsSuperAdmin();
   const [financialYear, setFinancialYear] = useState(getCurrentFinancialYear);
   const [company, setCompany] = useState('');
+  const [location, setLocation] = useState('');
   const fyOptions = getFinancialYearOptions(1);
 
-  const params = { financialYear, ...(company && { company }) };
+  const params = {
+    financialYear,
+    ...(company && { company }),
+    ...(isSuperadmin && location && { location }),
+  };
 
   const { data, isLoading, isError, error: queryError } = useMonthwiseReport(params);
   const months = data?.months ?? [];
@@ -107,6 +114,7 @@ export default function MonthwiseReportPage() {
       <div className="card p-4 mb-4 flex flex-wrap items-center gap-3">
         <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
         <CompanySelect value={company} onChange={setCompany} />
+        {isSuperadmin && <LocationSelect value={location} onChange={setLocation} />}
       </div>
 
       {error && <div className="card p-4 mb-4 company-error-alert">{error}</div>}

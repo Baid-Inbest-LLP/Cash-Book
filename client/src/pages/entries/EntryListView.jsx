@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useDebouncedValue } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { useMe } from '../../hooks/useAuth';
+import { useIsSuperAdmin } from '../../hooks/useAuth';
 import { useCompanies } from '../../hooks/useCompanies';
 import { useExpenseHeads } from '../../hooks/useExpenseHeads';
+import { useLocationCities } from '../../hooks/useMasters';
 import {
   useDeleteEntriesPermanent,
   useEntries,
@@ -14,7 +15,6 @@ import {
 } from '../../hooks/useEntries';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { DEFAULT_PAGE_SIZE } from '../../constants';
-import { isSuperAdmin } from '../../constants/roles';
 import { getCurrentFinancialYear } from '../../utils/financialYear';
 import { formatCurrency, formatDate } from '../../utils/format';
 import ConfirmModal from '../../components/common/ConfirmModal';
@@ -40,14 +40,15 @@ const emptyFilters = () => ({
   month: '',
   company: '',
   expenseHead: '',
+  location: '',
   fromDate: '',
   toDate: '',
   search: '',
 });
 
 export default function EntryListView({ isExcluded }) {
-  const { data: user } = useMe();
-  const canDeletePermanently = isSuperAdmin(user?.role);
+  const isSuperadmin = useIsSuperAdmin();
+  const canDeletePermanently = isSuperadmin;
 
   const [filters, setFilters] = useState(emptyFilters);
   const [debouncedSearch] = useDebouncedValue(filters.search.trim(), 300);
@@ -73,6 +74,7 @@ export default function EntryListView({ isExcluded }) {
     ...(filters.month && { month: filters.month }),
     ...(filters.company && { company: filters.company }),
     ...(filters.expenseHead && { expenseHead: filters.expenseHead }),
+    ...(isSuperadmin && filters.location && { location: filters.location }),
     ...(filters.fromDate && { fromDate: filters.fromDate }),
     ...(filters.toDate && { toDate: filters.toDate }),
     ...(debouncedSearch && { search: debouncedSearch }),
@@ -85,6 +87,7 @@ export default function EntryListView({ isExcluded }) {
 
   const { data: companiesData } = useCompanies({ isActive: true, limit: 100 });
   const { data: expenseHeadsData } = useExpenseHeads({ activeOnly: true, limit: 100 });
+  const { data: locationCities = [] } = useLocationCities(isSuperadmin);
   const companies = companiesData?.companies ?? [];
   const expenseHeads = expenseHeadsData?.expenseHeads ?? [];
 
@@ -279,6 +282,8 @@ export default function EntryListView({ isExcluded }) {
         onChange={(patch) => setFilters((f) => ({ ...f, ...patch }))}
         companies={companies}
         expenseHeads={expenseHeads}
+        locationCities={locationCities}
+        showLocationFilter={isSuperadmin}
       />
 
       {selectedCount > 0 && (

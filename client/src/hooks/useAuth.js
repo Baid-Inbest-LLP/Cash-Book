@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../api/auth.api';
 import { queryKeys } from '../lib/queryKeys';
 import { clearSession, getStoredUser, isAuthenticated, saveSession } from '../lib/session';
+import { isSuperAdmin } from '../constants/roles';
 
 // The authenticated user. Source of truth for `user` across the app.
 export const useMe = () =>
@@ -12,6 +13,12 @@ export const useMe = () =>
     initialData: getStoredUser() ?? undefined,
     staleTime: 5 * 60 * 1000,
   });
+
+// Whether the current user is a superadmin — the common role check across the app.
+export const useIsSuperAdmin = () => {
+  const { data: user } = useMe();
+  return isSuperAdmin(user?.role);
+};
 
 export const useLogin = () => {
   const queryClient = useQueryClient();

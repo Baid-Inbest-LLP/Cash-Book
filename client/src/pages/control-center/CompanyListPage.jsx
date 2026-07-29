@@ -1,18 +1,16 @@
 import { useState, useCallback } from "react";
 import { useDebouncedValue } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { useMe } from "../../hooks/useAuth";
+import { useIsSuperAdmin } from "../../hooks/useAuth";
 import { useCompanies, useDeleteCompany } from "../../hooks/useCompanies";
 import { getApiErrorMessage } from "../../lib/queryClient";
 import CompanyForm from "./CompanyForm";
 import ControlCenterToolbar from "./ControlCenterToolbar";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import Skeleton, { SkeletonText } from "../../components/common/Skeleton";
-import { isSuperAdmin } from "../../constants/roles";
 
 export default function CompanyListPage() {
-	const { data: user } = useMe();
-	const canManage = isSuperAdmin(user?.role);
+	const canManage = useIsSuperAdmin();
 	const [search, setSearch] = useState("");
 	const [debouncedSearch] = useDebouncedValue(search.trim(), 300);
 	const [showForm, setShowForm] = useState(false);

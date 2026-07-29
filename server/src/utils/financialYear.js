@@ -26,3 +26,6 @@ export const getPreviousFinancialYear = (financialYear) => {
   const startYear = Number(financialYear.slice(0, 4)) - 1;
   return `${startYear}-${String(startYear + 1).slice(-2)}`;
 };
+
+// Every FY-scoped endpoint defaults to the current financial year when the client omits it.
+export const resolveFinancialYear = (requestedFinancialYear) => requestedFinancialYear || getFinancialYear();

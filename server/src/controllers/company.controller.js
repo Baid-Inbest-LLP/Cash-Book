@@ -181,13 +181,6 @@ export const getCompanies = asyncHandler(async (req, res) => {
 	});
 });
 
-export const getCompany = asyncHandler(async (req, res) => {
-	const company = await Company.findById(req.params.id);
-	if (!company) throw ApiError.notFound("Company not found");
-	const locations = await loadCompanyLocations(company._id);
-	ApiResponse.success(res, toPublicCompany(company, locations));
-});
-
 export const createCompany = asyncHandler(async (req, res) => {
 	const { locations = [], ...companyBody } = req.body;
 	const fields = normalizeCompanyFields(companyBody);

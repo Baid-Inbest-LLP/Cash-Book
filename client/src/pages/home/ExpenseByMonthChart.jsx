@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useExpenseByMonth } from '../../hooks/useDashboard';
 import { useChartFilters } from '../../hooks/useChartFilters';
+import { useIsSuperAdmin } from '../../hooks/useAuth';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import { FY_MONTH_ORDER, MONTHS } from '../../constants';
 import { formatCompactCurrency, formatCurrency } from '../../utils/format';
-import { FinancialYearSelect } from '../reports/ReportFilters';
+import { FinancialYearSelect, LocationSelect } from '../reports/ReportFilters';
 import {
   CHART_ANIMATION_DURATION,
   CHART_ANIMATION_EASING,
@@ -40,13 +42,15 @@ function MonthTooltip({ active, payload }) {
 // Single series over time (total payments per month) — one hue, no legend needed.
 export default function ExpenseByMonthChart() {
   const { financialYear, setFinancialYear, fyOptions } = useChartFilters();
+  const isSuperadmin = useIsSuperAdmin();
+  const [location, setLocation] = useState('');
 
   const {
     data: response,
     isLoading,
     isError,
     error: queryError,
-  } = useExpenseByMonth({ financialYear });
+  } = useExpenseByMonth({ financialYear, ...(isSuperadmin && location && { location }) });
   const error = isError ? getApiErrorMessage(queryError, 'Failed to load this chart') : null;
   const rows = response?.data ?? [];
   const data = fillAllMonths(rows);
@@ -55,6 +59,7 @@ export default function ExpenseByMonthChart() {
     <div className="card p-4">
       <ChartCardHeader icon={monthlyTrendIcon} badgeClassName="bg-emerald-50 text-emerald-600" title="Monthly Spend Analysis">
         <FinancialYearSelect value={financialYear} onChange={setFinancialYear} options={fyOptions} />
+        {isSuperadmin && <LocationSelect value={location} onChange={setLocation} />}
       </ChartCardHeader>
 
       {error || isLoading || rows.length === 0 ? (

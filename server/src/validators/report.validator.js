@@ -16,9 +16,11 @@ const objectIdSchema = z
   .regex(/^[0-9a-fA-F]{24}$/, 'Valid MongoDB ObjectId is required');
 
 // Dashboard and the head/company breakdowns share the same FY + optional month filter.
+// `location` is superadmin-only narrowing; accountants are always scoped server-side.
 export const reportQuerySchema = z.object({
   financialYear: financialYearSchema.optional(),
   month: monthQuerySchema,
+  location: objectIdSchema.optional(),
 });
 
 // Expense-head report also supports narrowing to a single company.
@@ -35,9 +37,11 @@ export const exportExpenseHeadReportQuerySchema = reportQuerySchema.extend({
 export const monthwiseQuerySchema = z.object({
   financialYear: financialYearSchema.optional(),
   company: objectIdSchema.optional(),
+  location: objectIdSchema.optional(),
 });
 
 export const exportMonthwiseQuerySchema = z.object({
   financialYear: financialYearSchema.optional(),
   company: objectIdSchema.optional(),
+  location: objectIdSchema.optional(),
 });
