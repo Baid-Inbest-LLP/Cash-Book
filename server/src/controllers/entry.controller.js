@@ -126,20 +126,20 @@ const entryLabel = (count) => `${count} entr${count === 1 ? 'y' : 'ies'}`;
 // PATCH /entries/exclude - move the selected entries to excluded entries.
 export const excludeEntries = asyncHandler(async (req, res) => {
   const { ids } = req.body;
-  const { count } = await entryService.excludeEntries({ ids, userId: req.user._id });
+  const { count } = await entryService.excludeEntries({ ids, user: req.user });
   ApiResponse.success(res, null, `${entryLabel(count)} moved to excluded entries`);
 });
 
 // PATCH /entries/restore - restore the selected excluded entries back to the cash book.
 export const restoreEntries = asyncHandler(async (req, res) => {
   const { ids } = req.body;
-  const { count } = await entryService.restoreEntries({ ids });
+  const { count } = await entryService.restoreEntries({ ids, user: req.user });
   ApiResponse.success(res, null, `${entryLabel(count)} restored`);
 });
 
 // DELETE /entries/permanent - permanently remove the selected already-excluded entries.
 export const deleteEntries = asyncHandler(async (req, res) => {
   const { ids } = req.body;
-  const { count } = await entryService.deleteEntries({ ids });
+  const { count } = await entryService.deleteEntries({ ids, user: req.user });
   ApiResponse.success(res, null, `${entryLabel(count)} deleted permanently`);
 });

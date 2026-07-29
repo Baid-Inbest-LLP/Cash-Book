@@ -270,16 +270,24 @@ export const updateEntry = async ({ id, updates, user }) => {
   await entry.save();
 };
 
-// Move the selected entries to the excluded/recycle-bin list. Already-excluded ids are
-// skipped; returns how many were newly excluded.
-export const excludeEntries = async ({ ids, userId }) => {
+// Accountants may only ever act on their own location's entries; superadmin is unrestricted
+// for bulk actions (no location filter param here — these operate on ids the caller chose).
+const scopeIdsFilter = ({ ids, user }) => {
+  const filter = { _id: { $in: ids } };
+  if (user.role === 'accountant') filter.location = toObjectId(user.locationCity);
+  return filter;
+};
+
+// Move the selected entries to the excluded/recycle-bin list. Already-excluded ids, and ids
+// outside the caller's location, are silently skipped; returns how many were newly excluded.
+export const excludeEntries = async ({ ids, user }) => {
   const { modifiedCount } = await Entry.updateMany(
-    { _id: { $in: ids }, isExcluded: false },
+    { ...scopeIdsFilter({ ids, user }), isExcluded: false },
     {
       $set: {
         isExcluded: true,
         excludedAt: new Date(),
-        excludedBy: userId,
+        excludedBy: user._id,
       },
     },
   );
@@ -288,9 +296,9 @@ export const excludeEntries = async ({ ids, userId }) => {
 };
 
 // Restore the selected excluded entries back to normal cashbook calculations.
-export const restoreEntries = async ({ ids }) => {
+export const restoreEntries = async ({ ids, user }) => {
   const { modifiedCount } = await Entry.updateMany(
-    { _id: { $in: ids }, isExcluded: true },
+    { ...scopeIdsFilter({ ids, user }), isExcluded: true },
     {
       $set: {
         isExcluded: false,
@@ -304,7 +312,10 @@ export const restoreEntries = async ({ ids }) => {
 };
 
 // Permanently delete the selected entries — only those already moved to excluded entries.
-export const deleteEntries = async ({ ids }) => {
-  const { deletedCount } = await Entry.deleteMany({ _id: { $in: ids }, isExcluded: true });
+export const deleteEntries = async ({ ids, user }) => {
+  const { deletedCount } = await Entry.deleteMany({
+    ...scopeIdsFilter({ ids, user }),
+    isExcluded: true,
+  });
   return { count: deletedCount };
 };
