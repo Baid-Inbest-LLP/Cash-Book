@@ -63,14 +63,15 @@ export const exportEntriesPdf = asyncHandler(async (req, res) => {
 
 // POST /entries/receipt - create a receipt entry.
 export const createReceipt = asyncHandler(async (req, res) => {
-  const { date, company, amount, description } = req.body;
+  const { date, company, amount, description, location } = req.body;
 
   await entryService.createReceipt({
     date,
     company,
     amount,
     description,
-    userId: req.user._id,
+    location,
+    user: req.user,
   });
 
   ApiResponse.created(res, null, 'Receipt entry created');
@@ -78,7 +79,7 @@ export const createReceipt = asyncHandler(async (req, res) => {
 
 // POST /entries/payment - create a payment entry with an expense head.
 export const createPayment = asyncHandler(async (req, res) => {
-  const { date, company, expenseHead, amount, description } = req.body;
+  const { date, company, expenseHead, amount, description, location } = req.body;
 
   await entryService.createPayment({
     date,
@@ -86,7 +87,8 @@ export const createPayment = asyncHandler(async (req, res) => {
     expenseHead,
     amount,
     description,
-    userId: req.user._id,
+    location,
+    user: req.user,
   });
 
   ApiResponse.created(res, null, 'Payment entry created');
@@ -95,19 +97,19 @@ export const createPayment = asyncHandler(async (req, res) => {
 // PUT /entries/:id - update an existing entry and refresh derived period tags when date changes.
 export const updateEntry = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { type, date, company, expenseHead, amount, description } = req.body;
+  const { date, company, expenseHead, amount, description, location } = req.body;
 
   await entryService.updateEntry({
     id,
     updates: {
-      type,
       date,
       company,
       expenseHead,
       amount,
       description,
+      location,
     },
-    userId: req.user._id,
+    user: req.user,
   });
 
   ApiResponse.success(res, null, 'Entry updated');

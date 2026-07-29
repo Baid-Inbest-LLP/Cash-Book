@@ -1,8 +1,12 @@
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
 import { DatePickerInput } from '@mantine/dates';
 import { useCreatePayment, useCreateReceipt, useUpdateEntry } from '../../hooks/useEntries';
+import { useMe } from '../../hooks/useAuth';
+import { useLocationCities } from '../../hooks/useMasters';
 import { getApiErrorMessage } from '../../lib/queryClient';
+import { isSuperAdmin } from '../../constants/roles';
 import CurrencyInput from '../../components/common/CurrencyInput';
 
 const toDateInputValue = (date) => new Date(date).toISOString().slice(0, 10);
@@ -12,6 +16,9 @@ const MAX_DATE = new Date();
 
 export default function EntryForm({ entry, initialType, companies, expenseHeads, onClose }) {
   const isEdit = Boolean(entry);
+  const { data: user } = useMe();
+  const isSuperadmin = isSuperAdmin(user?.role);
+  const { data: locationCities = [] } = useLocationCities();
   const createReceipt = useCreateReceipt();
   const createPayment = useCreatePayment();
   const updateEntry = useUpdateEntry();
@@ -22,6 +29,7 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
     handleSubmit,
     watch,
     control,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -31,11 +39,22 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
       expenseHead: entry?.expenseHead?._id || '',
       amount: entry?.amount ?? '',
       description: entry?.description || '',
+      location: entry?.location?._id || '',
     },
   });
 
+  useEffect(() => {
+    if (!isSuperadmin && !isEdit && locationCities.length === 1) {
+      setValue('location', locationCities[0]._id);
+    }
+  }, [isSuperadmin, isEdit, locationCities, setValue]);
+
   const type = watch('type');
   const isPayment = type === 'payment';
+  const accountantLocationName = entry?.location?.name || locationCities[0]?.name || '';
+  const editLocationOptions = entry?.location?._id
+    ? [...locationCities.filter((c) => c._id !== entry.location._id), entry.location]
+    : locationCities;
 
   const onSubmit = async (data) => {
     const base = {
@@ -50,9 +69,9 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
           id: entry._id,
           data: {
             ...base,
-            type: data.type,
             company: isPayment ? data.company : data.company || null,
             expenseHead: isPayment ? data.expenseHead : null,
+            ...(isSuperadmin ? { location: data.location } : {}),
           },
         });
       } else if (isPayment) {
@@ -60,11 +79,13 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
           ...base,
           company: data.company,
           expenseHead: data.expenseHead,
+          location: data.location,
         });
       } else {
         await createReceipt.mutateAsync({
           ...base,
           company: data.company || undefined,
+          location: data.location,
         });
       }
       notifications.show({ message: isEdit ? 'Entry updated' : 'Entry created', color: 'green' });
@@ -124,7 +145,7 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
               <label className="company-form-field-label">
                 Type <span className="text-red-500">*</span>
               </label>
-              <select className="input-field" disabled={!isEdit} {...register('type')}>
+              <select className="input-field" disabled={isEdit} {...register('type')}>
                 <option value="receipt">Receipt</option>
                 <option value="payment">Payment</option>
               </select>
@@ -177,6 +198,32 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
               </div>
             )}
 
+            <div>
+              <label className="company-form-field-label">
+                Location <span className="text-red-500">*</span>
+              </label>
+              {isSuperadmin ? (
+                <>
+                  <select
+                    className={inputCls(errors.location)}
+                    {...register('location', { required: 'Location is required' })}
+                  >
+                    <option value="">Select location</option>
+                    {editLocationOptions.map((c) => (
+                      <option key={c._id} value={c._id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.location && (
+                    <p className="text-red-500 text-xs mt-1">{errors.location.message}</p>
+                  )}
+                </>
+              ) : (
+                <input className="input-field" value={accountantLocationName} disabled readOnly />
+              )}
+            </div>
+
             {isPayment && (
               <div>
                 <label className="company-form-field-label">
@@ -201,7 +248,7 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
               </div>
             )}
 
-            <div className="col-span-2">
+            <div>
               <label className="company-form-field-label">
                 Amount <span className="text-red-500">*</span>
               </label>

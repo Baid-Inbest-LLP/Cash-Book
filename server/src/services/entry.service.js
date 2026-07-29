@@ -1,5 +1,5 @@
 import { ENTRY_TYPES } from '../constants/entryTypes.js';
-import { Company, Entry, ExpenseHead } from '../models/index.js';
+import { Company, Entry, ExpenseHead, LocationCity } from '../models/index.js';
 import { ApiError } from '../utils/ApiError.js';
 import { getFinancialYear, getFinancialYearAndMonth } from '../utils/financialYear.js';
 import { lookupOne, toObjectId } from '../utils/mongoAggregation.js';
@@ -24,9 +24,31 @@ const assertActiveExpenseHead = async ({ expenseHeadId }) => {
   if (!exists) throw ApiError.badRequest('Active expense head is required');
 };
 
+const assertActiveLocation = async ({ locationId }) => {
+  const exists = await LocationCity.exists({ _id: locationId, isActive: true });
+  if (!exists) throw ApiError.badRequest('A valid location is required');
+};
+
+// Accountants are always pinned to their own location; superadmin must pick one explicitly.
+const resolveEntryLocation = ({ location, user }) => {
+  if (user.role === 'accountant') return user.locationCity;
+  if (!location) throw ApiError.badRequest('Location is required');
+  return location;
+};
+
 // Create either a receipt or payment entry after validating its references.
-const createEntry = async ({ type, date, company, expenseHead, amount, description, userId }) => {
-  const referenceChecks = [];
+const createEntry = async ({
+  type,
+  date,
+  company,
+  expenseHead,
+  amount,
+  description,
+  location,
+  user,
+}) => {
+  const resolvedLocation = resolveEntryLocation({ location, user });
+  const referenceChecks = [assertActiveLocation({ locationId: resolvedLocation })];
 
   if (type === ENTRY_TYPES.PAYMENT) {
     if (!company) throw ApiError.badRequest('Active company is required');
@@ -45,24 +67,26 @@ const createEntry = async ({ type, date, company, expenseHead, amount, descripti
     expenseHead: type === ENTRY_TYPES.PAYMENT ? expenseHead : null,
     amount,
     description,
+    location: resolvedLocation,
     ...period,
-    createdBy: userId,
+    createdBy: user._id,
   });
 };
 
 // Insert a receipt entry.
-export const createReceipt = ({ date, company, amount, description, userId }) =>
+export const createReceipt = ({ date, company, amount, description, location, user }) =>
   createEntry({
     type: ENTRY_TYPES.RECEIPT,
     date,
     company,
     amount,
     description,
-    userId,
+    location,
+    user,
   });
 
 // Insert a payment entry.
-export const createPayment = ({ date, company, expenseHead, amount, description, userId }) =>
+export const createPayment = ({ date, company, expenseHead, amount, description, location, user }) =>
   createEntry({
     type: ENTRY_TYPES.PAYMENT,
     date,
@@ -70,7 +94,8 @@ export const createPayment = ({ date, company, expenseHead, amount, description,
     expenseHead,
     amount,
     description,
-    userId,
+    location,
+    user,
   });
 
 // Build MongoDB filters for the entries table and balance summary.
@@ -122,6 +147,12 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
             as: 'expenseHead',
             project: { name: 1 },
           }),
+          ...lookupOne({
+            from: 'locationcities',
+            localField: 'location',
+            as: 'location',
+            project: { name: 1 },
+          }),
           {
             $project: {
               type: 1,
@@ -130,6 +161,7 @@ const aggregateEntries = async ({ filter, skip, limit }) => {
               month: 1,
               company: 1,
               expenseHead: 1,
+              location: 1,
               amount: 1,
               description: 1,
               isExcluded: 1,
@@ -192,27 +224,28 @@ export const listEntries = async ({ filters = {} }) => {
   };
 };
 
-// Update entry fields and keep payment/receipt reference rules consistent.
-export const updateEntry = async ({ id, updates, userId }) => {
+// Update entry fields and keep payment/receipt reference rules consistent. Entry type is
+// immutable after creation — the client never offers it and the validator strips it.
+export const updateEntry = async ({ id, updates, user }) => {
   const entry = await loadEntry({ id });
-  const nextType = updates.type || entry.type;
   const nextCompany = updates.company === undefined ? entry.company : updates.company;
   const nextExpenseHead =
-    nextType === ENTRY_TYPES.PAYMENT ? (updates.expenseHead ?? entry.expenseHead) : null;
+    entry.type === ENTRY_TYPES.PAYMENT ? (updates.expenseHead ?? entry.expenseHead) : null;
+
+  if (updates.location !== undefined && user.role !== 'accountant') {
+    await assertActiveLocation({ locationId: updates.location });
+  }
 
   const referenceChecks = [];
 
-  if (nextType === ENTRY_TYPES.PAYMENT) {
+  if (entry.type === ENTRY_TYPES.PAYMENT) {
     if (!nextCompany) throw ApiError.badRequest('Active company is required');
     referenceChecks.push(assertActiveCompany({ companyId: nextCompany }));
   } else if (updates.company !== undefined && nextCompany) {
     referenceChecks.push(assertActiveCompany({ companyId: nextCompany }));
   }
 
-  if (
-    nextType === ENTRY_TYPES.PAYMENT &&
-    (updates.type !== undefined || updates.expenseHead !== undefined)
-  ) {
+  if (entry.type === ENTRY_TYPES.PAYMENT && updates.expenseHead !== undefined) {
     if (!nextExpenseHead) throw ApiError.badRequest('Expense head is required for payments');
     referenceChecks.push(assertActiveExpenseHead({ expenseHeadId: nextExpenseHead }));
   }
@@ -222,12 +255,12 @@ export const updateEntry = async ({ id, updates, userId }) => {
     entry.date = updates.date;
     Object.assign(entry, getFinancialYearAndMonth(updates.date));
   }
-  if (updates.type !== undefined) entry.type = nextType;
   if (updates.company !== undefined) entry.company = updates.company;
   if (updates.amount !== undefined) entry.amount = updates.amount;
   if (updates.description !== undefined) entry.description = updates.description;
+  if (updates.location !== undefined && user.role !== 'accountant') entry.location = updates.location;
   entry.expenseHead = nextExpenseHead;
-  entry.updatedBy = userId;
+  entry.updatedBy = user._id;
 
   await entry.save();
 };

@@ -106,20 +106,24 @@ export const exportEntriesQuerySchema = baseListEntriesQuerySchema.refine(...dat
 
 export const createReceiptSchema = baseCreateEntryBodySchema.extend({
   company: objectIdSchema.nullish(),
+  // Required only for superadmin; accountants have it forced server-side from their profile.
+  location: objectIdSchema.optional(),
 });
 
 export const createPaymentSchema = baseCreateEntryBodySchema.extend({
   company: objectIdSchema,
   expenseHead: objectIdSchema,
+  location: objectIdSchema.optional(),
 });
 
 export const updateEntrySchema = z
   .object({
-    type: entryTypeSchema.optional(),
     date: dateSchema.optional(),
     company: objectIdSchema.nullish(),
     expenseHead: objectIdSchema.nullish(),
     amount: amountSchema.optional(),
     description: descriptionSchema,
+    // Only a superadmin may change this; accountants' requests have it ignored server-side.
+    location: objectIdSchema.optional(),
   })
   .refine((data) => Object.keys(data).length > 0, 'At least one field is required');
