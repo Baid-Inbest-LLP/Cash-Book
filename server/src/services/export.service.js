@@ -1,7 +1,8 @@
 import { buildBrandedWorkbook } from '../utils/excel.js';
 import { buildBrandedPdf } from '../utils/pdf.js';
 import { ApiError } from '../utils/ApiError.js';
-import { Company } from '../models/index.js';
+import { Company, LocationCity } from '../models/index.js';
+import { resolveLocationScope } from '../utils/reportUtils.js';
 import { getEntriesForExport } from './entry.service.js';
 import { getCompanyReport, getExpenseHeadReport, getMonthwiseReport } from './report.service.js';
 
@@ -30,7 +31,15 @@ const companyLabel = (company) => {
 
 // "2026-27" -> "26-27", used in the title so the full year isn't repeated separately.
 const shortFinancialYear = (financialYear) => financialYear.slice(2);
-const buildTitle = (financialYear) => `Cash Book\nFY ${shortFinancialYear(financialYear)}`;
+const buildTitle = (financialYear, locationName) =>
+  `Cash Book${locationName ? ` - ${locationName}` : ''}\nFY ${shortFinancialYear(financialYear)}`;
+
+const resolveLocationName = async ({ user, location }) => {
+  const scopedLocation = resolveLocationScope({ user, location });
+  if (!scopedLocation) return null;
+  const city = await LocationCity.findById(scopedLocation).select('name').lean();
+  return city?.name || null;
+};
 
 // Active-filter context lines printed under the title/report-name (FY is already in the
 // title, so it isn't repeated here).
@@ -54,9 +63,10 @@ const getCompanyHeaderInfo = async (companyId) => {
 // so the data-fetching and shaping logic is written once per report.
 const buildEntriesReportConfig = async ({ filters, user }) => {
   const { financialYear } = filters;
-  const [entries, companyInfo] = await Promise.all([
+  const [entries, companyInfo, locationName] = await Promise.all([
     getEntriesForExport({ filters, user }),
     getCompanyHeaderInfo(filters.company),
+    resolveLocationName({ user, location: filters.location }),
   ]);
 
   let totalReceipts = 0;
@@ -83,7 +93,7 @@ const buildEntriesReportConfig = async ({ filters, user }) => {
   return {
     config: {
       sheetName: 'Entries',
-      title: buildTitle(financialYear),
+      title: buildTitle(financialYear, locationName),
       subtitle: filters.isExcluded ? 'Excluded Entries' : 'Entries',
       meta: buildMeta({ month: filters.month, extra }),
       columns: [
@@ -114,9 +124,10 @@ export const buildEntriesPdf = async ({ filters, user }) => {
 };
 
 const buildMonthwiseReportConfig = async ({ financialYear, company, user, location }) => {
-  const [{ months, summary }, companyInfo] = await Promise.all([
+  const [{ months, summary }, companyInfo, locationName] = await Promise.all([
     getMonthwiseReport({ financialYear, company, user, location }),
     getCompanyHeaderInfo(company),
+    resolveLocationName({ user, location }),
   ]);
 
   const rows = months.map((row) => ({
@@ -131,7 +142,7 @@ const buildMonthwiseReportConfig = async ({ financialYear, company, user, locati
   return {
     config: {
       sheetName: 'Monthwise',
-      title: buildTitle(financialYear),
+      title: buildTitle(financialYear, locationName),
       subtitle: 'Monthwise Report',
       columns: [
         { header: 'Month', key: 'month', width: 14 },
@@ -177,6 +188,7 @@ const buildBreakdownReportConfig = ({
   reportName,
   filenamePrefix,
   companyInfo,
+  locationName,
 }) => {
   let totalCount = 0;
   const rows = items.map((item) => {
@@ -192,7 +204,7 @@ const buildBreakdownReportConfig = ({
   return {
     config: {
       sheetName,
-      title: buildTitle(financialYear),
+      title: buildTitle(financialYear, locationName),
       subtitle: reportName,
       meta: buildMeta({ month }),
       columns: [
@@ -214,9 +226,10 @@ const buildBreakdownReportConfig = ({
 };
 
 const buildExpenseHeadReportConfig = async ({ financialYear, month, company, user, location }) => {
-  const [{ summary, expenseHeads }, companyInfo] = await Promise.all([
+  const [{ summary, expenseHeads }, companyInfo, locationName] = await Promise.all([
     getExpenseHeadReport({ financialYear, month, company, user, location }),
     getCompanyHeaderInfo(company),
+    resolveLocationName({ user, location }),
   ]);
 
   return buildBreakdownReportConfig({
@@ -229,6 +242,7 @@ const buildExpenseHeadReportConfig = async ({ financialYear, month, company, use
     reportName: 'Expense Head Report',
     filenamePrefix: 'expense-head-report',
     companyInfo,
+    locationName,
   });
 };
 
@@ -255,7 +269,10 @@ export const buildExpenseHeadPdf = async ({ financialYear, month, company, user,
 };
 
 const buildCompanyReportConfig = async ({ financialYear, month, user, location }) => {
-  const { summary, companies } = await getCompanyReport({ financialYear, month, user, location });
+  const [{ summary, companies }, locationName] = await Promise.all([
+    getCompanyReport({ financialYear, month, user, location }),
+    resolveLocationName({ user, location }),
+  ]);
 
   return buildBreakdownReportConfig({
     financialYear,
@@ -266,6 +283,7 @@ const buildCompanyReportConfig = async ({ financialYear, month, user, location }
     sheetName: 'Companies',
     reportName: 'Company Report',
     filenamePrefix: 'company-report',
+    locationName,
   });
 };
 

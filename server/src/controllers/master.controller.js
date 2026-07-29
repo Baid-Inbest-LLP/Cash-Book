@@ -115,7 +115,7 @@ export const listUsers = asyncHandler(async (req, res) => {
 			"name userName role isActive locationCity lastLogin createdAt updatedAt",
 		)
 		.populate("locationCity", "name")
-		.sort({ name: 1 });
+		.sort({ createdAt: 1 });
 	ApiResponse.success(res, users);
 });
 
