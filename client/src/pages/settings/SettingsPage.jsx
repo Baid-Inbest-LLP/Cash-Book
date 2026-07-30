@@ -239,6 +239,32 @@ export default function SettingsPage() {
         ]}
       />
 
+      {!canManageUsers && user && (
+        <div className="card overflow-hidden p-6 space-y-4">
+          <h2 className="company-form-title">My Details</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="company-form-field-label">Full Name</label>
+              <p className="text-left font-semibold settings-detail-blue">{user.name}</p>
+            </div>
+            <div>
+              <label className="company-form-field-label">Username</label>
+              <p className="text-left font-semibold settings-detail-purple">{user.userName}</p>
+            </div>
+            <div>
+              <label className="company-form-field-label">Role</label>
+              <span className="settings-role-badge">{roleLabel(user.role)}</span>
+            </div>
+            <div>
+              <label className="company-form-field-label">Location</label>
+              <p className="text-left font-semibold settings-detail-emerald">
+                {user.locationCity?.name || '—'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {canManageUsers && (
         <>
           {showCreate && (

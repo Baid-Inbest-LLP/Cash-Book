@@ -14,6 +14,7 @@ const toAuthUser = (user) => ({
   name: user.name,
   userName: user.userName,
   role: user.role,
+  ...(user.locationCity !== undefined ? { locationCity: user.locationCity } : {}),
 });
 
 /** Normalize legacy string | string[] | null refreshToken storage. */
@@ -31,9 +32,9 @@ const rememberRefreshToken = (user, token) => {
 
 export const login = async (userName, password) => {
   const normalizedUserName = String(userName).trim().toLowerCase();
-  const user = await User.findOne({ userName: normalizedUserName }).select(
-    'name userName role isActive password refreshToken',
-  );
+  const user = await User.findOne({ userName: normalizedUserName })
+    .select('name userName role isActive password refreshToken locationCity')
+    .populate('locationCity', 'name');
   if (!user || !(await user.comparePassword(password))) {
     throw ApiError.unauthorized('Invalid user name or password');
   }
@@ -120,7 +121,9 @@ export const resetUserPassword = async (targetUserId, requestedBy) => {
 };
 
 export const getProfile = async (userId) => {
-  const user = await User.findById(userId).select('name userName role');
+  const user = await User.findById(userId)
+    .select('name userName role locationCity')
+    .populate('locationCity', 'name');
   if (!user) throw ApiError.notFound('User not found');
   return toAuthUser(user);
 };
