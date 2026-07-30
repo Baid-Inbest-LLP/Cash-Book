@@ -73,7 +73,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white/90 mb-1">User Name</label>
+              <label className="block text-sm font-medium text-white/90 mb-1">Username</label>
               <input
                 type="text"
                 className="login-input"
