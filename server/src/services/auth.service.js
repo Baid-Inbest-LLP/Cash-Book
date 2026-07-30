@@ -36,7 +36,7 @@ export const login = async (userName, password) => {
     .select('name userName role isActive password refreshToken locationCity')
     .populate('locationCity', 'name');
   if (!user || !(await user.comparePassword(password))) {
-    throw ApiError.unauthorized('Invalid user name or password');
+    throw ApiError.unauthorized('Invalid username or password');
   }
   if (!user.isActive) {
     throw ApiError.unauthorized('Account is deactivated');
