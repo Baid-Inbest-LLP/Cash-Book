@@ -3,7 +3,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
 import { DatePickerInput } from '@mantine/dates';
 import { useCreatePayment, useCreateReceipt, useUpdateEntry } from '../../hooks/useEntries';
-import { useIsSuperAdmin } from '../../hooks/useAuth';
+import { useIsSuperAdmin, useMe } from '../../hooks/useAuth';
 import { useLocationCities } from '../../hooks/useMasters';
 import { getApiErrorMessage } from '../../lib/queryClient';
 import CurrencyInput from '../../components/common/CurrencyInput';
@@ -16,6 +16,7 @@ const MAX_DATE = new Date();
 export default function EntryForm({ entry, initialType, companies, expenseHeads, onClose }) {
   const isEdit = Boolean(entry);
   const isSuperadmin = useIsSuperAdmin();
+  const { data: currentUser } = useMe();
   const { data: locationCities = [] } = useLocationCities();
   const createReceipt = useCreateReceipt();
   const createPayment = useCreatePayment();
@@ -37,7 +38,9 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
       expenseHead: entry?.expenseHead?._id || '',
       amount: entry?.amount ?? '',
       description: entry?.description || '',
-      location: entry?.location?._id || '',
+      location:
+        entry?.location?._id ||
+        (!isSuperadmin && !entry ? currentUser?.locationCity?._id || '' : ''),
     },
   });
 
@@ -49,7 +52,8 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
 
   const type = watch('type');
   const isPayment = type === 'payment';
-  const accountantLocationName = entry?.location?.name || locationCities[0]?.name || '';
+  const accountantLocationName =
+    entry?.location?.name || locationCities[0]?.name || currentUser?.locationCity?.name || '';
   const editLocationOptions = entry?.location?._id
     ? [...locationCities.filter((c) => c._id !== entry.location._id), entry.location]
     : locationCities;
