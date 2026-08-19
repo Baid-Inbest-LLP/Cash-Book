@@ -205,8 +205,12 @@ export default function EntryListView({ isExcluded }) {
       key: 'description',
       header: 'Description',
       align: 'center',
-      className: 'whitespace-nowrap',
-      render: (e) => e.description || '-',
+      width: '320px',
+      render: (e) => (
+        <div className="truncate max-w-[320px]" title={e.description || undefined}>
+          {e.description || '-'}
+        </div>
+      ),
     },
     {
       key: 'amount',
