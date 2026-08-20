@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { notifications } from '@mantine/notifications';
-import { DatePickerInput } from '@mantine/dates';
+import { DateInput } from '@mantine/dates';
 import { useCreatePayment, useCreateReceipt, useUpdateEntry } from '../../hooks/useEntries';
 import { useIsSuperAdmin, useMe } from '../../hooks/useAuth';
 import { useLocationCities } from '../../hooks/useMasters';
@@ -12,6 +12,54 @@ const toDateInputValue = (date) => new Date(date).toISOString().slice(0, 10);
 const todayInputValue = () => toDateInputValue(new Date());
 
 const MAX_DATE = new Date();
+
+const MONTH_NAMES = [
+  'jan',
+  'feb',
+  'mar',
+  'apr',
+  'may',
+  'jun',
+  'jul',
+  'aug',
+  'sep',
+  'oct',
+  'nov',
+  'dec',
+];
+
+const parseTypedDate = (input) => {
+  const value = input.trim();
+  if (!value) return null;
+
+  // ISO: YYYY-MM-DD
+  let match = value.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (match) {
+    const [, y, m, d] = match;
+    const date = new Date(Number(y), Number(m) - 1, Number(d));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  // DD MMM YYYY (e.g. "20 Aug 2026")
+  match = value.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/);
+  if (match) {
+    const [, d, mon, y] = match;
+    const monthIndex = MONTH_NAMES.indexOf(mon.slice(0, 3).toLowerCase());
+    if (monthIndex === -1) return null;
+    const date = new Date(Number(y), monthIndex, Number(d));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY
+  match = value.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (match) {
+    const [, d, m, y] = match;
+    const date = new Date(Number(y), Number(m) - 1, Number(d));
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  return null;
+};
 
 export default function EntryForm({ entry, initialType, companies, expenseHeads, onClose }) {
   const isEdit = Boolean(entry);
@@ -162,13 +210,14 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
                 control={control}
                 rules={{ required: 'Date is required' }}
                 render={({ field }) => (
-                  <DatePickerInput
-                    placeholder="Select date"
+                  <DateInput
+                    placeholder="DD MMM YYYY"
                     valueFormat="DD MMM YYYY"
                     maxDate={MAX_DATE}
                     value={field.value || null}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
+                    dateParser={parseTypedDate}
                     classNames={{ input: inputCls(errors.date) }}
                   />
                 )}

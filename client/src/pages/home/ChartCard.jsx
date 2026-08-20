@@ -1,4 +1,4 @@
-import Skeleton from '../../components/common/Skeleton';
+import { Loader } from '@mantine/core';
 
 export function ChartCardHeader({ icon, badgeClassName, title, children }) {
   return (
@@ -16,7 +16,13 @@ export function ChartCardHeader({ icon, badgeClassName, title, children }) {
 
 
 export function ChartCardState({ isLoading, error, isEmpty, emptyMessage, className = 'h-64' }) {
-  if (isLoading) return <Skeleton className={`${className} w-full`} />;
+  if (isLoading) {
+    return (
+      <div className={`${className} w-full flex items-center justify-center`}>
+        <Loader size="md" />
+      </div>
+    );
+  }
 
   if (error) {
     return (
