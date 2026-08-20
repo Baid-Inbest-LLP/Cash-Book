@@ -147,7 +147,7 @@ export default function EntryForm({ entry, initialType, companies, expenseHeads,
               <label className="company-form-field-label">
                 Type <span className="text-red-500">*</span>
               </label>
-              <select className="input-field" disabled={isEdit} {...register('type')}>
+              <select className="input-field" disabled {...register('type')}>
                 <option value="receipt">Receipt</option>
                 <option value="payment">Payment</option>
               </select>
